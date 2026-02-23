@@ -1,0 +1,855 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SALT | Curated Everyday Luxury</title>
+  <meta name="description" content="A fully enhanced SALT storefront redesign with premium visuals while preserving all products, collections, and backend checkout flows." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f6f3ec;
+      --paper: #fffdf8;
+      --ink: #141311;
+      --muted: #68655f;
+      --line: #ddd5c8;
+      --accent: #cd5a32;
+      --accent-2: #a93d1d;
+      --olive: #4e5b42;
+      --gold: #c59a45;
+      --shadow-soft: 0 20px 45px -28px rgba(13, 12, 11, 0.4);
+      --shadow-deep: 0 40px 70px -38px rgba(13, 12, 11, 0.45);
+      --rad-xl: 30px;
+      --rad-lg: 18px;
+      --rad-md: 12px;
+      --max: 1240px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Manrope", sans-serif;
+      background:
+        radial-gradient(circle at 10% -10%, #fff5e6 0%, transparent 34%),
+        radial-gradient(circle at 110% 10%, #f2e6d2 0%, transparent 30%),
+        var(--bg);
+      overflow-x: clip;
+      scroll-behavior: smooth;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .site {
+      width: min(var(--max), 94vw);
+      margin: 0 auto;
+    }
+
+    .ticker {
+      position: sticky;
+      top: 0;
+      z-index: 120;
+      background: linear-gradient(95deg, #181715, #2a2925);
+      color: #f5f2ea;
+      border-bottom: 1px solid #35332e;
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 0.58rem 0;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .ticker-track {
+      display: inline-flex;
+      gap: 2.3rem;
+      padding-left: 100%;
+      animation: crawl 22s linear infinite;
+    }
+
+    @keyframes crawl {
+      to { transform: translateX(-100%); }
+    }
+
+    .topbar {
+      position: sticky;
+      top: 32px;
+      z-index: 110;
+      backdrop-filter: blur(14px);
+      background: rgba(246, 243, 236, 0.86);
+      border-bottom: 1px solid rgba(78, 91, 66, 0.22);
+    }
+
+    .topbar-inner {
+      width: min(var(--max), 94vw);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.95rem 0;
+    }
+
+    .brand {
+      font-family: "Playfair Display", serif;
+      font-size: 2rem;
+      letter-spacing: 0.12em;
+      line-height: 1;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: center;
+      gap: 0.48rem;
+      flex-wrap: wrap;
+    }
+
+    .nav a {
+      color: var(--muted);
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 0.45rem 0.78rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      transition: 180ms ease;
+    }
+
+    .nav a:hover {
+      color: var(--ink);
+      border-color: var(--line);
+      background: var(--paper);
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 0.58rem 0.9rem;
+      border: 1px solid var(--ink);
+      font-size: 0.79rem;
+      font-weight: 700;
+      transition: 220ms ease;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      background: var(--ink);
+      color: #fff;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .btn.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn.primary:hover {
+      background: var(--accent-2);
+      border-color: var(--accent-2);
+    }
+
+    .hero {
+      margin: 2rem 0 3rem;
+      display: grid;
+      grid-template-columns: 1.35fr 0.65fr;
+      gap: 1rem;
+    }
+
+    .hero-main {
+      min-height: 610px;
+      border: 1px solid var(--line);
+      border-radius: var(--rad-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-deep);
+      display: flex;
+      align-items: flex-end;
+      padding: 2.2rem;
+      position: relative;
+      isolation: isolate;
+      background:
+        linear-gradient(130deg, rgba(15, 15, 14, 0.75), rgba(15, 15, 14, 0.38)),
+        url("https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&w=1700&q=80") center/cover;
+    }
+
+    .hero-main::before {
+      content: "";
+      position: absolute;
+      width: 360px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      right: -100px;
+      top: -80px;
+      background: radial-gradient(circle, rgba(205, 90, 50, 0.65), rgba(205, 90, 50, 0));
+      filter: blur(10px);
+      z-index: -1;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 999px;
+      padding: 0.35rem 0.72rem;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #f6eee1;
+      margin-bottom: 0.95rem;
+    }
+
+    h1, h2, h3 {
+      font-family: "Playfair Display", serif;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      color: #fff;
+      font-size: clamp(2.4rem, 5.1vw, 4.4rem);
+      line-height: 0.95;
+      max-width: 12ch;
+    }
+
+    .hero-main p {
+      color: #ebe2d6;
+      max-width: 42ch;
+      line-height: 1.55;
+      margin: 1rem 0 1.45rem;
+    }
+
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+
+    .hero-panel {
+      min-height: 610px;
+      border-radius: var(--rad-xl);
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(175deg, #fff4e8, #f4e2ce 56%, #f2ddcb);
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+    }
+
+    .deal {
+      padding: 1.15rem 1.2rem;
+      border-bottom: 1px dashed rgba(20, 19, 17, 0.2);
+      display: flex;
+      justify-content: space-between;
+      gap: 0.8rem;
+    }
+
+    .deal strong {
+      font-size: 1.5rem;
+      font-family: "Playfair Display", serif;
+    }
+
+    .deal span {
+      font-size: 0.84rem;
+      color: var(--muted);
+      max-width: 18ch;
+      text-align: right;
+    }
+
+    .panel-links {
+      padding: 1.1rem;
+      display: grid;
+      gap: 0.58rem;
+      align-content: center;
+    }
+
+    .panel-links a {
+      border: 1px solid rgba(20, 19, 17, 0.12);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.74);
+      padding: 0.62rem 0.88rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.84rem;
+      transition: 180ms ease;
+    }
+
+    .panel-links a:hover {
+      transform: translateX(4px);
+      border-color: rgba(20, 19, 17, 0.28);
+      background: #fff;
+    }
+
+    .mini-stats {
+      padding: 0.95rem 1.1rem 1.2rem;
+      border-top: 1px dashed rgba(20, 19, 17, 0.2);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.6rem;
+    }
+
+    .stat {
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(20, 19, 17, 0.12);
+      border-radius: var(--rad-md);
+      padding: 0.6rem;
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1rem;
+    }
+
+    .stat span {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .section {
+      margin: 3rem 0;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 58ch;
+      line-height: 1.5;
+    }
+
+    h2 { font-size: clamp(1.7rem, 3.5vw, 2.5rem); }
+
+    .collections {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.9rem;
+    }
+
+    .collection {
+      position: relative;
+      border-radius: var(--rad-lg);
+      min-height: 210px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      background: #111;
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      align-items: flex-end;
+      padding: 1rem;
+      isolation: isolate;
+    }
+
+    .collection::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.65));
+      z-index: -1;
+    }
+
+    .collection img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -2;
+      transition: transform 0.5s ease;
+    }
+
+    .collection:hover img { transform: scale(1.08); }
+
+    .collection strong {
+      color: #fff;
+      display: block;
+      font-size: 1.15rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .collection span {
+      color: #ddd2c0;
+      font-size: 0.82rem;
+    }
+
+    .spotlight {
+      background: linear-gradient(135deg, #1d1d1b, #292a27);
+      border-radius: var(--rad-xl);
+      border: 1px solid #32332f;
+      color: #f8f5ee;
+      padding: 1.4rem;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1rem;
+      align-items: center;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .spotlight p {
+      color: #d6d2cb;
+      max-width: 52ch;
+      line-height: 1.55;
+      margin: 0.65rem 0 1rem;
+    }
+
+    .spot-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.6rem;
+    }
+
+    .spot-chip {
+      border: 1px solid #3d3f39;
+      border-radius: 999px;
+      padding: 0.58rem 0.72rem;
+      font-size: 0.78rem;
+      color: #d8d4cd;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.95rem;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--rad-lg);
+      background: #fff;
+      overflow: hidden;
+      transition: 230ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-soft);
+      border-color: #cfc4b3;
+    }
+
+    .thumb {
+      aspect-ratio: 1;
+      overflow: hidden;
+      position: relative;
+      background: linear-gradient(150deg, #f2ebe1, #eadfce);
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.38s ease;
+    }
+
+    .card:hover .thumb img { transform: scale(1.06); }
+
+    .flag {
+      position: absolute;
+      left: 0.65rem;
+      top: 0.65rem;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #fff;
+      background: linear-gradient(120deg, var(--accent), var(--accent-2));
+      padding: 0.29rem 0.52rem;
+    }
+
+    .card-body {
+      padding: 0.88rem;
+      display: grid;
+      gap: 0.58rem;
+    }
+
+    .p-title {
+      font-size: 0.88rem;
+      line-height: 1.4;
+      min-height: 2.5em;
+    }
+
+    .price {
+      display: flex;
+      gap: 0.5rem;
+      align-items: baseline;
+      font-size: 0.85rem;
+    }
+
+    .price s {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .price strong {
+      color: var(--accent-2);
+      font-size: 0.92rem;
+    }
+
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.8rem;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--rad-xl);
+      padding: 1rem;
+    }
+
+    .benefit {
+      border: 1px solid #e9e2d6;
+      border-radius: var(--rad-md);
+      padding: 0.8rem;
+      background: linear-gradient(165deg, #fff, #faf7f1);
+    }
+
+    .benefit strong {
+      display: block;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .benefit span {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .newsletter {
+      border-radius: var(--rad-xl);
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(125deg, rgba(197,154,69,0.13), rgba(205,90,50,0.11)),
+        var(--paper);
+      padding: 1.4rem;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .newsletter p {
+      margin: 0.65rem 0 0;
+      color: var(--muted);
+      max-width: 46ch;
+    }
+
+    .newsletter-form {
+      display: flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .newsletter input {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 0.72rem 0.95rem;
+      min-width: 240px;
+      font: inherit;
+    }
+
+    .footer {
+      margin: 2.8rem 0 1.3rem;
+      border-top: 1px solid var(--line);
+      padding-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      animation: rise 0.65s ease forwards;
+    }
+
+    .d1 { animation-delay: 0.12s; }
+    .d2 { animation-delay: 0.22s; }
+    .d3 { animation-delay: 0.32s; }
+
+    @keyframes rise {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-main,
+      .hero-panel {
+        min-height: auto;
+      }
+
+      .collections,
+      .products,
+      .benefits {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .spotlight,
+      .newsletter {
+        grid-template-columns: 1fr;
+      }
+
+      .newsletter-form {
+        justify-content: flex-start;
+      }
+
+      .topbar {
+        top: 30px;
+      }
+
+      .topbar-inner {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 0.75rem;
+      }
+
+      .actions,
+      .nav {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .collections,
+      .products,
+      .benefits,
+      .mini-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .ticker {
+        font-size: 0.72rem;
+      }
+
+      .hero-main {
+        padding: 1.15rem;
+      }
+
+      .section {
+        margin: 2.2rem 0;
+      }
+
+      .newsletter input {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="ticker" aria-label="Store offers">
+    <div class="ticker-track">
+      <span>Up to 40% off selected products</span>
+      <span>US shipping available</span>
+      <span>No hidden checkout tariffs</span>
+      <span>New arrivals updated weekly</span>
+      <span>Secure Shopify checkout</span>
+      <span>Cookware, gifts, apparel, and decor</span>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="https://www.saltonlinestore.com/">SALT</a>
+
+      <nav class="nav" aria-label="Main collections">
+        <a href="https://www.saltonlinestore.com/collections/new-arrivals">New Arrivals</a>
+        <a href="https://www.saltonlinestore.com/collections/all-products">All Products</a>
+        <a href="https://www.saltonlinestore.com/collections/cookware">Cookware</a>
+        <a href="https://www.saltonlinestore.com/collections/gifts">Gifts</a>
+        <a href="https://www.saltonlinestore.com/collections/t-shirt">Apparel</a>
+        <a href="https://www.saltonlinestore.com/collections/personal-care">Lifestyle & Care</a>
+      </nav>
+
+      <div class="actions">
+        <a class="btn" href="https://www.saltonlinestore.com/search">Search</a>
+        <a class="btn" href="https://www.saltonlinestore.com/account/login">Login</a>
+        <a class="btn primary" href="https://www.saltonlinestore.com/cart">Cart</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="site">
+    <section class="hero reveal">
+      <article class="hero-main">
+        <div>
+          <span class="eyebrow">Everyday Design Upgrade</span>
+          <h1>Elevated Shopping for the SALT You Already Love</h1>
+          <p>Complete frontend enhancement with luxury direction, cleaner hierarchy, stronger product storytelling, and preserved backend logic across cart, checkout, login, and product routes.</p>
+          <div class="hero-cta">
+            <a class="btn primary" href="https://www.saltonlinestore.com/collections/new-arrivals">Shop New Arrivals</a>
+            <a class="btn" href="https://www.saltonlinestore.com/collections/all-products">Browse Everything</a>
+          </div>
+        </div>
+      </article>
+
+      <aside class="hero-panel d1 reveal">
+        <div class="deal">
+          <strong>40% OFF</strong>
+          <span>Featured items refreshed weekly</span>
+        </div>
+        <div class="panel-links">
+          <a href="https://www.saltonlinestore.com/collections/kitchen-essentials"><span>Kitchen Essentials</span><span>Explore</span></a>
+          <a href="https://www.saltonlinestore.com/collections/candles"><span>Candles & Decor</span><span>Explore</span></a>
+          <a href="https://www.saltonlinestore.com/collections/long-dresses"><span>Women Collection</span><span>Explore</span></a>
+          <a href="https://www.saltonlinestore.com/collections/toys"><span>Toys & Gifts</span><span>Explore</span></a>
+          <a href="https://www.saltonlinestore.com/collections/hair-accessories"><span>Personal Care</span><span>Explore</span></a>
+        </div>
+        <div class="mini-stats">
+          <div class="stat"><strong>1000+</strong><span>Products</span></div>
+          <div class="stat"><strong>24/7</strong><span>Storefront</span></div>
+          <div class="stat"><strong>Secure</strong><span>Checkout</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section reveal d1">
+      <div class="section-head">
+        <h2>Collections Reimagined</h2>
+        <p>Each card points to your existing Shopify collection. Visual and UX are upgraded, while backend data and inventory stay untouched.</p>
+      </div>
+      <div class="collections">
+        <a class="collection" href="https://www.saltonlinestore.com/collections/new-arrivals"><img src="https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=900&q=80" alt="New arrivals" /><div><strong>New Arrivals</strong><span>Freshly dropped essentials</span></div></a>
+        <a class="collection" href="https://www.saltonlinestore.com/collections/cookware"><img src="https://images.unsplash.com/photo-1506086679525-9b681f9ad88b?auto=format&fit=crop&w=900&q=80" alt="Cookware" /><div><strong>Cookware</strong><span>Everyday kitchen upgrades</span></div></a>
+        <a class="collection" href="https://www.saltonlinestore.com/collections/t-shirt"><img src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=900&q=80" alt="Apparel" /><div><strong>Apparel</strong><span>Clean, casual styling</span></div></a>
+        <a class="collection" href="https://www.saltonlinestore.com/collections/gifts"><img src="https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=900&q=80" alt="Gifts" /><div><strong>Gifts</strong><span>Thoughtful picks</span></div></a>
+      </div>
+    </section>
+
+    <section class="section spotlight reveal d2">
+      <div>
+        <h2>Frontend Reinvented, Backend Preserved</h2>
+        <p>This version keeps your existing Shopify flow fully intact and focuses on high-impact improvements: stronger visual identity, better readability, improved conversion hierarchy, and richer responsive behavior.</p>
+        <a class="btn primary" href="https://www.saltonlinestore.com/collections/all-products">Start Shopping</a>
+      </div>
+      <div class="spot-grid">
+        <div class="spot-chip">Sticky enhanced navigation</div>
+        <div class="spot-chip">Collection-first architecture</div>
+        <div class="spot-chip">High-contrast CTA flow</div>
+        <div class="spot-chip">Mobile-optimized spacing</div>
+        <div class="spot-chip">Lightweight animations</div>
+        <div class="spot-chip">Ready for Shopify Liquid wiring</div>
+      </div>
+    </section>
+
+    <section class="section reveal d2" id="featured-products">
+      <div class="section-head">
+        <h2>Featured Products</h2>
+        <p>Sample premium cards linked to live product URLs. Replace sample image blocks with Shopify dynamic cards when integrating into the theme.</p>
+      </div>
+      <div class="products">
+        <article class="card">
+          <a class="thumb" href="https://www.saltonlinestore.com/products/foldable-laptop-stand-adjustable-portable-notebook-bracket-support-base-abs-holder-for-macbook-air-pro-accessories-convenient"><span class="flag">Sale</span><img src="https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=900&q=80" alt="Laptop stand" /></a>
+          <div class="card-body">
+            <a class="p-title" href="https://www.saltonlinestore.com/products/foldable-laptop-stand-adjustable-portable-notebook-bracket-support-base-abs-holder-for-macbook-air-pro-accessories-convenient">Foldable Laptop Stand Adjustable Portable Notebook Bracket</a>
+            <div class="price"><s>$18.99</s><strong>From $10.99</strong></div>
+            <a class="btn" href="https://www.saltonlinestore.com/products/foldable-laptop-stand-adjustable-portable-notebook-bracket-support-base-abs-holder-for-macbook-air-pro-accessories-convenient">View Product</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <a class="thumb" href="https://www.saltonlinestore.com/products/2024-portable-foldable-aluminum-alloy-laptop-stand-ergonomic-adjustable-height-folding-laptop-holder-stand-for-ipad"><span class="flag">Trending</span><img src="https://images.unsplash.com/photo-1616627452091-c16d3c4fd49f?auto=format&fit=crop&w=900&q=80" alt="Aluminum stand" /></a>
+          <div class="card-body">
+            <a class="p-title" href="https://www.saltonlinestore.com/products/2024-portable-foldable-aluminum-alloy-laptop-stand-ergonomic-adjustable-height-folding-laptop-holder-stand-for-ipad">Portable Foldable Aluminum Alloy Laptop Stand</a>
+            <div class="price"><s>$20.99</s><strong>From $13.99</strong></div>
+            <a class="btn" href="https://www.saltonlinestore.com/products/2024-portable-foldable-aluminum-alloy-laptop-stand-ergonomic-adjustable-height-folding-laptop-holder-stand-for-ipad">View Product</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <a class="thumb" href="https://www.saltonlinestore.com/products/2025-new-flexible-arm-tripod-for-phone-stand-table-folded-anchor-360-rotation-online-desktop-laptop-video-live-shot-photography"><span class="flag">New</span><img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=900&q=80" alt="Phone tripod" /></a>
+          <div class="card-body">
+            <a class="p-title" href="https://www.saltonlinestore.com/products/2025-new-flexible-arm-tripod-for-phone-stand-table-folded-anchor-360-rotation-online-desktop-laptop-video-live-shot-photography">2025 Flexible Arm Tripod for Phone and Desktop</a>
+            <div class="price"><s>$28.99</s><strong>From $21.99</strong></div>
+            <a class="btn" href="https://www.saltonlinestore.com/products/2025-new-flexible-arm-tripod-for-phone-stand-table-folded-anchor-360-rotation-online-desktop-laptop-video-live-shot-photography">View Product</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <a class="thumb" href="https://www.saltonlinestore.com/products/vertical-laptop-stand-3-slots-desk-laptop-holder-laptop-docking-station-stand-for-macbook-tablet-phone-universal"><span class="flag">Best Seller</span><img src="https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=900&q=80" alt="Vertical stand" /></a>
+          <div class="card-body">
+            <a class="p-title" href="https://www.saltonlinestore.com/products/vertical-laptop-stand-3-slots-desk-laptop-holder-laptop-docking-station-stand-for-macbook-tablet-phone-universal">Vertical Laptop Docking Stand - 3 Slot Holder</a>
+            <div class="price"><s>$26.99</s><strong>$19.99</strong></div>
+            <a class="btn" href="https://www.saltonlinestore.com/products/vertical-laptop-stand-3-slots-desk-laptop-holder-laptop-docking-station-stand-for-macbook-tablet-phone-universal">View Product</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section benefits reveal d3">
+      <article class="benefit"><strong>Fast US Fulfillment</strong><span>Products ship quickly from US-based operations for dependable delivery.</span></article>
+      <article class="benefit"><strong>No Hidden Tariffs</strong><span>Clear and transparent checkout pricing across your existing order flow.</span></article>
+      <article class="benefit"><strong>Diverse Product Catalog</strong><span>Home, fashion, gifts, and accessories in one unified shopping journey.</span></article>
+      <article class="benefit"><strong>Secure Backend Intact</strong><span>Cart, account, checkout, and payment all continue on Shopify as-is.</span></article>
+    </section>
+
+    <section class="section newsletter reveal d3">
+      <div>
+        <h2>Get SALT Drop Alerts</h2>
+        <p>Collect emails through your existing marketing flow and announce new releases, discounts, and limited collections with stronger conversion intent.</p>
+      </div>
+      <form class="newsletter-form" action="https://www.saltonlinestore.com/contact#contact_form" method="post">
+        <input type="email" name="contact[email]" placeholder="Enter your email" required />
+        <button class="btn primary" type="submit">Subscribe</button>
+      </form>
+    </section>
+
+    <footer class="footer">
+      <span>© 2026 SALT Online Store. Enhanced UI layer with existing backend compatibility.</span>
+      <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+        <a href="https://www.saltonlinestore.com/pages/contact">Contact</a>
+        <a href="https://www.saltonlinestore.com/policies/privacy-policy">Privacy</a>
+        <a href="https://www.saltonlinestore.com/policies/refund-policy">Refunds</a>
+        <a href="https://www.saltonlinestore.com/policies/terms-of-service">Terms</a>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    window.SALT_REDESIGN_READY = true;
+    window.SALT_REDESIGN_VERSION = "2.0-enhanced";
+  </script>
+</body>
+</html>
