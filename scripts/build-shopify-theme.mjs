@@ -885,16 +885,20 @@ async function writeThemeScaffold(settingsData = null, routeAssets = {}) {
               },
               "deliveryTime": {
                 "@type": "ShippingDeliveryTime",
+                "businessDays": {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": ["https://schema.org/Monday", "https://schema.org/Tuesday", "https://schema.org/Wednesday", "https://schema.org/Thursday", "https://schema.org/Friday"]
+                },
                 "handlingTime": {
                   "@type": "QuantitativeValue",
                   "minValue": 1,
-                  "maxValue": 3,
+                  "maxValue": 2,
                   "unitCode": "DAY"
                 },
                 "transitTime": {
                   "@type": "QuantitativeValue",
-                  "minValue": 5,
-                  "maxValue": 8,
+                  "minValue": 4,
+                  "maxValue": 13,
                   "unitCode": "DAY"
                 }
               }
@@ -903,9 +907,9 @@ async function writeThemeScaffold(settingsData = null, routeAssets = {}) {
               "@type": "MerchantReturnPolicy",
               "applicableCountry": "US",
               "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
-              "merchantReturnDays": 30,
+              "merchantReturnDays": 14,
               "returnMethod": "https://schema.org/ReturnByMail",
-              "returnFees": "https://schema.org/FreeReturn"
+              "returnFees": "https://schema.org/ReturnFeesCustomerResponsibility"
             }
           }{% if salt_schema_judgeme_rating_value >= 1 and salt_schema_judgeme_rating_value <= 5 and salt_schema_judgeme_review_count_value > 0 %},
             "aggregateRating": {

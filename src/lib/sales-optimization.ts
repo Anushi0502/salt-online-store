@@ -8,6 +8,11 @@ import type {
   ShopifyProduct,
   ShopifyShop,
 } from "@/types/shopify";
+import { RETURN_WINDOW_DAYS } from "@/lib/store-promises";
+
+const BUSINESS_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(
+  (day) => `https://schema.org/${day}`,
+);
 
 type MerchandisingContext = {
   query?: string | null;
@@ -711,16 +716,22 @@ export function buildProductStructuredData(
         },
         deliveryTime: {
           "@type": "ShippingDeliveryTime",
+          businessDays: {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: BUSINESS_DAYS,
+          },
+          // 1–2 business days processing + 4–13 in transit = the 5–15
+          // business days promised in src/lib/store-promises.ts.
           handlingTime: {
             "@type": "QuantitativeValue",
             minValue: 1,
-            maxValue: 3,
+            maxValue: 2,
             unitCode: "DAY",
           },
           transitTime: {
             "@type": "QuantitativeValue",
-            minValue: 5,
-            maxValue: 8,
+            minValue: 4,
+            maxValue: 13,
             unitCode: "DAY",
           },
         },
@@ -729,9 +740,9 @@ export function buildProductStructuredData(
         "@type": "MerchantReturnPolicy",
         applicableCountry: "US",
         returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
-        merchantReturnDays: 30,
+        merchantReturnDays: RETURN_WINDOW_DAYS,
         returnMethod: "https://schema.org/ReturnByMail",
-        returnFees: "https://schema.org/FreeReturn",
+        returnFees: "https://schema.org/ReturnFeesCustomerResponsibility",
       },
       ...(comparePrice > currentPrice
         ? {

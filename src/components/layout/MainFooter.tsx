@@ -11,6 +11,7 @@ import {
 import { useShop } from "@/lib/shopify-data";
 import { getRuntimeContext } from "@/lib/theme-assets";
 import { getNewsletterTags } from "@/lib/newsletter-attribution";
+import { RETURN_WINDOW_DAYS } from "@/lib/store-promises";
 
 const footerLinkClass = "transition-colors hover:text-white";
 
@@ -402,10 +403,10 @@ const MainFooter = () => {
               Secure checkout
             </span>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[0.62rem] tracking-[0.12em] text-white/80">
-              Tracked shipping
+              Free tracked US shipping
             </span>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[0.62rem] tracking-[0.12em] text-white/80">
-              Easy returns
+              {RETURN_WINDOW_DAYS}-day returns
             </span>
           </div>
 

@@ -53,40 +53,6 @@ const HOME_HERO_BANNERS = [
   { key: "women", title: "Women", handle: "women", image: womenCollectionBanner, alt: "Women collection banner" },
 ] as const;
 
-const fallbackReviewTiles: ReviewTile[] = [
-  {
-    key: "fallback-review-1",
-    quote: "Creating a warm home feels easier when everything is grouped in one calm place.",
-    author: "SALT customer",
-    rating: 5,
-    verifiedBuyer: true,
-    sourceLabel: "Verified shopper",
-  },
-  {
-    key: "fallback-review-2",
-    quote: "The layout feels clean, the categories make sense, and checkout is quick.",
-    author: "SALT customer",
-    rating: 5,
-    verifiedBuyer: true,
-    sourceLabel: "Verified shopper",
-  },
-  {
-    key: "fallback-review-3",
-    quote: "Beautiful picks, soft colors, and products that feel giftable right away.",
-    author: "SALT customer",
-    rating: 5,
-    verifiedBuyer: true,
-    sourceLabel: "Verified shopper",
-  },
-  {
-    key: "fallback-review-4",
-    quote: "Quality felt better than expected and delivery updates were clear throughout.",
-    author: "SALT customer",
-    rating: 5,
-    verifiedBuyer: true,
-    sourceLabel: "Verified shopper",
-  },
-];
 
 const stars = Array.from({ length: 5 }, (_, index) => index);
 
@@ -226,11 +192,12 @@ const HomePage = () => {
     [homeCollectionProductsPayload],
   );
   const reviewCarouselRef = useRef<HTMLDivElement | null>(null);
+  const reviewSectionRef = useRef<HTMLElement | null>(null);
   const reviewScrollPositionRef = useRef(0);
   const [testimonialsEnabled, setTestimonialsEnabled] = useState(false);
   useEffect(() => {
-    const carousel = reviewCarouselRef.current;
-    if (!carousel || typeof IntersectionObserver === "undefined") {
+    const section = reviewSectionRef.current;
+    if (!section || typeof IntersectionObserver === "undefined") {
       setTestimonialsEnabled(true);
       return undefined;
     }
@@ -247,7 +214,7 @@ const HomePage = () => {
       { rootMargin: "900px 0px" },
     );
 
-    observer.observe(carousel);
+    observer.observe(section);
     return () => observer.disconnect();
   }, []);
   // The homepage displays at most REVIEW_DISPLAY_LIMIT testimonials. Do not
@@ -261,7 +228,7 @@ const HomePage = () => {
         .map((review) => ({
           key: review.id,
           quote: polishPlainText(review.body || review.title),
-          author: polishPlainText(review.author || "Verified shopper") || "Verified shopper",
+          author: polishPlainText(review.author || "SALT customer") || "SALT customer",
           rating: Math.max(0, Math.min(5, review.rating || 0)),
           verifiedBuyer: review.verifiedBuyer,
           sourceLabel: polishPlainText(review.sourceLabel || "Judge.me review") || "Judge.me review",
@@ -269,13 +236,14 @@ const HomePage = () => {
         .filter((tile) => Boolean(tile.quote));
     }
 
-    if (judgeMeTestimonialsFetching) {
-      return [];
-    }
-
-    return fallbackReviewTiles;
-  }, [judgeMeTestimonials, judgeMeTestimonialsFetching]);
-  const reviewSectionLoading = judgeMeTestimonialsFetching && judgeMeTestimonials.length === 0;
+    // Show only real customer reviews; the section hides when there are none.
+    return [];
+  }, [judgeMeTestimonials]);
+  const reviewSectionLoading =
+    (!testimonialsEnabled || judgeMeTestimonialsFetching) && judgeMeTestimonials.length === 0;
+  // Hide the section rather than show an empty or invented review wall.
+  const reviewSectionHidden = testimonialsEnabled && !reviewSectionLoading && reviewTiles.length === 0;
+  const hasVerifiedReview = reviewTiles.some((tile) => tile.verifiedBuyer);
   const reviewLoopCopies = useMemo(() => {
     return reviewTiles.length > 0 ? 2 : 0;
   }, [reviewTiles.length]);
@@ -468,8 +436,11 @@ const HomePage = () => {
           <SaltFinds />
         </Reveal>
 
-        <Reveal delayMs={280}>
-          <section className="salt-section-shell rounded-[1.75rem] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6">
+        <Reveal delayMs={280} className={reviewSectionHidden ? "hidden" : undefined}>
+          <section
+            ref={reviewSectionRef}
+            className="salt-section-shell rounded-[1.75rem] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6"
+          >
             <div className="mx-auto max-w-5xl text-center">
               <h2 className="font-display text-[clamp(1.7rem,4vw,3rem)] leading-[0.94] tracking-[-0.05em] text-foreground sm:text-[clamp(1.85rem,3.3vw,3.25rem)]">
                 What Our Customers Are Saying
@@ -490,12 +461,14 @@ const HomePage = () => {
                     <span>{reviewRatingLabel}</span>
                     <Star className="h-4 w-4 fill-current" />
                   </div>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/92 px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-foreground shadow-[0_10px_24px_-20px_rgba(15,23,42,0.2)]">
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#4cc1ba] text-white shadow-sm">
-                      <Check className="h-3.5 w-3.5" />
+                  {hasVerifiedReview ? (
+                    <span className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/92 px-3 py-1.5 text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-foreground shadow-[0_10px_24px_-20px_rgba(15,23,42,0.2)]">
+                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#4cc1ba] text-white shadow-sm">
+                        <Check className="h-3.5 w-3.5" />
+                      </span>
+                      Verified
                     </span>
-                    Verified
-                  </span>
+                  ) : null}
                 </div>
               )}
             </div>

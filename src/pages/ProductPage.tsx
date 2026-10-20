@@ -57,6 +57,14 @@ import { isNativeApp } from "@/lib/mobile";
 import { openExternalUrl } from "@/lib/mobile";
 import { rememberRecentlyViewedHandle } from "@/lib/recently-viewed";
 import {
+  DELIVERY_DETAIL,
+  DELIVERY_ESTIMATE,
+  PAYMENT_DETAIL,
+  RETURN_WINDOW_DAYS,
+  RETURNS_DETAIL,
+  SHOP_APP_STORE_URL,
+} from "@/lib/store-promises";
+import {
   getStoreCurrencyCode,
   scheduleMetaPixelTask,
   trackMetaPixelInitiateCheckout,
@@ -1225,8 +1233,8 @@ const ProductPage = () => {
                 <TrustStrip
                   items={[
                     { icon: Truck, label: "Free US shipping" },
-                    { icon: PackageCheck, label: "Tracked fulfillment" },
-                    { icon: ShieldCheck, label: "30-day returns" },
+                    { icon: PackageCheck, label: `Delivery in ${DELIVERY_ESTIMATE}` },
+                    { icon: ShieldCheck, label: `${RETURN_WINDOW_DAYS}-day returns` },
                     { icon: BadgeCheck, label: "Secure payment" },
                   ]}
                 />
@@ -1235,18 +1243,43 @@ const ProductPage = () => {
               <Accordion type="multiple" className="mt-4 rounded-[1.45rem] border border-border/80 bg-card/86">
                 <AccordionItem value="shipping" className="border-border/70">
                   <AccordionTrigger className="py-4 text-left text-sm font-semibold text-foreground hover:no-underline">
-                    Shipping and returns
+                    Delivery, returns and payment
                   </AccordionTrigger>
-                  <AccordionContent className="pb-4 text-sm leading-6 text-muted-foreground">
-                    Shipping and taxes are calculated at Shopify checkout. Review the current{" "}
-                    <Link to="/policies/shipping-policy" className="font-semibold text-primary underline underline-offset-2">
-                      shipping policy
-                    </Link>{" "}
-                    and{" "}
-                    <Link to="/policies/refund-policy" className="font-semibold text-primary underline underline-offset-2">
-                      returns policy
-                    </Link>{" "}
-                    for eligibility and timing.
+                  <AccordionContent className="space-y-2.5 pb-4 text-sm leading-6 text-muted-foreground">
+                    <p>
+                      <strong className="font-semibold text-foreground">Delivery:</strong> {DELIVERY_DETAIL}
+                    </p>
+                    <p>
+                      <strong className="font-semibold text-foreground">Returns:</strong> {RETURNS_DETAIL}
+                    </p>
+                    <p>
+                      <strong className="font-semibold text-foreground">Payment:</strong> {PAYMENT_DETAIL}
+                      {SHOP_APP_STORE_URL ? (
+                        <>
+                          {" "}You can also buy from SALT in the{" "}
+                          <a
+                            href={SHOP_APP_STORE_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-semibold text-primary underline underline-offset-2"
+                          >
+                            Shop app
+                          </a>
+                          .
+                        </>
+                      ) : null}
+                    </p>
+                    <p>
+                      Full details:{" "}
+                      <Link to="/policies/shipping-policy" className="font-semibold text-primary underline underline-offset-2">
+                        shipping policy
+                      </Link>{" "}
+                      and{" "}
+                      <Link to="/policies/refund-policy" className="font-semibold text-primary underline underline-offset-2">
+                        refund policy
+                      </Link>
+                      .
+                    </p>
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="service" className="border-none">

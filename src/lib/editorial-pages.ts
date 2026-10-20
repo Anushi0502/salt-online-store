@@ -101,6 +101,7 @@ import {
 } from "@/lib/site-navigation";
 import { RESOURCE_HUB_HUB_FEATURED_PRODUCTS } from "@/lib/resource-hub-data";
 import { SALT_BRAND_DESCRIPTION, SALT_FINDS_WEEK_01 } from "@/lib/salt-brand";
+import { STORE_FAQ } from "@/lib/store-promises";
 
 function buildCollectionPageContent(collectionHandle: string): EditorialPageContent | null {
   const collection = getCollectionByHandle(collectionHandle);
@@ -1033,7 +1034,7 @@ function buildFaqPageContent(): EditorialPageContent {
     handle: "faq",
     kicker: "Support",
     title: "FAQ",
-    summary: "Quick answers to the most common store and shipping questions.",
+    summary: "Clear answers about SALT delivery times, free US shipping, returns, cancellations and payment options.",
     stats: [
       { label: "Focus", value: "Fast answers" },
       { label: "Use case", value: "Pre-purchase help" },
@@ -1053,6 +1054,7 @@ function buildFaqPageContent(): EditorialPageContent {
     faqsTitle: "Common questions",
     faqsDescription: "Short answers people usually need before they order.",
     faqs: [
+      ...STORE_FAQ,
       {
         question: "How do I find the right collection?",
         answer:
@@ -1062,11 +1064,6 @@ function buildFaqPageContent(): EditorialPageContent {
         question: "How do I check my order?",
         answer:
           `Use the Track Order link in the footer or open the Shopify customer portal: ${TRACK_ORDER_URL}.`,
-      },
-      {
-        question: "Where is shipping and return information?",
-        answer:
-          "Shipping, return, and privacy details are available in the footer policy section and remain synced to the current store setup.",
       },
       {
         question: "What should I do if I still need help?",

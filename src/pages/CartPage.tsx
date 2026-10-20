@@ -14,6 +14,7 @@ import { formatMoney, productImage } from "@/lib/formatters";
 import { openExternalUrl } from "@/lib/mobile";
 import { trackMetaPixelInitiateCheckout } from "@/lib/meta-pixel";
 import { recordDeviceOrderHistory } from "@/lib/order-history";
+import { RETURN_WINDOW_DAYS } from "@/lib/store-promises";
 import { useCollectionProductsMap, useProductSearchIndex } from "@/lib/shopify-data";
 import {
   buildCartRecommendations,
@@ -496,7 +497,7 @@ const CartPage = () => {
                 <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Secure payment
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <PackageCheck className="h-3.5 w-3.5 text-primary" /> 30-day returns
+                <PackageCheck className="h-3.5 w-3.5 text-primary" /> {RETURN_WINDOW_DAYS}-day returns
               </span>
             </div>
           </div>
