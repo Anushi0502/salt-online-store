@@ -14,12 +14,12 @@ import { useHomeCollectionProducts } from "@/lib/home-collection-products";
 import { useHomeFeaturedProducts } from "@/lib/home-featured-products";
 import { useJudgeMeTestimonials } from "@/lib/judgeme";
 import { normalizeShopifyAssetUrl } from "@/lib/theme-assets";
-import kidsCollectionBanner from "@/assets/collection-banners/kids-collection-banner.png";
-import footwearCollectionBanner from "@/assets/collection-banners/footwear-collection-banner.png";
-import bestsellersCollectionBanner from "@/assets/collection-banners/bestsellers-collection-banner.png";
-import luxuryFragrancesCollectionBanner from "@/assets/collection-banners/luxury-fragrances-collection-banner.png";
-import menCollectionBanner from "@/assets/collection-banners/men-collection-banner.png";
-import womenCollectionBanner from "@/assets/collection-banners/women-collection-banner.png";
+import kidsCollectionBanner from "@/assets/collection-banners/kids-collection-banner-square.webp";
+import footwearCollectionBanner from "@/assets/collection-banners/footwear-collection-banner-square.webp";
+import bestsellersCollectionBanner from "@/assets/collection-banners/bestsellers-collection-banner-square.webp";
+import luxuryFragrancesCollectionBanner from "@/assets/collection-banners/luxury-fragrances-collection-banner-square.webp";
+import menCollectionBanner from "@/assets/collection-banners/men-collection-banner-square.webp";
+import womenCollectionBanner from "@/assets/collection-banners/women-collection-banner-square.webp";
 import heroMain from "@/assets/hero-main.jpg";
 import type { ShopifyProduct } from "@/types/shopify";
 

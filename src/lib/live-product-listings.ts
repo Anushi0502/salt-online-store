@@ -50,8 +50,16 @@ type PredictiveSearchPayload = {
   resources?: {
     results?: {
       products?: Array<Record<string, unknown>>;
+      queries?: Array<{ text?: unknown }>;
+      collections?: Array<{ title?: unknown; handle?: unknown }>;
     };
   };
+};
+
+export type PredictiveSearchResult = {
+  products: ShopifyProduct[];
+  queries: string[];
+  collections: Array<{ title: string; handle: string }>;
 };
 
 type ListingPayloadInput = Omit<Partial<LiveProductListingPayload>, "products"> & {
@@ -382,15 +390,20 @@ async function fetchCollectionFallback(base: string, params: LiveProductListingP
   );
 }
 
-export async function loadPredictiveProducts(query: string, limit = 6): Promise<ShopifyProduct[]> {
+export async function loadPredictiveSearch(
+  query: string,
+  limit = 6,
+  types: Array<"product" | "query" | "collection"> = ["product", "query", "collection"],
+): Promise<PredictiveSearchResult> {
   const normalizedQuery = query.trim();
-  if (normalizedQuery.length < 2) return [];
+  if (normalizedQuery.length < 2) return { products: [], queries: [], collections: [] };
   const errors: string[] = [];
 
   for (const base of getLiveBases()) {
     const searchParams = new URLSearchParams({ q: normalizedQuery });
-    searchParams.set("resources[type]", "product");
+    searchParams.set("resources[type]", types.join(","));
     searchParams.set("resources[limit]", String(Math.max(1, Math.min(10, Math.floor(limit)))));
+    searchParams.set("resources[limit_scope]", "each");
     searchParams.set("resources[options][unavailable_products]", "hide");
 
     try {
@@ -400,15 +413,30 @@ export async function loadPredictiveProducts(query: string, limit = 6): Promise<
       });
       if (!response.ok) throw new Error(`predictive search failed (${response.status})`);
       const payload = (await response.json()) as PredictiveSearchPayload;
-      return (payload.resources?.results?.products || [])
-        .map(normalizeLiveListingProduct)
-        .filter((product): product is ShopifyProduct => Boolean(product));
+      const results = payload.resources?.results;
+      return {
+        products: (results?.products || [])
+          .map(normalizeLiveListingProduct)
+          .filter((product): product is ShopifyProduct => Boolean(product)),
+        // Shopify's suggested queries include spelling corrections and store
+        // synonyms, which helps shoppers who type a related word.
+        queries: (results?.queries || [])
+          .map((entry) => String(entry?.text || "").trim())
+          .filter(Boolean),
+        collections: (results?.collections || [])
+          .map((entry) => ({ title: String(entry?.title || "").trim(), handle: String(entry?.handle || "").trim() }))
+          .filter((entry) => entry.title && entry.handle),
+      };
     } catch (error) {
       errors.push(`${base}: ${error instanceof Error ? error.message : "unknown error"}`);
     }
   }
 
   throw new Error(`Live predictive search unavailable. ${errors.slice(0, 3).join(" | ")}`);
+}
+
+export async function loadPredictiveProducts(query: string, limit = 6): Promise<ShopifyProduct[]> {
+  return (await loadPredictiveSearch(query, limit, ["product"])).products;
 }
 
 export async function loadLiveProductListing(
@@ -513,6 +541,30 @@ export function useLiveProductListing(params: LiveProductListingParams, enabled 
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     retry: 2,
+  });
+}
+
+export function usePredictiveSearch(query: string, limit = 6, enabled = true) {
+  const normalizedQuery = query.trim();
+  return useQuery({
+    queryKey: ["predictive-search", normalizedQuery.toLowerCase(), limit],
+    queryFn: () => loadPredictiveSearch(normalizedQuery, limit),
+    enabled: enabled && normalizedQuery.length >= 2,
+    staleTime: PREDICTIVE_SEARCH_STALE_TIME_MS,
+    placeholderData: (previousData) => previousData,
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });
+}
+
+export function useCollectionPreviewProducts(handle: string, limit = 6, enabled = true) {
+  return useQuery({
+    queryKey: ["collection-preview-products", handle, limit],
+    queryFn: () => loadCollectionPreviewProducts(handle, limit),
+    enabled,
+    staleTime: LIVE_LISTING_STALE_TIME_MS,
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
 }
 
