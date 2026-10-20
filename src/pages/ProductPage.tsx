@@ -65,19 +65,16 @@ import {
 import { recordDeviceOrderHistory } from "@/lib/order-history";
 import { getEditorialGuidesForProductHandle } from "@/lib/editorial-pages";
 import {
-  useCollectionProductsMap,
   useProductByHandle,
-  useProductSearchIndex,
+  useProductRecommendations,
+  useProductsByHandles,
 } from "@/lib/shopify-data";
 import { normalizeShopifyAssetUrl } from "@/lib/theme-assets";
 import { useWishlist, wishlistItemFromProduct } from "@/lib/wishlist";
 import {
   buildBreadcrumbStructuredData,
-  buildProductCollectionIndex,
   buildProductMetaDescription,
   buildProductStructuredData,
-  pickComplementaryProducts,
-  pickRelatedProducts,
 } from "@/lib/sales-optimization";
 import { buildVariantSeoProfile } from "@/lib/shopify-variant-seo";
 import type { ShopifyProduct, ShopifyProductReference } from "@/types/shopify";
@@ -402,16 +399,12 @@ const ProductPage = () => {
   const product = useMemo(() => productData, [productData]);
   const loadSecondaryContent = Boolean(product?.id && secondaryContentProductId === product.id);
   const shouldLoadMerchandisingData = Boolean(product && loadSecondaryContent);
-  const { data: collectionProductsMapPayload } = useCollectionProductsMap(shouldLoadMerchandisingData);
-  const { data: productSearchPayload } = useProductSearchIndex(shouldLoadMerchandisingData);
-  const products = useMemo(() => productSearchPayload?.products ?? [], [productSearchPayload]);
+  // Recommendations come from Shopify's Product Recommendations endpoint (a few
+  // small records) instead of the full collection map and a catalog page.
+  const { data: recommendationsPayload } = useProductRecommendations(product?.id, shouldLoadMerchandisingData);
   const nativeApp = isNativeApp();
   const primaryProductImage = product ? productImage(product) || "" : "";
   const heroImageRef = useRef<HTMLImageElement | null>(null);
-  const collectionIndex = useMemo(
-    () => buildProductCollectionIndex(collectionProductsMapPayload),
-    [collectionProductsMapPayload],
-  );
   const editorialGuides = useMemo(
     () => getEditorialGuidesForProductHandle(product?.handle || ""),
     [product?.handle],
@@ -644,6 +637,32 @@ const ProductPage = () => {
     );
   }, [product, selectedVariant]);
 
+  // Manual picks and recently viewed items are fetched by handle (a handful of
+  // small requests) so they no longer depend on a full catalog download.
+  const referencedProductHandles = useMemo(() => {
+    const references = [
+      ...(product?.customData?.relatedProducts || []),
+      ...(product?.customData?.complementaryProducts || []),
+    ];
+    const referenceHandles = references
+      .map((reference) => String(reference?.handle || "").trim().toLowerCase())
+      .filter(Boolean);
+    const recent = recentHandles.filter((entry) => entry !== product?.handle).slice(0, 5);
+    return Array.from(new Set([...referenceHandles, ...recent]));
+  }, [product?.customData?.complementaryProducts, product?.customData?.relatedProducts, product?.handle, recentHandles]);
+  const { data: referencedProductsPayload } = useProductsByHandles(
+    referencedProductHandles,
+    shouldLoadMerchandisingData,
+  );
+  const products = useMemo(
+    () =>
+      dedupeProducts([
+        ...(referencedProductsPayload ?? []),
+        ...(recommendationsPayload?.related ?? []),
+        ...(recommendationsPayload?.complementary ?? []),
+      ]),
+    [recommendationsPayload, referencedProductsPayload],
+  );
   const manualRelatedProducts = useMemo(
     () => resolveProductReferences(product?.customData?.relatedProducts, products).filter((entry) => entry.id !== product?.id),
     [product?.customData?.relatedProducts, product?.id, products],
@@ -652,17 +671,14 @@ const ProductPage = () => {
     () => resolveProductReferences(product?.customData?.complementaryProducts, products).filter((entry) => entry.id !== product?.id),
     [product?.customData?.complementaryProducts, product?.id, products],
   );
-  const automaticRelatedProducts = useMemo(
-    () =>
-      product
-        ? pickRelatedProducts(product, products, {
-            collectionIndex,
-            limit: 5,
-            excludedIds: new Set<number>([...manualRelatedProducts.map((entry) => entry.id), product.id]),
-          })
-        : [],
-    [collectionIndex, manualRelatedProducts, product, products],
-  );
+  const automaticRelatedProducts = useMemo(() => {
+    if (!product) {
+      return [];
+    }
+
+    const excludedIds = new Set<number>([...manualRelatedProducts.map((entry) => entry.id), product.id]);
+    return (recommendationsPayload?.related ?? []).filter((entry) => !excludedIds.has(entry.id)).slice(0, 5);
+  }, [manualRelatedProducts, product, recommendationsPayload]);
   const relatedProducts = useMemo(() => {
     if (!product) {
       return [];
@@ -682,21 +698,23 @@ const ProductPage = () => {
 
     return dedupeProducts(combined).slice(0, 5);
   }, [automaticRelatedProducts, manualRelatedProducts, product]);
-  const automaticComplementaryProducts = useMemo(
-    () =>
-      product
-        ? pickComplementaryProducts(product, products, {
-            collectionIndex,
-            limit: 5,
-            excludedIds: new Set<number>([
-              product.id,
-              ...relatedProducts.map((entry) => entry.id),
-              ...manualComplementaryProducts.map((entry) => entry.id),
-            ]),
-          })
-        : [],
-    [collectionIndex, manualComplementaryProducts, product, products, relatedProducts],
-  );
+  const automaticComplementaryProducts = useMemo(() => {
+    if (!product) {
+      return [];
+    }
+
+    const excludedIds = new Set<number>([
+      product.id,
+      ...relatedProducts.map((entry) => entry.id),
+      ...manualComplementaryProducts.map((entry) => entry.id),
+    ]);
+    // Shopify returns complementary items only when they are configured in the
+    // Search & Discovery app; otherwise fall back to the remaining related items.
+    const complementaryPool = recommendationsPayload?.complementary?.length
+      ? recommendationsPayload.complementary
+      : recommendationsPayload?.related ?? [];
+    return complementaryPool.filter((entry) => !excludedIds.has(entry.id)).slice(0, 5);
+  }, [manualComplementaryProducts, product, recommendationsPayload, relatedProducts]);
   const complementaryProducts = useMemo(
     () =>
       dedupeProducts(

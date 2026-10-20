@@ -1366,7 +1366,73 @@ const sectionLiquid = `<div
   data-judgeme-shop-domain="{{ shop.permanent_domain | escape }}"
   data-judgeme-public-token="TQ0rk940ADN89zj_f83SKuTYIfY"
   data-currency="{{ cart.currency.iso_code | default: shop.currency | escape }}"
-></div>
+>
+  {% comment %}
+    Server-rendered content for search engines and AI crawlers.
+    Googlebot renders with JavaScript ON, so it ignores <noscript>. This markup
+    lives inside #root instead: crawlers read it in the first HTML response, and
+    React's createRoot().render() replaces it on load, so shoppers see the app.
+  {% endcomment %}
+  <div class="salt-ssr" style="max-width:1200px;margin:0 auto;padding:16px;font-family:Arial,sans-serif">
+    <nav aria-label="Shop by category">
+      <a href="/">Home</a> · <a href="/collections">All collections</a> · <a href="/collections/best-sellers">Best Sellers</a> · <a href="/collections/new-arrivals">New Arrivals</a>
+      <ul>
+        {%- for salt_ssr_g in linklists['sidebar-collections'].links %}
+        <li><a href="{{ salt_ssr_g.url }}">{{ salt_ssr_g.title | escape }}</a>
+          {%- if salt_ssr_g.links.size > 0 %}
+          <ul>{% for salt_ssr_l in salt_ssr_g.links %}<li><a href="{{ salt_ssr_l.url }}">{{ salt_ssr_l.title | escape }}</a></li>{% endfor %}</ul>
+          {%- endif %}
+        </li>
+        {%- endfor %}
+      </ul>
+    </nav>
+    {% if request.page_type == 'product' and product %}
+      {% assign salt_ssr_variant = product.selected_or_first_available_variant %}
+      <nav aria-label="Breadcrumb"><a href="/">Home</a>{% if product.collections.size > 0 %} › <a href="{{ product.collections.first.url }}">{{ product.collections.first.title | escape }}</a>{% endif %} › {{ product.title | escape }}</nav>
+      <h1>{{ product.title | escape }}</h1>
+      {% if product.featured_image %}
+        <img src="{{ product.featured_image | image_url: width: 600 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" width="600" height="600" loading="eager">
+      {% endif %}
+      <p><strong>{{ salt_ssr_variant.price | money }}</strong> · {% if product.available %}In stock{% else %}Currently unavailable{% endif %}</p>
+      <div>{{ product.description }}</div>
+      {% if product.collections.size > 0 %}
+        <p>Found in:
+          {% for salt_ssr_c in product.collections limit: 6 %}<a href="{{ salt_ssr_c.url }}">{{ salt_ssr_c.title | escape }}</a>{% unless forloop.last %}, {% endunless %}{% endfor %}
+        </p>
+      {% endif %}
+    {% elsif request.page_type == 'collection' and collection %}
+      <h1>{{ collection.title | escape }}</h1>
+      {% if collection.description != blank %}<div>{{ collection.description }}</div>{% endif %}
+      {% paginate collection.products by 36 %}
+        <ul style="list-style:none;padding:0">
+          {% for salt_ssr_p in collection.products %}
+            <li><a href="{{ salt_ssr_p.url }}">{{ salt_ssr_p.title | escape }}</a> – {{ salt_ssr_p.price | money }}</li>
+          {% endfor %}
+        </ul>
+        {% if paginate.pages > 1 %}
+          <nav aria-label="Pagination">
+            {% if paginate.previous %}<a href="{{ paginate.previous.url }}" rel="prev">Previous page</a>{% endif %}
+            Page {{ paginate.current_page }} of {{ paginate.pages }}
+            {% if paginate.next %}<a href="{{ paginate.next.url }}" rel="next">Next page</a>{% endif %}
+          </nav>
+        {% endif %}
+      {% endpaginate %}
+    {% elsif request.page_type == 'list-collections' %}
+      <h1>All collections</h1>
+      <ul>
+        {% for salt_ssr_c in collections %}
+          {% if salt_ssr_c.products_count > 0 %}<li><a href="{{ salt_ssr_c.url }}">{{ salt_ssr_c.title | escape }}</a> ({{ salt_ssr_c.products_count }})</li>{% endif %}
+        {% endfor %}
+      </ul>
+    {% elsif request.page_type == 'index' %}
+      <h1>{{ shop.name | escape }}: practical, giftable finds for every home</h1>
+      <p>{{ shop.description | escape }}</p>
+    {% elsif request.page_type == 'page' and page %}
+      <h1>{{ page.title | escape }}</h1>
+      <div>{{ page.content }}</div>
+    {% endif %}
+  </div>
+</div>
 <noscript>
   <main>
     {% if request.page_type == 'product' and product %}
@@ -1482,12 +1548,14 @@ const sectionLiquid = `<div
     var observer = null;
     var ensureHeading = function () {
       if (!root.isConnected) return;
-      if (root.querySelector('h1')) {
+      var appHeading = root.querySelector('h1');
+      if (appHeading && !appHeading.closest('.salt-ssr')) {
         if (observer) observer.disconnect();
         return;
       }
 
       var shell = root.querySelector('.salt-shop-channel-shell, main, section');
+      if (shell && shell.closest('.salt-ssr')) shell = null;
       if (!shell) {
         attempts += 1;
         if (attempts > 120 && observer) observer.disconnect();
@@ -1507,6 +1575,69 @@ const sectionLiquid = `<div
     window.setTimeout(function () {
       if (observer) observer.disconnect();
     }, 12000);
+  })();
+</script>
+<script>
+  {% comment %}
+    Live collection banners. The app reads collections from a build-time
+    snapshot (assets/data-collections.json), so banners, titles and alt text
+    changed in Shopify admin don't show until the next build. This patches the
+    snapshot response with live values for every collection in the header and
+    sidebar menus, and adds collections created after the snapshot.
+  {% endcomment %}
+  (function () {
+    var live = {};
+    {%- assign salt_live_handles = 'senior-living-solutions,gifts,holiday-gifts,gifts-for-seniors,digital-products,caregiver-resources' -%}
+    {%- for salt_g in linklists['sidebar-collections'].links -%}
+      {%- if salt_g.type == 'collection_link' -%}{%- assign salt_live_handles = salt_live_handles | append: ',' | append: salt_g.object.handle -%}{%- endif -%}
+      {%- for salt_l in salt_g.links -%}{%- if salt_l.type == 'collection_link' -%}{%- assign salt_live_handles = salt_live_handles | append: ',' | append: salt_l.object.handle -%}{%- endif -%}{%- endfor -%}
+    {%- endfor -%}
+    {%- for salt_g in linklists['header-collections'].links -%}
+      {%- if salt_g.type == 'collection_link' -%}{%- assign salt_live_handles = salt_live_handles | append: ',' | append: salt_g.object.handle -%}{%- endif -%}
+      {%- for salt_l in salt_g.links -%}{%- if salt_l.type == 'collection_link' -%}{%- assign salt_live_handles = salt_live_handles | append: ',' | append: salt_l.object.handle -%}{%- endif -%}{%- endfor -%}
+    {%- endfor -%}
+    {%- assign salt_live_handles = salt_live_handles | split: ',' | uniq -%}
+    {%- for salt_bh in salt_live_handles -%}
+      {%- assign salt_bc = collections[salt_bh] -%}
+      {%- if salt_bc.id %}
+    live[{{ salt_bh | json }}] = { id: {{ salt_bc.id | json }}, handle: {{ salt_bc.handle | json }}, title: {{ salt_bc.title | json }}, products_count: {{ salt_bc.products_count | default: 0 }}{% if salt_bc.image %}, image: { src: {{ salt_bc.image | image_url: width: 1600 | prepend: 'https:' | json }}, alt: {{ salt_bc.image.alt | json }}, width: {{ salt_bc.image.width | default: 0 }}, height: {{ salt_bc.image.height | default: 0 }} }{% endif %} };
+      {%- endif -%}
+    {%- endfor %}
+    var originalFetch = window.fetch;
+    if (!originalFetch) return;
+    window.fetch = function (input) {
+      var url = typeof input === 'string' ? input : (input && input.url) || '';
+      var request = originalFetch.apply(this, arguments);
+      if (String(url).indexOf('data-collections.json') === -1) return request;
+      return request.then(function (response) {
+        if (!response || !response.ok) return response;
+        return response.clone().json().then(function (data) {
+          if (!data || !Array.isArray(data.collections)) return response;
+          var list = data.collections;
+          var seen = {};
+          list.forEach(function (collection) {
+            var key = String(collection && collection.handle || '').toLowerCase();
+            var patch = live[key];
+            if (!patch) return;
+            seen[key] = true;
+            collection.title = patch.title;
+            if (patch.products_count) collection.products_count = patch.products_count;
+            if (patch.image) collection.image = Object.assign({}, collection.image || {}, patch.image);
+          });
+          Object.keys(live).forEach(function (key) {
+            if (seen[key]) return;
+            var p = live[key];
+            list.push({ id: p.id, title: p.title, handle: p.handle, description: '', image: p.image || null, products_count: p.products_count });
+          });
+          data.total = list.length;
+          return new Response(JSON.stringify(data), {
+            status: response.status,
+            statusText: response.statusText,
+            headers: { 'content-type': 'application/json; charset=utf-8' }
+          });
+        }).catch(function () { return response; });
+      });
+    };
   })();
 </script>
 <script type="application/json" id="salt-sidebar-collections">

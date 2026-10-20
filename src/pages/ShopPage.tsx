@@ -23,6 +23,7 @@ import { minPrice, savingsPercent } from "@/lib/formatters";
 import { isDesignedCollectionBanner } from "@/lib/collection-banner";
 import { trackMetaPixelSearch } from "@/lib/meta-pixel";
 import { resolveShopBannerImageSelection } from "@/lib/shop-banner";
+import { buildShopifyCdnSrcSet } from "@/lib/responsive-image";
 import {
   getCollectionByHandle,
   getSubcollectionByHandle,
@@ -997,8 +998,14 @@ const ShopPage = () => {
         <Reveal>
           {showDesignedCollectionBanner ? (
             <div className="salt-editorial-shell salt-shop-channel-shell mt-3 overflow-hidden rounded-[1.35rem] p-0 shadow-[0_18px_45px_-30px_rgba(12,32,72,0.32)] sm:rounded-[1.7rem]">
+              {/* The designed banner carries the visible title as artwork; keep a real H1 for search engines and screen readers. */}
+              <h1 className="sr-only">
+                {curatedSubcollection?.title || curatedCollection?.title || selectedCollection?.title || "Explore the full SALT catalog"}
+              </h1>
               <img
                 src={selectedCollectionImage}
+                srcSet={buildShopifyCdnSrcSet(selectedCollectionImage, [800, 1200, 1600, 2400])}
+                sizes="(min-width: 1280px) 1200px, 100vw"
                 alt={selectedCollectionImageAlt}
                 className="block h-auto w-full"
                 decoding="async"
@@ -1032,10 +1039,6 @@ const ShopPage = () => {
                   <div className="mt-5 flex flex-wrap gap-2">
                     {[
                       { label: "Results", value: `${totalResults.toLocaleString()} products` },
-                      {
-                        label: "Route",
-                        value: curatedSubcollection?.title || curatedCollection?.title || selectedCollection?.title || "All products",
-                      },
                       { label: "Sort", value: sortLabel },
                     ].map((item) => (
                       <div
@@ -1056,8 +1059,11 @@ const ShopPage = () => {
                   <div className="relative order-first aspect-[6/5] overflow-hidden rounded-[1.15rem] border border-border/70 bg-background/92 shadow-[0_16px_34px_-28px_rgba(12,32,72,0.18)] lg:order-none">
                     <img
                       src={selectedCollectionImage}
+                      srcSet={buildShopifyCdnSrcSet(selectedCollectionImage, [480, 720, 960])}
+                      sizes="(min-width: 1024px) 480px, 100vw"
                       alt={selectedCollectionImageAlt}
                       className="h-full w-full object-cover object-center transition duration-500"
+                      decoding="async"
                     />
                     <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--background)/0.02),hsl(var(--foreground)/0.04)_54%,hsl(var(--foreground)/0.16))]" />
                   </div>
