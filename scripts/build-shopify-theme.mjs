@@ -233,6 +233,7 @@ async function writeThemeScaffold(settingsData = null, routeAssets = {}) {
 <html lang="{{ request.locale.iso_code }}">
   <head>
     <meta charset="utf-8">
+    <meta name="google-site-verification" content="DPgZx-vhEB4PIX6KKeKT_apV0ZsHiMG1BZX0s3F3u8c">
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
     <meta name="theme-color" content="#1e3a6e">
     {% assign salt_route = request.path %}
