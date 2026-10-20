@@ -2,11 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import { conciseTitle, formatMoney, minPrice, productImage } from "@/lib/formatters";
-import { useCollections } from "@/lib/collections-data";
-import { usePredictiveProducts } from "@/lib/live-product-listings";
+import { useCollectionPreviewProducts, usePredictiveSearch } from "@/lib/live-product-listings";
 import type { ShopifyProduct } from "@/types/shopify";
 
-const DEFAULT_TRENDING_SEARCHES = ["Gifts", "Candles", "Kitchen", "Pet accessories", "Home decor"];
+const DEFAULT_TRENDING_SEARCHES = ["Perfume", "Shoes", "Kids", "Men shirts", "Women"];
+const POPULAR_PRODUCTS_COLLECTION = "best-sellers";
 
 type HeaderSearchResultsProps = {
   query: string;
@@ -22,6 +22,9 @@ function normalizeSearchPhrase(input: string): string {
 
 const SEARCH_DEBOUNCE_MS = 180;
 
+// Boosts strong title matches to the top. Shopify predictive search already
+// matched every result (including descriptions, tags, synonyms and typo
+// tolerance), so this only reorders and never drops a result.
 function scoreQuickSearchProduct(
   product: ShopifyProduct,
   normalizedQuery: string,
@@ -34,16 +37,7 @@ function scoreQuickSearchProduct(
     : normalizeSearchPhrase(String(product.tags || ""));
   const haystack = `${title} ${type} ${tags}`;
 
-  if (!queryTokens.length || !haystack) {
-    return 0;
-  }
-
-  const matchedTokens = queryTokens.filter((token) => haystack.includes(token)).length;
-  if (matchedTokens !== queryTokens.length) {
-    return 0;
-  }
-
-  let score = matchedTokens * 10;
+  let score = queryTokens.filter((token) => haystack.includes(token)).length * 10;
   if (title === normalizedQuery) {
     score += 100;
   } else if (title.startsWith(normalizedQuery)) {
@@ -80,56 +74,23 @@ const HeaderSearchResults = ({
   const normalizedQuery = useMemo(() => normalizeSearchPhrase(deferredQuery), [deferredQuery]);
   const queryTokens = useMemo(() => normalizedQuery.split(/\s+/).filter(Boolean), [normalizedQuery]);
   const canMatchProducts = normalizedQuery.length >= 2;
-  // Shopify predictive search returns only the useful live matches. React Query
-  // deduplicates repeated terms, so typing never downloads or rescans a catalog.
-  const { data: predictiveProducts } = usePredictiveProducts(deferredQuery, 6, canMatchProducts);
-  const { data: collectionsData } = useCollections(canMatchProducts);
-  const allProducts = useMemo(() => predictiveProducts ?? [], [predictiveProducts]);
-  const allCollections = useMemo(() => collectionsData?.collections ?? [], [collectionsData]);
-  const quickSearchRecords = useMemo(
-    () => {
-      if (!canMatchProducts) {
-        return [];
-      }
-
-      return allProducts.map((product) => ({
-        product,
-        title: normalizeSearchPhrase(product.title),
-        type: normalizeSearchPhrase(product.product_type || ""),
-        tags: Array.isArray(product.tags)
-          ? normalizeSearchPhrase(product.tags.join(" "))
-          : normalizeSearchPhrase(String(product.tags || "")),
-      }));
-    },
-    [allProducts, canMatchProducts],
+  // One Shopify predictive request returns products, suggested queries and
+  // collections, so typing never downloads or rescans a catalog file.
+  const { data: predictiveSearch, isFetching: predictiveFetching } = usePredictiveSearch(
+    deferredQuery,
+    8,
+    canMatchProducts,
   );
-  const quickSearchBuckets = useMemo(() => {
-    const buckets = new Map<string, typeof quickSearchRecords>();
-
-    if (!canMatchProducts) {
-      return buckets;
-    }
-
-    quickSearchRecords.forEach((record) => {
-      const searchableText = [record.title, record.type, record.tags].join(" ");
-      const prefixes = new Set<string>();
-
-      for (let index = 0; index < searchableText.length - 1; index += 1) {
-        prefixes.add(searchableText.slice(index, index + 2));
-      }
-
-      prefixes.forEach((prefix) => {
-        const bucket = buckets.get(prefix);
-        if (bucket) {
-          bucket.push(record);
-        } else {
-          buckets.set(prefix, [record]);
-        }
-      });
-    });
-
-    return buckets;
-  }, [canMatchProducts, quickSearchRecords]);
+  // An empty search box shows popular products instead of a blank panel.
+  const { data: popularProducts, isPending: popularPending } = useCollectionPreviewProducts(
+    POPULAR_PRODUCTS_COLLECTION,
+    6,
+    !hasSearchQuery,
+  );
+  const allProducts = useMemo(
+    () => (canMatchProducts ? predictiveSearch?.products ?? [] : []),
+    [canMatchProducts, predictiveSearch],
+  );
   const typeSuggestions = useMemo(() => {
     const counts = new Map<string, number>();
 
@@ -147,89 +108,58 @@ const HeaderSearchResults = ({
   }, [allProducts]);
 
   const dropdownProducts = useMemo(() => {
-    if (!allProducts.length) {
-      return [];
-    }
-
     if (!hasSearchQuery) {
-      return allProducts.slice(0, 4);
+      return (popularProducts ?? []).slice(0, 6);
     }
 
-    if (queryTokens.some((token) => token.length < 2)) {
-      return [];
-    }
-
-    const candidateRecords = Array.from(
-      new Set(queryTokens.flatMap((token) => quickSearchBuckets.get(token.slice(0, 2)) ?? [])),
-    );
-
-    return candidateRecords
-      .map(({ product, title, type, tags }) => {
-        const haystack = `${title} ${type} ${tags}`;
-        const matchedTokens = queryTokens.filter((token) => haystack.includes(token)).length;
-        if (matchedTokens !== queryTokens.length) {
-          return null;
-        }
-
-        return {
-          product,
-          score: scoreQuickSearchProduct(product, normalizedQuery, queryTokens),
-        };
-      })
-      .filter((entry): entry is { product: (typeof allProducts)[number]; score: number } => Boolean(entry?.score))
-      .sort((left, right) => right.score - left.score)
+    return allProducts
+      .map((product, index) => ({
+        product,
+        index,
+        score: scoreQuickSearchProduct(product, normalizedQuery, queryTokens),
+      }))
+      .sort((left, right) => right.score - left.score || left.index - right.index)
       .slice(0, 6)
       .map(({ product }) => product);
-  }, [allProducts, hasSearchQuery, normalizedQuery, queryTokens, quickSearchBuckets]);
+  }, [allProducts, hasSearchQuery, normalizedQuery, popularProducts, queryTokens]);
 
-  const productSectionLabel = hasSearchQuery ? "Product matches" : "Product matches";
-  const predictiveQuerySuggestions: Array<{ query: string; label: string }> = [];
+  const productsLoading = hasSearchQuery
+    ? canMatchProducts && predictiveFetching && !dropdownProducts.length
+    : popularPending;
+  const productSectionLabel = hasSearchQuery ? "Product matches" : "Popular right now";
+  const predictiveQuerySuggestions = useMemo(
+    () =>
+      (canMatchProducts ? predictiveSearch?.queries ?? [] : [])
+        .filter((text) => normalizeSearchPhrase(text) !== normalizedQuery)
+        .slice(0, 5)
+        .map((text) => ({ query: text, label: text })),
+    [canMatchProducts, normalizedQuery, predictiveSearch],
+  );
 
   const trendingSearches = useMemo(() => {
-    if (!allProducts.length) {
-      return DEFAULT_TRENDING_SEARCHES;
-    }
-
     const topFromCatalog = typeSuggestions.slice(0, 5).map(({ label }) => label);
     const merged = [...topFromCatalog, ...DEFAULT_TRENDING_SEARCHES];
 
     return merged
       .filter((value, index) => merged.findIndex((entry) => entry.toLowerCase() === value.toLowerCase()) === index)
       .slice(0, 6);
-  }, [allProducts.length, typeSuggestions]);
+  }, [typeSuggestions]);
 
   const categorySuggestions = useMemo(() => {
     const suggestions: Array<{ label: string; to: string }> = [];
     const seen = new Set<string>();
 
-    allCollections.forEach((collection) => {
-      const label = String(collection.title || "").trim();
-      const handle = String(collection.handle || "").trim();
-      if (!label || !handle) {
-        return;
-      }
-
-      if (normalizedQuery) {
-        const searchable = normalizeSearchPhrase(`${collection.title} ${collection.handle}`);
-        if (!searchable.includes(normalizedQuery)) {
-          return;
-        }
-      }
-
-      const key = `collection:${label.toLowerCase()}`;
+    (canMatchProducts ? predictiveSearch?.collections ?? [] : []).forEach((collection) => {
+      const key = `collection:${collection.title.toLowerCase()}`;
       if (seen.has(key)) {
         return;
       }
 
       seen.add(key);
-      suggestions.push({ label, to: `/collections/${handle}` });
+      suggestions.push({ label: collection.title, to: `/collections/${collection.handle}` });
     });
 
     typeSuggestions.forEach(({ label }) => {
-      if (normalizedQuery && !normalizeSearchPhrase(label).includes(normalizedQuery)) {
-        return;
-      }
-
       const key = `type:${label.toLowerCase()}`;
       if (seen.has(key)) {
         return;
@@ -240,41 +170,16 @@ const HeaderSearchResults = ({
     });
 
     return suggestions.slice(0, 8);
-  }, [allCollections, normalizedQuery, typeSuggestions]);
+  }, [canMatchProducts, predictiveSearch, typeSuggestions]);
 
   const predictiveCategorySuggestions = categorySuggestions;
 
-  const bestSellerCollection = useMemo(
-    () =>
-      allCollections.find((collection) =>
-        /best[\s-]*sellers?/i.test(`${collection.handle} ${collection.title}`),
-      ) || null,
-    [allCollections],
-  );
-
-  const summerCollection = useMemo(
-    () =>
-      allCollections.find((collection) =>
-        /(summer|sunny|vacation|beach)/i.test(`${collection.handle} ${collection.title}`),
-      ) || null,
-    [allCollections],
-  );
-
-  const popularRoutes = useMemo(
-    () => [
-      { label: "All Products", to: "/shop?collection=all-products" },
-      {
-        label: "Best Sellers",
-        to: bestSellerCollection ? `/collections/${bestSellerCollection.handle}` : "/shop?sort=featured",
-      },
-      { label: "New Arrivals", to: "/shop?collection=new-arrivals" },
-      {
-        label: "Summer Collection",
-        to: summerCollection ? `/collections/${summerCollection.handle}` : "/collections",
-      },
-    ],
-    [bestSellerCollection, summerCollection],
-  );
+  const popularRoutes = [
+    { label: "All Products", to: "/shop?collection=all-products" },
+    { label: "Best Sellers", to: "/collections/best-sellers" },
+    { label: "New Arrivals", to: "/collections/new-arrivals" },
+    { label: "All Collections", to: "/collections" },
+  ];
 
   const quickCategoryLinks = useMemo(() => categorySuggestions.slice(0, 3), [categorySuggestions]);
   const quickSearchTerms = useMemo(
@@ -296,7 +201,7 @@ const HeaderSearchResults = ({
               </p>
               {hasSearchQuery ? (
                 <p className="mt-1 text-[0.54rem] leading-5 text-muted-foreground">
-                  Matching titles, product types, tags, boosts, and collection clues.
+                  Matching names, descriptions, tags, and related words.
                 </p>
               ) : null}
             </div>
@@ -347,9 +252,18 @@ const HeaderSearchResults = ({
               );
             })}
 
-            {hasSearchQuery && !dropdownProducts.length ? (
+            {productsLoading && !dropdownProducts.length
+              ? Array.from({ length: 4 }, (_, index) => (
+                  <div
+                    key={`search-skeleton-${index}`}
+                    className="h-[3.75rem] animate-pulse rounded-[0.85rem] border border-border/70 bg-muted/40"
+                  />
+                ))
+              : null}
+
+            {hasSearchQuery && canMatchProducts && !productsLoading && !dropdownProducts.length ? (
               <div className="rounded-[0.95rem] border border-dashed border-border/70 bg-background/92 px-3 py-4 text-sm text-muted-foreground">
-                <p>No exact match yet. Try a category shortcut:</p>
+                <p>No match for that word yet. Try a suggestion or category:</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {(categorySuggestions.length ? categorySuggestions : popularRoutes).slice(0, 3).map((entry) => (
                     <Link

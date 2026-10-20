@@ -4,6 +4,7 @@ import {
   LIVE_PRODUCT_PAGE_SIZE,
   loadLiveProductListing,
   loadPredictiveProducts,
+  loadPredictiveSearch,
   normalizeLiveListingProduct,
 } from "@/lib/live-product-listings";
 
@@ -154,5 +155,32 @@ describe("live Shopify product listings", () => {
     expect(requests).toHaveLength(1);
     expect(requests[0]).toContain("/search/suggest.json");
     expect(requests[0]).not.toContain("/data/product-search");
+  });
+
+  it("returns suggested queries and collections from one predictive request", async () => {
+    const requests: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        requests.push(String(input));
+        return jsonResponse({
+          resources: {
+            results: {
+              products: [liveProduct({ variants: [], price: "19.99" })],
+              queries: [{ text: "perfume for men" }, { text: "" }],
+              collections: [{ title: "Luxury Fragrances", handle: "luxury-fragrances" }, { title: "No handle" }],
+            },
+          },
+        });
+      }),
+    );
+
+    const result = await loadPredictiveSearch("perfum", 8);
+
+    expect(requests).toHaveLength(1);
+    expect(decodeURIComponent(requests[0])).toContain("resources[type]=product,query,collection");
+    expect(result.products).toHaveLength(1);
+    expect(result.queries).toEqual(["perfume for men"]);
+    expect(result.collections).toEqual([{ title: "Luxury Fragrances", handle: "luxury-fragrances" }]);
   });
 });
