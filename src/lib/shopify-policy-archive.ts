@@ -185,103 +185,37 @@ export const SHOPIFY_POLICY_ARCHIVE = {
     sourceUrl: "https://www.saltonlinestore.com/policies/refund-policy",
     archiveUrl: "https://web.archive.org/web/20250801031136id_/https://www.saltonlinestore.com/policies/refund-policy",
     route: "/refund-policy",
-    bodyHtml: String.raw`<p><strong>Return Policy</strong></p>
-<p><strong>We want you to love your purchase!</strong> If for any reason you are not completely satisfied with your order, we’re here to help. Please carefully read our return policy below:</p>
-<p><strong>1. Order Cancellations</strong><br>-<strong>Cancellations Before Shipping</strong>: Orders can be canceled without penalty within 24 hours of placing the order. Once the order has been processed and shipped, cancellations are not possible.</p>
-<p><strong>2. Damaged, Defective, or Incorrect Items</strong><br>-<strong>If you receive a damaged, defective, or incorrect item</strong>, please contact us within 7 days of receiving your order. We will require a photo or video of the issue to process your request.<br>-<strong> We will provide a replacement or issue a refund</strong> after verifying the issue, without requiring the item to be returned.</p>
-<p><strong>3. Change of Mind / Buyer’s Remorse</strong><br>- <strong>Due to the nature of our business model, we do not accept returns or exchanges</strong> for change of mind or buyer’s remorse. Please make sure to read the product descriptions carefully before purchasing.</p>
-<p><strong>4. Non-Returnable Items</strong><br>- <strong>Certain items are non-returnable</strong>, including but not limited to:<br>  - Custom or personalized products<br>  - Clearance or sale items<br>  - Products listed as non-returnable on their product page</p>
-<p> <strong>5. Return Shipping Costs</strong><br>-<strong style="font-size:0.875rem;"> Return shipping costs are the responsibility of the custome</strong><span style="font-size:0.875rem;"><strong>r</strong> unless the return is due to an error on our part (e.g., incorrect or defective item).</span></p>
-<p>- If a return is required, we will provide instructions on where to ship the item. Please note that return shipping costs can be significant, especially for international returns.</p>
-<p><strong>6. Refunds</strong><br>- <strong>Refunds will be issued to the original payment method</strong> once we receive the returned item and confirm it is in its original, unused condition. Shipping fees are non-refundable.<br>-<strong> Partial refunds</strong> may be issued at our discretion, depending on the condition of the returned item.</p>
-<p><strong>7. Late or Missing Refunds</strong><br>-<strong> If you haven’t received a refund</strong>, please check your bank account again or contact your credit card company; it may take some time before your refund is officially posted.<br>- If you’ve done all of this and still have not received your refund, please contact us at help@saltonlinestore.com</p>
-<p><strong>8. Final Sale Items</strong><br>- <strong>All clearance and sale items are final sale</strong> and cannot be returned or exchanged.</p>
-<p><strong>9. How to Initiate a Return</strong><br>- To initiate a return, please contact our customer support at "help@saltonlinestore.com" with your order number and a detailed description of the issue. We will provide you with further instructions.</p>
-<p><strong>10. Shipping Times and Delays</strong><br>- <strong>Please note that shipping times may vary </strong>depending on the destination country and that delays caused by customs or postal services are beyond our control. We appreciate your understanding.</p>
-<p>---</p>
-<p><strong>Important Notes:</strong><br>- <strong>All returns must be pre-approved by our customer service team. </strong>Items sent back to us without first requesting a return will not be accepted.<br>- <strong>We reserve the right to deny returns</strong> that do not comply with our return policy.</p>
-<p>---</p>
-<p><strong>Contact Us:</strong><br>If you have any questions about our return policy, feel free to reach out to us at "help@saltonlinestore.com" </p>`,
+    bodyHtml: String.raw`<p><strong>Returns</strong> We have a 14-day return policy, which means you have 14 days after receiving your item to request a return.</p>
+<p>To be eligible for a return, your item must be in the same condition that you received it, unworn or unused, with tags, and in its original packaging. You'll also need your order number or proof of purchase.</p>
+<p>To start a return, contact us at help@saltonlinestore.com with your order number and reason for return. Once your return is accepted, we'll send you instructions on how and where to send your package. Items sent back to us without first requesting a return will not be accepted.</p>
+<p><strong>Damages and issues</strong> Please inspect your order upon delivery and contact us immediately if the item is defective, damaged, or if you receive the wrong item, so we can evaluate the issue and make it right.</p>
+<p><strong>Exceptions / non-returnable items</strong> Certain types of items cannot be returned, like perishable goods (such as food, flowers, or plants), custom products (such as special orders or personalized items), personal care goods (such as beauty products), and digital products. We also do not accept returns for hazardous materials, flammable liquids, or gases. Please get in touch if you have questions or concerns about your specific item.</p>
+<p>Unfortunately, we cannot accept returns on sale items or gift cards.</p>
+<p><strong>Exchanges</strong> The fastest way to get what you want is to return the item you have, and once the return is accepted, make a separate purchase for the new item.</p>
+<p><strong>Refunds</strong> We will notify you once we've received and inspected your return, and let you know if the refund was approved or not. If approved, you'll be automatically refunded on your original payment method within 10 business days. Please remember it can take some time for your bank or credit card company to process and post the refund too. If more than 15 business days have passed since we've approved your return, please contact us at help@saltonlinestore.com.</p>
+<p><strong>Cancellations</strong> You can request a cancellation within 24 hours of placing your order, before it ships. After that window, orders enter fulfillment and can no longer be cancelled. If an item is out of stock or unavailable and we cannot fulfill your order, we will cancel it and issue a full refund to your original payment method.</p>
+<p><strong>Order changes</strong> We can update the shipping address or item details within the same 24-hour window. Once fulfillment begins, we are unable to modify orders.</p>`,
   },
   shipping: {
     title: "Shipping policy",
     sourceUrl: "https://www.saltonlinestore.com/policies/shipping-policy",
     archiveUrl: "https://web.archive.org/web/20250801040816id_/https://www.saltonlinestore.com/policies/shipping-policy",
     route: "/shipping-policy",
-    bodyHtml: String.raw`<p>Thank you for shopping with <b>SaltOnlineStore</b> We’re committed to providing a seamless shopping experience. Please review our U.S. shipping policy below.</p>
-<hr>
-<h2>Order Processing</h2>
+    bodyHtml: String.raw`<h2>Shipping policy</h2>
+<p><strong>Free standard shipping on all US orders.</strong> We ship to all 50 US states. We do not currently ship outside the United States.</p>
+<h3>Delivery times</h3>
 <ul>
-<li>
-<p>All orders are processed within <strong>2–5 business days</strong> (Monday through Friday).</p>
-</li>
-<li>
-<p>Orders are not processed or shipped on weekends or U.S. holidays.</p>
-</li>
-<li>
-<p>You will receive a shipping confirmation email once your order has been dispatched.</p>
-</li>
+<li>Orders are processed within <strong>1–2 business days</strong>.</li>
+<li>Most orders arrive within <strong>5–15 business days</strong> of ordering.</li>
+<li>During holidays, sales events or carrier delays, delivery can occasionally take up to <strong>20 business days</strong>.</li>
 </ul>
-<hr>
-<h2>🇺🇸 Shipping Within the United States</h2>
-<ul>
-<li>
-<p><strong>Estimated Delivery Time:</strong><br><strong>7–21 business days</strong> (excluding order processing time)</p>
-</li>
-<li>
-<p>Please note that delivery times may vary due to:</p>
-<ul>
-<li>
-<p>High demand during holidays or sales</p>
-</li>
-<li>
-<p>Delays from carriers</p>
-</li>
-<li>
-<p>Weather disruptions or unforeseen events</p>
-</li>
-</ul>
-</li>
-</ul>
-<hr>
-<h2>Tracking Information</h2>
-<ul>
-<li>
-<p>A tracking number will be provided via email once your order is shipped.</p>
-</li>
-<li>
-<p>Please allow <strong>3–7 business days</strong> for tracking updates to become available after dispatch.</p>
-</li>
-<li>
-<p>If you have not received your tracking information within 7 business days of placing your order, please contact us.</p>
-</li>
-</ul>
-<hr>
-<h2>Shipping Delays &amp; Responsibility</h2>
-<p>We are not liable for shipping delays caused by:</p>
-<ul>
-<li>
-<p>Incorrect or incomplete shipping addresses</p>
-</li>
-<li>
-<p>Carrier delays</p>
-</li>
-<li>
-<p>Customs processing (if applicable)</p>
-</li>
-<li>
-<p>Natural disasters or emergencies</p>
-</li>
-</ul>
-<p>If your order is significantly delayed, please reach out to our support team.</p>
-<hr>
-<h2>Lost or Missing Packages</h2>
-<p>If your package has not arrived within <strong>30 business days</strong> from the shipping date, please contact us at <strong>help@saltonlinestore.com</strong>. We will assist in locating your package or arranging a suitable resolution.</p>
-<hr>
-<h2>Contact Us</h2>
-<p>If you have any questions or concerns regarding shipping, feel free to contact us:</p>
-<p><strong>Email:</strong> help@saltonlinestore.com</p>
-<p><strong>Store URL:</strong> https://www.saltonlinestore.com/</p>`,
+<p>Our products ship directly from our fulfillment partners, so items in one order may arrive in separate packages.</p>
+<h3>Tracking</h3>
+<p>Every order ships with tracking. We email your tracking number as soon as your order ships. Please allow 24–48 hours for tracking to update.</p>
+<h3>Late or missing orders</h3>
+<p>If your order has not arrived within 20 business days, or tracking has not updated for 7 days, contact us and we will resolve it.</p>
+<h3>Contact us</h3>
+<p>Email: help@saltonlinestore.com<br>Phone: +1 888-835-7211 (Mon–Fri, 8am–9pm EST)</p>`,
   },
   contact: {
     title: "Contact information",

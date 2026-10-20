@@ -38,7 +38,13 @@ const POSSESSIVE_FIXES = new Map([
 
 const BROKEN_POSSESSIVE = /\b(?:man|men|woman|women|children|child|kids?|girls?|boys?|lady|baby)\s+s\b/i;
 
-const LEADING_FILLER = new Set(["new", "hot", "top", "best"]);
+const LEADING_FILLER = new Set(["new", "hot", "top", "best", "fashion", "fashionable", "stylish", "trendy", "a", "an", "the"]);
+
+// Verbs and fragments from supplier sentences ("Eyeliner Is Smooth").
+const DROP_WORDS = new Set(["is", "are", "there", "this", "our"]);
+
+// Words that read as cut off when a long title is shortened.
+const WEAK_TRAILING = new Set(["sun", "leave", "head", "man", "woman", "top", "style", "fashion", "new", "automatic", "female", "male", "random", "instant", "cute", "adorable"]);
 
 // "1 2pcs", "1-3 Pcs", "2Pcs/set", "1 10 Pair Of", "5pcs"
 const LEADING_COUNT = /^(?:\d+\s+)*\d+\s*(?:pcs?|pieces?|pairs?|packs?|sets?)(?:\s*\/\s*sets?)?(?:\s+sets?)?(?:\s+of)?\b/i;
@@ -90,7 +96,7 @@ function words(value) {
     .replace(/(?<![A-Za-z])-|-(?![A-Za-z])/g, " ")
     .split(/\s+/)
     .map((word) => word.replace(/^[.']+|[.']+$/g, ""))
-    .filter(Boolean);
+    .filter((word) => word && !DROP_WORDS.has(word.toLowerCase()));
 }
 
 function stem(word) {
@@ -207,7 +213,9 @@ function trimToLength(list, maxLength) {
   }
   const wasCut = out.length < list.length;
   const isLoose = (word) =>
-    DANGLING_END.has(word.toLowerCase()) || word === "&" || (wasCut && /^\d+$/.test(word));
+    DANGLING_END.has(word.toLowerCase()) ||
+    word === "&" ||
+    (wasCut && (/^\d+$/.test(word) || WEAK_TRAILING.has(word.toLowerCase())));
   while (out.length > 2 && isLoose(out[out.length - 1])) {
     out.pop();
   }
