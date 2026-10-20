@@ -1,7 +1,6 @@
 import { FormEvent, lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  ChevronDown,
   ChevronRight,
   CircleUserRound,
   Heart,
@@ -38,7 +37,6 @@ const CollectionHoverMenu = lazy(() =>
   })),
 );
 
-type HeaderSearchScope = string;
 
 type HeaderNavItem = {
   label: string;
@@ -501,8 +499,6 @@ const MainHeader = () => {
   const headerRef = useRef<HTMLElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedScope, setSelectedScope] = useState<HeaderSearchScope>("all-products");
-  const [scopeOpen, setScopeOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -516,28 +512,6 @@ const MainHeader = () => {
     () => buildCollectionNavigation(navigationPayload, "header"),
     [navigationPayload],
   );
-  const searchScopeOptions = useMemo(() => {
-    const options = [{ label: "All", collection: "all-products" }];
-    const seen = new Set(["all-products"]);
-
-    sidebarCollections.forEach((group) => {
-      const entries = [
-        group.handle ? { label: group.title, collection: group.handle } : null,
-        ...group.items.map((item) => ({ label: item.title, collection: item.handle })),
-      ].filter((entry): entry is { label: string; collection: string } => Boolean(entry));
-
-      entries.forEach((entry) => {
-        if (!entry.label || !entry.collection || seen.has(entry.collection)) {
-          return;
-        }
-
-        seen.add(entry.collection);
-        options.push(entry);
-      });
-    });
-
-    return options;
-  }, [sidebarCollections]);
   const headerLinks = useMemo(() => {
     const dynamicLinks = headerCollections.flatMap<SiteHeaderCollectionLink>((group) => {
       const routeHandle = group.handle || group.items[0]?.handle;
@@ -605,13 +579,7 @@ const MainHeader = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const query = params.get("q") || "";
-    const collection = params.get("collection");
-
-    setSearchQuery(query);
-    setSelectedScope(
-      collection && collection !== "all-products" ? collection : "all-products",
-    );
+    setSearchQuery(params.get("q") || "");
   }, [location.pathname, location.search]);
 
   useEffect(() => {
@@ -621,14 +589,12 @@ const MainHeader = () => {
       }
 
       if (!headerRef.current.contains(event.target as Node)) {
-        setScopeOpen(false);
         setSearchDropdownOpen(false);
       }
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setScopeOpen(false);
         setSearchDropdownOpen(false);
       }
     };
@@ -672,11 +638,7 @@ const MainHeader = () => {
     setMenuOpen(false);
   }, [location.pathname, location.search]);
 
-  const selectedScopeLabel =
-    searchScopeOptions.find((option) => option.collection === selectedScope)?.label || "All";
-
   const openMenu = () => {
-    setScopeOpen(false);
     setSearchDropdownOpen(false);
     setMenuOpen(true);
   };
@@ -705,7 +667,7 @@ const MainHeader = () => {
     const normalizedQuery = value.trim();
     const params = new URLSearchParams();
 
-    params.set("collection", selectedScope);
+    params.set("collection", "all-products");
 
     if (normalizedQuery) {
       rememberSearchQuery(normalizedQuery);
@@ -734,13 +696,7 @@ const MainHeader = () => {
   const submitSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSearchDropdownOpen(false);
-    setScopeOpen(false);
     applySearchQuery(searchQuery);
-  };
-
-  const setScope = (nextScope: HeaderSearchScope) => {
-    setSelectedScope(nextScope);
-    setScopeOpen(false);
   };
 
   const cartLabel = `Cart with ${cartItemCount} item${cartItemCount === 1 ? "" : "s"}`;
@@ -812,63 +768,7 @@ const MainHeader = () => {
             onBlurCapture={handleSearchBlur}
             className="relative flex h-11 overflow-visible rounded-full border border-border/70 bg-background/92 shadow-[0_12px_22px_-18px_rgba(15,23,42,0.16)] transition focus-within:border-primary/25 focus-within:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)]"
           >
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => {
-                  setSearchDropdownOpen(false);
-                  setScopeOpen((open) => !open);
-                }}
-                aria-label={`Search category ${selectedScopeLabel}`}
-                aria-haspopup="listbox"
-                aria-expanded={scopeOpen}
-                className="flex h-full min-w-[4.5rem] items-center justify-between gap-1.5 rounded-l-full border-r border-border/70 bg-muted/35 px-3 text-left text-[0.8rem] font-semibold text-muted-foreground transition hover:bg-muted/55 sm:min-w-[6rem] sm:max-w-[11.5rem]"
-              >
-                <span className="truncate">{selectedScopeLabel}</span>
-                <ChevronDown
-                  className={`h-3.5 w-3.5 shrink-0 text-muted-foreground transition ${scopeOpen ? "rotate-180" : ""}`}
-                />
-              </button>
-
-              {scopeOpen ? (
-                <div
-                  id="header-scope-menu"
-                  role="listbox"
-                  className="absolute left-0 top-[calc(100%+0.55rem)] z-[70] w-[min(18rem,calc(100vw-1.25rem))] rounded-[1.2rem] border border-border/70 bg-background/96 p-2 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.18)] backdrop-blur-xl"
-                >
-                  {searchScopeOptions.map((option) => {
-                    const active = option.collection === selectedScope;
-
-                    return (
-                      <button
-                        key={option.collection}
-                        type="button"
-                        role="option"
-                        aria-selected={active}
-                        onClick={() => {
-                          setSearchDropdownOpen(false);
-                          setScope(option.collection);
-                        }}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition ${
-                          active
-                            ? "bg-primary/10 font-semibold text-foreground"
-                            : "text-foreground hover:bg-muted/40"
-                        }`}
-                      >
-                        <span>{option.label}</span>
-                        {active ? (
-                          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-primary">
-                            Selected
-                          </span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </div>
-
-            <label className="relative flex min-w-0 flex-1 items-stretch bg-background">
+            <label className="relative flex min-w-0 flex-1 items-stretch rounded-l-full bg-background">
               <span className="sr-only">Search SALT</span>
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
