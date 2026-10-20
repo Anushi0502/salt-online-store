@@ -48,7 +48,7 @@ describe("rebuildProductDescription", () => {
     );
 
     expect(result.changed).toBe(true);
-    expect(result.html).toContain("is a ceramic ramen bowl.");
+    expect(result.html).toContain("Shop the <strong>6.5 Inch Japanese Style Ceramic Ramen Bowl with Lid</strong> at SALT.");
     expect(result.html).toContain("6.5 Inch, 750 ml");
     expect(result.html).toContain("Colors:</strong> White, Black");
     expect(result.html).toContain("5–15 business days");
@@ -68,5 +68,8 @@ describe("rebuildProductDescription", () => {
   it("keeps SEO titles within 70 characters", () => {
     expect(buildSeoTitle("Ceramic Ramen Bowl")).toBe("Ceramic Ramen Bowl | SALT");
     expect(buildSeoTitle("x".repeat(40) + " " + "y".repeat(40)).length).toBeLessThanOrEqual(70);
+    expect(buildSeoTitle("0.05mm Slim Waterproof Eyeliner, Quick-Drying, Smudge-Proof, 4 Colors")).toBe(
+      "0.05mm Slim Waterproof Eyeliner, Quick-Drying, Smudge-Proof, 4 Colors",
+    );
   });
 });

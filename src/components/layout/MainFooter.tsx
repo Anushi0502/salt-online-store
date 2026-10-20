@@ -12,6 +12,7 @@ import { useShop } from "@/lib/shopify-data";
 import { getRuntimeContext } from "@/lib/theme-assets";
 import { getNewsletterTags } from "@/lib/newsletter-attribution";
 import { RETURN_WINDOW_DAYS } from "@/lib/store-promises";
+import ShopAppPromo from "@/components/storefront/ShopAppPromo";
 
 const footerLinkClass = "transition-colors hover:text-white";
 
@@ -242,6 +243,7 @@ const MainFooter = () => {
                 <span className="sr-only">YouTube</span>
               </a>
             </div>
+            <ShopAppPromo variant="footer" className="mt-6" />
           </div>
 
           {/* Company links */}

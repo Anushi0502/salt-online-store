@@ -11,11 +11,14 @@ export const SUPPORT_EMAIL = "help@saltonlinestore.com";
 
 // Store page in the Shop app (Shopify admin > Sales channels > Shop). Leave
 // empty to hide the Shop app links.
-export const SHOP_APP_STORE_URL = "";
+export const SHOP_APP_STORE_URL = "https://shop.app/m/saltstore";
 
-// Shop Pay Installments must be turned on in Settings > Payments before this
-// is shown.
+// Installments are offered inside the Shop app; the website checkout does not
+// advertise Shop Pay Installments.
 export const SHOP_PAY_INSTALLMENTS_ENABLED = false;
+
+export const SHOP_APP_PITCH =
+  "Find SALT in Shopify's Shop app. Check out with Shop Pay, pay in installments on eligible orders, and track your delivery in one place.";
 
 export const DELIVERY_SUMMARY = `Free US shipping. Delivery usually takes ${DELIVERY_ESTIMATE}.`;
 
@@ -46,8 +49,7 @@ export const STORE_FAQ: Array<{ question: string; answer: string }> = [
     ? [
         {
           question: "Can I buy SALT products in the Shop app?",
-          answer:
-            "Yes. SALT has a store in Shopify's Shop app, where you can check out with Shop Pay and track your orders.",
+          answer: `Yes. Open ${SHOP_APP_STORE_URL} or search "SALT" in the Shop app. You can check out with Shop Pay, pay in installments on eligible orders, and track your delivery there.`,
         },
       ]
     : []),

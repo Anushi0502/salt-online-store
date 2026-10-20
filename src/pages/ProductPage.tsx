@@ -22,6 +22,7 @@ import Reveal from "@/components/storefront/Reveal";
 import ProductCard from "@/components/storefront/ProductCard";
 import SeoMetadata from "@/components/storefront/SeoMetadata";
 import SectionHeading from "@/components/storefront/SectionHeading";
+import ShopAppPromo from "@/components/storefront/ShopAppPromo";
 import TrustStrip from "@/components/storefront/TrustStrip";
 import {
   Accordion,
@@ -1239,6 +1240,7 @@ const ProductPage = () => {
                   ]}
                 />
               </div>
+              <ShopAppPromo className="mt-3" />
 
               <Accordion type="multiple" className="mt-4 rounded-[1.45rem] border border-border/80 bg-card/86">
                 <AccordionItem value="shipping" className="border-border/70">

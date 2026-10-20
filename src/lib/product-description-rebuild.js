@@ -32,7 +32,7 @@ const MATERIAL_WORDS = [
   "cotton", "linen", "wool", "cashmere", "silk", "satin", "velvet", "flannel", "fleece", "denim", "leather", "suede",
   "polyester", "nylon", "spandex", "lyocell", "mesh", "lace", "chiffon", "knit", "ceramic", "porcelain", "glass",
   "bamboo", "wood", "wooden", "silicone", "rubber", "plastic", "acrylic", "metal", "aluminum", "alloy", "copper",
-  "brass", "titanium", "resin", "canvas", "felt", "foam", "eva", "tpu", "abs", "pvc", "paper", "stone", "marble",
+  "brass", "titanium", "resin", "canvas", "felt", "foam", "eva", "tpu", "abs", "pvc", "paper", "marble",
 ];
 
 const FEATURE_WORDS = [
@@ -55,7 +55,7 @@ const AUDIENCE_PATTERNS = [
 
 const USE_WORDS = [
   "kitchen", "bathroom", "bedroom", "living room", "office", "travel", "outdoor", "camping", "hiking", "beach",
-  "gym", "yoga", "fitness", "running", "cycling", "garden", "car", "home", "party", "wedding", "school", "work",
+  "gym", "yoga", "fitness", "running", "cycling", "garden", "home", "party", "wedding", "school",
 ];
 
 const SEASON_WORDS = ["spring", "summer", "autumn", "fall", "winter"];
@@ -167,13 +167,17 @@ function listToText(values) {
   return `${values.slice(0, -1).join(", ")} and ${values[values.length - 1]}`;
 }
 
-function article(noun) {
-  return /^[aeiou]/i.test(noun) ? "an" : "a";
+// Supplier option codes ("T0466", "N", "Style B", "2pcs 1") mean nothing to
+// shoppers or search engines; only real words are listed.
+function isMeaningfulOption(value) {
+  const letters = value.replace(/[^a-z]/gi, "");
+  return letters.length >= 3 && !/^(?:style|type|color|colour|model)\s*[a-z0-9]{1,3}$/i.test(value) && !/\d{3,}/.test(value);
 }
 
 function optionValues(product, pattern) {
   const option = (product.options || []).find((entry) => pattern.test(String(entry?.name || "")));
-  return option ? uniqueValues((option.values || option.optionValues?.map((value) => value.name) || []).join(",")) : [];
+  const values = option ? uniqueValues((option.values || option.optionValues?.map((value) => value.name) || []).join(",")) : [];
+  return values;
 }
 
 export const DELIVERY_RETURNS_LINE =
@@ -199,16 +203,19 @@ export function rebuildProductDescription(product, cleanTitle) {
     .map((value) => (/^(?:led|usb|uv400)$/i.test(value) ? value.toUpperCase() : value))
     .slice(0, 4);
   const audience = AUDIENCE_PATTERNS.filter(([pattern]) => pattern.test(title)).map(([, label]) => label);
-  const uses = uniqueValues([...(facts.use || []), ...findWords(source, USE_WORDS)].join(",")).slice(0, 3);
+  const uses = uniqueValues([...(facts.use || []), ...findWords(source, USE_WORDS)].map((value) => value.toLowerCase()).join(",")).slice(0, 3);
   const seasons = findWords(source, SEASON_WORDS);
   const sizes = reconcileSizes(facts.size, title);
-  const colors = optionValues(product, /colou?r/i).slice(0, 12);
+  const rawColors = optionValues(product, /colou?r/i);
+  const colors = rawColors.filter(isMeaningfulOption).length === rawColors.length ? rawColors.slice(0, 12) : [];
   const sizeOptions = optionValues(product, /size/i).slice(0, 12);
 
+  // The cleaned title already names the product, so the summary opens with it
+  // rather than with the old template's product-type guess.
   const name = `<strong>${escapeHtml(title)}</strong>`;
-  let summary = noun ? `${name} is ${article(noun)} ${escapeHtml(noun)}` : name;
-  if (material.length) summary += noun ? ` made of ${escapeHtml(listToText(material))}` : ` is made of ${escapeHtml(listToText(material))}`;
-  summary += noun || material.length ? "." : " from SALT.";
+  let summary = material.length
+    ? `The ${name} is made of ${escapeHtml(listToText(material))}.`
+    : `Shop the ${name} at SALT.`;
   // "soft", "waterproof" describe the product; "large capacity", "LED" are things it has.
   const qualities = features.filter((value) => ADJECTIVE_FEATURES.has(value.toLowerCase()));
   const extras = features.filter((value) => !ADJECTIVE_FEATURES.has(value.toLowerCase()));
@@ -282,5 +289,9 @@ export function buildSeoTitle(cleanTitle) {
   const suffix = " | SALT";
   const title = String(cleanTitle || "").trim();
   if (title.length + suffix.length <= 70) return `${title}${suffix}`;
-  return title.slice(0, 70).replace(/\s+\S*$/, "");
+  if (title.length <= 70) return title;
+  // Cut at the last comma that fits, else at a word boundary.
+  const head = title.slice(0, 70);
+  const comma = head.lastIndexOf(",");
+  return (comma > 30 ? head.slice(0, comma) : head.replace(/\s+\S*$/, "")).trim();
 }
