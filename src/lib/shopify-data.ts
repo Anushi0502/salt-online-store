@@ -2154,6 +2154,67 @@ export function useProductByHandle(
   });
 }
 
+export type ProductRecommendationsPayload = {
+  related: ShopifyProduct[];
+  complementary: ShopifyProduct[];
+};
+
+const PRODUCT_RECOMMENDATION_LIMIT = 10;
+
+async function fetchProductRecommendationIntent(
+  productId: number,
+  intent: "related" | "complementary",
+): Promise<ShopifyProduct[]> {
+  for (const base of getLiveCatalogBases()) {
+    try {
+      // Shopify's Product Recommendations endpoint returns a few small product
+      // records chosen server-side. It replaces downloading the full collection
+      // map (~1.4 MB) plus a catalog page just to rank recommendations locally.
+      const url = `${base}/recommendations/products.json?product_id=${encodeURIComponent(
+        String(productId),
+      )}&limit=${PRODUCT_RECOMMENDATION_LIMIT}&intent=${intent}`;
+      const payload = await fetchJson<{ products?: unknown[] }>(url);
+      const products = Array.isArray(payload.products) ? payload.products : [];
+      return products
+        .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === "object")
+        .map((entry) => normalizeProductRecord(normalizeStorefrontProductPayload(entry)))
+        .filter((entry) => entry.id && entry.id !== productId);
+    } catch {
+      // Try the next live base; recommendations are optional content.
+    }
+  }
+
+  return [];
+}
+
+export async function loadProductRecommendations(productId: number): Promise<ProductRecommendationsPayload> {
+  if (!Number.isFinite(productId) || productId <= 0) {
+    return { related: [], complementary: [] };
+  }
+
+  const [related, complementary] = await Promise.all([
+    fetchProductRecommendationIntent(productId, "related"),
+    fetchProductRecommendationIntent(productId, "complementary"),
+  ]);
+
+  return { related, complementary };
+}
+
+export function useProductRecommendations(productId: number | null | undefined, enabled = true) {
+  const normalizedId = Number(productId || 0);
+
+  return useQuery({
+    queryKey: ["product-recommendations", DATA_MODE, normalizedId],
+    queryFn: () => loadProductRecommendations(normalizedId),
+    enabled: enabled && normalizedId > 0,
+    staleTime: CATALOG_STALE_TIME_MS,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
+  });
+}
+
 export function useProductsByHandles(handles: string[], enabled = true) {
   const normalizedHandles = Array.from(
     new Set(handles.map((handle) => String(handle || "").trim().toLowerCase()).filter(Boolean)),
