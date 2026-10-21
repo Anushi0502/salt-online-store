@@ -19,6 +19,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createShopifyAdminGraphQLClient } from "./shopify-admin-graphql-client.mjs";
+import { auditCatalog } from "../src/lib/catalog-audit.js";
 import { cleanProductTitle } from "../src/lib/product-title-cleanup.js";
 import { buildSeoTitle, HEALTH_CLAIM_PATTERN, rebuildProductDescription } from "../src/lib/product-description-rebuild.js";
 
@@ -28,7 +29,17 @@ const ATTRACTION_CLAIM_PATTERN = /\b(?:pheromones?|sexual(?:ly)?|flirt(?:ing)?|a
 const rootDir = process.cwd();
 const outputDir = resolve(rootDir, "output", "content-cleanup");
 const args = process.argv.slice(2);
-const mode = args.includes("--apply") ? "apply" : args.includes("--restore") ? "restore" : "dry-run";
+const mode = args.includes("--apply")
+  ? "apply"
+  : args.includes("--restore")
+    ? "restore"
+    : args.includes("--audit")
+      ? "audit"
+      : args.includes("--hide")
+        ? "hide"
+        : args.includes("--unhide")
+          ? "unhide"
+          : "dry-run";
 
 function argValue(name) {
   const index = args.indexOf(name);
@@ -46,6 +57,21 @@ const PRODUCTS_QUERY = `query ContentCleanupProducts($first: Int!, $after: Strin
 
 const PRODUCTS_BY_ID_QUERY = `query ContentCleanupProductsById($ids: [ID!]!) {
   nodes(ids: $ids) { ... on Product { id handle title status descriptionHtml seo { title description } } }
+}`;
+
+const AUDIT_QUERY = `query ContentCleanupAudit($first: Int!, $after: String) {
+  products(first: $first, after: $after, query: "status:active") {
+    nodes {
+      id handle title status createdAt productType totalInventory tracksInventory descriptionHtml
+      mediaCount { count }
+      priceRangeV2 { minVariantPrice { amount } maxVariantPrice { amount } }
+    }
+    pageInfo { hasNextPage endCursor }
+  }
+}`;
+
+const PRODUCT_STATUS_MUTATION = `mutation ContentCleanupStatus($product: ProductUpdateInput!) {
+  productUpdate(product: $product) { product { id status } userErrors { field message } }
 }`;
 
 const PRODUCT_UPDATE_MUTATION = `mutation ContentCleanupUpdate($product: ProductUpdateInput!) {
@@ -222,7 +248,89 @@ async function restore() {
   process.stdout.write("\n");
 }
 
-const actions = { "dry-run": dryRun, apply: applyPlan, restore };
+async function audit() {
+  await mkdir(outputDir, { recursive: true });
+  const products = [];
+  let after = null;
+  for (let page = 1; ; page += 1) {
+    const data = await client.run(AUDIT_QUERY, { first: 100, after }, { operation: `catalog audit page ${page}` });
+    const connection = data?.products;
+    if (!connection) throw new Error("Shopify returned no product connection");
+    products.push(...connection.nodes.filter((product) => product?.status === "ACTIVE"));
+    process.stdout.write(`\rRead ${products.length} active products`);
+    if (!connection.pageInfo?.hasNextPage) break;
+    after = connection.pageInfo.endCursor;
+  }
+  process.stdout.write("\n");
+
+  const flagged = auditCatalog(products);
+  const runStamp = stamp();
+  const csvPath = resolve(outputDir, `audit-${runStamp}.csv`);
+  const listPath = resolve(outputDir, `audit-${runStamp}.json`);
+  const csv = [["Suggested action", "Reasons", "Name", "Price", "Images", "Stock", "Created", "Link", "Product ID"].map(csvCell).join(",")];
+  for (const { product, reasons, action } of flagged) {
+    csv.push([
+      action,
+      reasons.join("; "),
+      product.title,
+      product.priceRangeV2?.minVariantPrice?.amount,
+      product.mediaCount?.count,
+      product.totalInventory,
+      String(product.createdAt || "").slice(0, 10),
+      `https://www.saltonlinestore.com/products/${product.handle}`,
+      product.id,
+    ].map(csvCell).join(","));
+  }
+  await writeFile(csvPath, csv.join("\n"));
+  await writeFile(listPath, JSON.stringify(flagged.map(({ product, reasons, action }) => ({ id: product.id, handle: product.handle, title: product.title, action, reasons })), null, 1));
+
+  const counts = {};
+  for (const { reasons } of flagged) for (const reason of reasons) {
+    const label = reason.startsWith("duplicate of") ? "duplicate listing" : reason;
+    counts[label] = (counts[label] || 0) + 1;
+  }
+  console.log(`Active products: ${products.length}`);
+  console.log(`Suggested to hide: ${flagged.filter((entry) => entry.action === "hide").length}  |  Worth a look: ${flagged.filter((entry) => entry.action === "review").length}`);
+  for (const [label, count] of Object.entries(counts).sort((left, right) => right[1] - left[1])) console.log(`  ${count}  ${label}`);
+  console.log(`Review:  ${csvPath}`);
+  console.log(`List:    ${listPath}`);
+  console.log("Nothing was changed in Shopify.");
+}
+
+// Sets products to draft: they leave the store, search and Google but are
+// not deleted. Only rows the audit marked "hide" are used.
+async function hide() {
+  const listPath = argValue("--audit-file");
+  if (!listPath) throw new Error("Pass --audit-file output/content-cleanup/audit-<stamp>.json");
+  const limit = Number(argValue("--limit") || 0);
+  const entries = JSON.parse(await readFile(resolve(rootDir, listPath), "utf8")).filter((entry) => entry.action === "hide");
+  const selected = limit > 0 ? entries.slice(0, limit) : entries;
+  const hidden = [];
+  for (const [index, entry] of selected.entries()) {
+    const data = await client.run(PRODUCT_STATUS_MUTATION, { product: { id: entry.id, status: "DRAFT" } }, { allowMutations: true, operation: `hide ${index + 1}/${selected.length}` });
+    if (!(data?.productUpdate?.userErrors || []).length) hidden.push(entry);
+    process.stdout.write(`\rHidden ${hidden.length} of ${selected.length}`);
+  }
+  process.stdout.write("\n");
+  const hiddenPath = resolve(outputDir, `hidden-${stamp()}.json`);
+  await writeFile(hiddenPath, JSON.stringify(hidden, null, 1));
+  console.log(`Hidden list (use with --unhide): ${hiddenPath}`);
+}
+
+async function unhide() {
+  const hiddenPath = argValue("--hidden-file");
+  if (!hiddenPath) throw new Error("Pass --hidden-file output/content-cleanup/hidden-<stamp>.json");
+  const entries = JSON.parse(await readFile(resolve(rootDir, hiddenPath), "utf8"));
+  let restored = 0;
+  for (const entry of entries) {
+    const data = await client.run(PRODUCT_STATUS_MUTATION, { product: { id: entry.id, status: "ACTIVE" } }, { allowMutations: true, operation: `unhide ${entry.handle}` });
+    if (!(data?.productUpdate?.userErrors || []).length) restored += 1;
+    process.stdout.write(`\rRestored ${restored} of ${entries.length}`);
+  }
+  process.stdout.write("\n");
+}
+
+const actions = { "dry-run": dryRun, apply: applyPlan, restore, audit, hide, unhide };
 actions[mode]().catch((error) => {
   console.error(error instanceof Error ? error.message : error);
   process.exit(1);
