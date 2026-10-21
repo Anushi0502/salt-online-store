@@ -1008,7 +1008,7 @@ const ShopPage = () => {
                 sizes="(min-width: 1280px) 1200px, 100vw"
                 alt={selectedCollectionImageAlt}
                 // Capped height keeps products on the first screen; the artwork scales, never crops.
-                className="block h-auto max-h-[11rem] w-auto max-w-full sm:max-h-[13rem] lg:max-h-[15rem]"
+                className="block h-auto max-h-[14rem] w-auto max-w-full sm:max-h-[18rem] lg:max-h-[22rem]"
                 decoding="async"
                 fetchPriority="high"
                 loading="eager"
@@ -1057,7 +1057,7 @@ const ShopPage = () => {
                 </div>
 
                 {selectedCollectionImage ? (
-                  <div className="relative order-first aspect-[16/9] max-h-[15rem] overflow-hidden rounded-[1.15rem] border border-border/70 bg-background/92 shadow-[0_16px_34px_-28px_rgba(12,32,72,0.18)] lg:order-none lg:max-h-[16rem]">
+                  <div className="relative order-first aspect-[4/3] max-h-[18rem] overflow-hidden rounded-[1.15rem] border border-border/70 bg-background/92 shadow-[0_16px_34px_-28px_rgba(12,32,72,0.18)] lg:order-none lg:max-h-[22rem]">
                     <img
                       src={selectedCollectionImage}
                       srcSet={buildShopifyCdnSrcSet(selectedCollectionImage, [480, 720, 960])}

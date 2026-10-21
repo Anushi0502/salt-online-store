@@ -31,6 +31,28 @@ import BrandLogo from "@/components/layout/BrandLogo";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 
 const HeaderSearchResults = lazy(() => import("@/components/layout/HeaderSearchResults"));
+const CollectionHoverMenu = lazy(() =>
+  import("@/components/layout/CollectionHoverMenu").then(({ CollectionHoverMenu: menu }) => ({
+    default: menu,
+  })),
+);
+
+const DESKTOP_MEDIA_QUERY = "(min-width: 1024px)";
+
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== "undefined" && window.matchMedia(DESKTOP_MEDIA_QUERY).matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia(DESKTOP_MEDIA_QUERY);
+    const onChange = () => setIsDesktop(media.matches);
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, []);
+
+  return isDesktop;
+}
 
 
 type HeaderNavItem = {
@@ -194,6 +216,7 @@ function HeaderMenuDrawer({
 }: HeaderMenuDrawerProps) {
   const [expandedCollectionHandle, setExpandedCollectionHandle] = useState<string | null>(null);
   const location = useLocation();
+  const isDesktop = useIsDesktop();
   const accountDisplayName = auth.displayName;
   const accountHref = SHOPIFY_CUSTOMER_ACCOUNT_URL;
   const accountLabel = auth.status === "signed-in" ? `Hello, ${accountDisplayName || "there"}` : "Hello, sign in";
@@ -219,7 +242,10 @@ function HeaderMenuDrawer({
   }, [open]);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    // On desktop the subcategory flyouts render outside the panel. A modal
+    // sheet locks scrolling everywhere outside itself, which blocked the
+    // mouse wheel inside long flyouts, so the desktop sheet is non-modal.
+    <Sheet open={open} onOpenChange={onOpenChange} modal={!isDesktop}>
       {open ? (
         <button
           type="button"
@@ -308,7 +334,7 @@ function HeaderMenuDrawer({
               </div>
 
               {/* Collection items - visible on mobile/tablet */}
-              <div className="mt-2.5 grid content-start gap-1.5 pb-4 pr-1">
+              <div className="mt-2.5 grid content-start gap-1.5 pb-4 pr-1 lg:hidden">
                 {collections.map((collection) => {
                   const isExpanded = expandedCollectionHandle === collection.id;
                   const activeSubcollection = collection.items.find((item) =>
@@ -425,6 +451,16 @@ function HeaderMenuDrawer({
                 })}
               </div>
 
+              {/* Collection hover menu - visible on desktop */}
+              <div className="mt-2 hidden min-h-0 flex-1 lg:flex">
+                <Suspense fallback={<div className="min-h-0 flex-1" aria-hidden="true" />}>
+                  <CollectionHoverMenu
+                    className="min-h-0 flex-1"
+                    collections={collections}
+                    onLinkClick={() => onOpenChange(false)}
+                  />
+                </Suspense>
+              </div>
             </section>
 
             <div className="mt-2 rounded-[1rem] border border-border/70 bg-[linear-gradient(180deg,hsl(var(--background)/0.98),hsl(var(--card)/0.98))] p-2.5 pb-[calc(0.65rem+env(safe-area-inset-bottom))] shadow-[0_-16px_30px_-26px_rgba(15,23,42,0.3)]">
