@@ -997,7 +997,7 @@ const ShopPage = () => {
       {!hasSearchQuery ? (
         <Reveal>
           {showDesignedCollectionBanner ? (
-            <div className="salt-editorial-shell salt-shop-channel-shell mt-3 overflow-hidden rounded-[1.35rem] p-0 shadow-[0_18px_45px_-30px_rgba(12,32,72,0.32)] sm:rounded-[1.7rem]">
+            <div className="salt-editorial-shell salt-shop-channel-shell mt-3 flex justify-center overflow-hidden rounded-[1.35rem] p-0 shadow-[0_18px_45px_-30px_rgba(12,32,72,0.32)] sm:rounded-[1.7rem]">
               {/* The designed banner carries the visible title as artwork; keep a real H1 for search engines and screen readers. */}
               <h1 className="sr-only">
                 {curatedSubcollection?.title || curatedCollection?.title || selectedCollection?.title || "Explore the full SALT catalog"}
@@ -1007,7 +1007,8 @@ const ShopPage = () => {
                 srcSet={buildShopifyCdnSrcSet(selectedCollectionImage, [800, 1200, 1600, 2400])}
                 sizes="(min-width: 1280px) 1200px, 100vw"
                 alt={selectedCollectionImageAlt}
-                className="block h-auto w-full"
+                // Capped height keeps products on the first screen; the artwork scales, never crops.
+                className="block h-auto max-h-[11rem] w-auto max-w-full sm:max-h-[13rem] lg:max-h-[15rem]"
                 decoding="async"
                 fetchPriority="high"
                 loading="eager"
@@ -1056,7 +1057,7 @@ const ShopPage = () => {
                 </div>
 
                 {selectedCollectionImage ? (
-                  <div className="relative order-first aspect-[6/5] overflow-hidden rounded-[1.15rem] border border-border/70 bg-background/92 shadow-[0_16px_34px_-28px_rgba(12,32,72,0.18)] lg:order-none">
+                  <div className="relative order-first aspect-[16/9] max-h-[15rem] overflow-hidden rounded-[1.15rem] border border-border/70 bg-background/92 shadow-[0_16px_34px_-28px_rgba(12,32,72,0.18)] lg:order-none lg:max-h-[16rem]">
                     <img
                       src={selectedCollectionImage}
                       srcSet={buildShopifyCdnSrcSet(selectedCollectionImage, [480, 720, 960])}

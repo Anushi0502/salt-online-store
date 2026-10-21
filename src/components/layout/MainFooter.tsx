@@ -14,7 +14,7 @@ import { getNewsletterTags } from "@/lib/newsletter-attribution";
 import { RETURN_WINDOW_DAYS } from "@/lib/store-promises";
 import ShopAppPromo from "@/components/storefront/ShopAppPromo";
 
-const footerLinkClass = "transition-colors hover:text-white";
+const footerLinkClass = "transition-colors hover:text-primary";
 
 /* Payment method icons - sourced from Shopify's standard payment icons */
 const paymentIcons = [
@@ -204,13 +204,13 @@ const MainFooter = () => {
       : "Live";
 
   return (
-    <footer className="mt-6 border-t border-white/10 bg-[linear-gradient(180deg,hsl(var(--foreground)/0.98),hsl(var(--salt-ink)/0.95))] text-white sm:mt-8">
+    <footer className="mt-6 border-t border-border bg-card text-foreground sm:mt-8">
       <div className="mx-auto w-full max-w-[1360px] px-4 py-12 sm:px-6 lg:px-10">
         <div className="grid gap-10 lg:grid-cols-[1.25fr_0.9fr_0.9fr_0.9fr_1.1fr]">
           {/* Brand column */}
           <div className="flex flex-col items-start">
             <BrandLogo withWordmark size="lg" />
-            <p className="mt-4 max-w-xs text-sm leading-6 text-white/68">
+            <p className="mt-4 max-w-xs text-sm leading-6 text-muted-foreground">
               A calmer way to browse {shopName}, with cleaner discovery, faster checkout, and
               more polished merchandising.
             </p>
@@ -219,7 +219,7 @@ const MainFooter = () => {
                 href="https://instagram.com/saltonlinestore"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 transition hover:border-white/30 hover:bg-white/10 hover:text-white"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-muted/60 text-foreground/85 transition hover:border-primary/40 hover:bg-muted hover:text-primary"
               >
                 <Instagram className="h-4.5 w-4.5" />
                 <span className="sr-only">Instagram</span>
@@ -228,7 +228,7 @@ const MainFooter = () => {
                 href="https://www.facebook.com/profile.php?id=61573199456052"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 transition hover:border-white/30 hover:bg-white/10 hover:text-white"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-muted/60 text-foreground/85 transition hover:border-primary/40 hover:bg-muted hover:text-primary"
               >
                 <Facebook className="h-4.5 w-4.5" />
                 <span className="sr-only">Facebook</span>
@@ -237,7 +237,7 @@ const MainFooter = () => {
                 href="https://youtube.com/@saltonlinestore"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 transition hover:border-white/30 hover:bg-white/10 hover:text-white"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-muted/60 text-foreground/85 transition hover:border-primary/40 hover:bg-muted hover:text-primary"
               >
                 <Youtube className="h-4.5 w-4.5" />
                 <span className="sr-only">YouTube</span>
@@ -248,10 +248,10 @@ const MainFooter = () => {
 
           {/* Company links */}
           <div>
-            <h3 className="text-[0.64rem] font-bold uppercase tracking-[0.22em] text-white/65">
+            <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
               Company
             </h3>
-            <div className="mt-4 grid gap-2 text-sm text-white/72">
+            <div className="mt-4 grid gap-2 text-sm text-muted-foreground">
               {SITE_FOOTER_COMPANY_LINKS.map((link) =>
                 link.href ? (
                   <a key={link.label} href={link.href} className={footerLinkClass}>
@@ -268,10 +268,10 @@ const MainFooter = () => {
 
           {/* Resources links */}
           <div>
-            <h3 className="text-[0.64rem] font-bold uppercase tracking-[0.22em] text-white/65">
+            <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
               Resources
             </h3>
-            <div className="mt-4 grid gap-2 text-sm text-white/72">
+            <div className="mt-4 grid gap-2 text-sm text-muted-foreground">
               {SITE_FOOTER_RESOURCE_LINKS.map((link) =>
                 link.href ? (
                   <a key={link.label} href={link.href} className={footerLinkClass}>
@@ -288,10 +288,10 @@ const MainFooter = () => {
 
           {/* Policies links */}
           <div>
-            <h3 className="text-[0.64rem] font-bold uppercase tracking-[0.22em] text-white/65">
+            <h3 className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
               Policies
             </h3>
-            <div className="mt-4 grid gap-2 text-sm text-white/72">
+            <div className="mt-4 grid gap-2 text-sm text-muted-foreground">
               {SITE_FOOTER_POLICY_LINKS.map((link) =>
                 link.href ? (
                   <a key={link.label} href={link.href} className={footerLinkClass}>
@@ -308,34 +308,34 @@ const MainFooter = () => {
 
           {/* Contact + Newsletter card */}
           <div>
-            <div className="rounded-[1.2rem] border border-white/10 bg-white/6 px-4 py-4 text-sm leading-6 text-white/78 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-              <p className="text-[0.64rem] font-bold uppercase tracking-[0.22em] text-white/65">
+            <div className="rounded-[1.2rem] border border-border bg-muted/60 px-4 py-4 text-sm leading-6 text-foreground/85 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
                 Contact
               </p>
               <address className="mt-3 space-y-2 not-italic">
                 <p className="break-words">
-                  <span className="text-white/52">Email:</span>{" "}
+                  <span className="text-muted-foreground">Email:</span>{" "}
                   <a href={`mailto:${SUPPORT_EMAIL}`} className={footerLinkClass}>
                     {SUPPORT_EMAIL}
                   </a>
                 </p>
                 <p className="break-words">
-                  <span className="text-white/52">Phone no.:</span>{" "}
+                  <span className="text-muted-foreground">Phone no.:</span>{" "}
                   <a href="tel:+18888357211" className={footerLinkClass}>
                     {SUPPORT_PHONE}
                   </a>
                 </p>
                 <p className="max-w-[18ch] break-words">
-                  <span className="text-white/52">Address:</span> {SUPPORT_ADDRESS}
+                  <span className="text-muted-foreground">Address:</span> {SUPPORT_ADDRESS}
                 </p>
               </address>
 
               {/* Newsletter signup */}
-              <div className="mt-4 border-t border-white/10 pt-4">
-                <p className="text-[0.64rem] font-bold uppercase tracking-[0.22em] text-white/65">
+              <div className="mt-4 border-t border-border pt-4">
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-muted-foreground">
                   Newsletter
                 </p>
-                <p id="footer-newsletter-consent" className="mt-1 text-xs leading-5 text-white/58">
+                <p id="footer-newsletter-consent" className="mt-1 text-xs leading-5 text-muted-foreground">
                   Get SALT product updates. Unsubscribe anytime.
                 </p>
                 <form
@@ -359,12 +359,12 @@ const MainFooter = () => {
                       autoComplete="email"
                       required
                       aria-label="Email for newsletter"
-                      className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white placeholder:text-white/40 focus:border-white/20 focus:outline-none focus:ring-1 focus:ring-white/15"
+                      className="min-w-0 flex-1 rounded-lg border border-border bg-muted/60 px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20"
                     />
                     <button
                       type="submit"
                       disabled={!emailValue.trim()}
-                      className="inline-flex shrink-0 items-center justify-center rounded-lg bg-white/10 px-3 py-1.5 text-[0.62rem] font-bold uppercase tracking-[0.12em] text-white/80 transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="inline-flex shrink-0 items-center justify-center rounded-lg bg-primary px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-primary-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       Subscribe
                     </button>
@@ -376,12 +376,12 @@ const MainFooter = () => {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-white/10">
-        <div className="mx-auto flex w-full max-w-[1360px] flex-col items-start justify-between gap-4 px-4 py-5 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-white/68 sm:px-6 lg:flex-row lg:items-center lg:px-10">
+      <div className="border-t border-border">
+        <div className="mx-auto flex w-full max-w-[1360px] flex-col items-start justify-between gap-4 px-4 py-5 text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:px-6 lg:flex-row lg:items-center lg:px-10">
           <div className="flex flex-wrap items-center gap-2">
             {/* Live sync status indicator */}
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[0.62rem] tracking-[0.12em] ${
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs tracking-[0.12em] ${
                 isFetching
                   ? "border-primary/30 bg-primary/10 text-primary"
                   : isLiveStale
@@ -401,19 +401,19 @@ const MainFooter = () => {
               />
               {syncStatusLabel}
             </span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[0.62rem] tracking-[0.12em] text-white/80">
+            <span className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs tracking-[0.12em] text-foreground/85">
               Secure checkout
             </span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[0.62rem] tracking-[0.12em] text-white/80">
+            <span className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs tracking-[0.12em] text-foreground/85">
               Free tracked US shipping
             </span>
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[0.62rem] tracking-[0.12em] text-white/80">
+            <span className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs tracking-[0.12em] text-foreground/85">
               {RETURN_WINDOW_DAYS}-day returns
             </span>
           </div>
 
           {/* Payment icons */}
-          <div className="flex flex-wrap items-center gap-2.5 text-white/60" aria-label="Accepted payment methods">
+          <div className="flex flex-wrap items-center gap-2.5 text-muted-foreground" aria-label="Accepted payment methods">
             {paymentIcons.map((icon) => (
               <span key={icon.id} className="inline-flex" title={icon.label}>
                 {icon.render()}
@@ -439,13 +439,13 @@ const MainFooter = () => {
         </div>
 
         {/* Powered by Shopify */}
-        <div className="border-t border-white/5 px-4 py-2.5 sm:px-6 lg:px-10">
-          <p className="text-center text-[0.55rem] font-semibold uppercase tracking-[0.2em] text-white/40">
+        <div className="border-t border-border px-4 py-2.5 sm:px-6 lg:px-10">
+          <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             <a
               href="https://www.shopify.com?utm_campaign=poweredby&amp;utm_medium=shopify&amp;utm_source=onlinestore"
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors hover:text-white/70"
+              className="transition-colors hover:text-primary"
             >
               Powered by Shopify
             </a>
