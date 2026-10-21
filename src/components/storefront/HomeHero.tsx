@@ -176,7 +176,8 @@ const HomeHero = ({ slides = [], reviewSummaries = {}, loading = true }: HomeHer
     >
       <Reveal className="salt-reveal-instant min-w-0 overflow-hidden">
         <div className="salt-editorial-shell rounded-[1.5rem] p-2 sm:rounded-[1.75rem] sm:p-3 lg:p-4">
-          <div className="grid gap-2 sm:gap-3 lg:grid-cols-[minmax(0,1.04fr)_minmax(0,0.96fr)] lg:items-stretch">
+          {/* The square banner column is capped so the hero stays within one screen and products show sooner. */}
+          <div className="grid gap-2 sm:gap-3 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] lg:items-stretch xl:grid-cols-[minmax(0,30rem)_minmax(0,1fr)]">
             <div
               id={activeSlideId}
               role="group"

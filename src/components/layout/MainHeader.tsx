@@ -31,11 +31,6 @@ import BrandLogo from "@/components/layout/BrandLogo";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 
 const HeaderSearchResults = lazy(() => import("@/components/layout/HeaderSearchResults"));
-const CollectionHoverMenu = lazy(() =>
-  import("@/components/layout/CollectionHoverMenu").then(({ CollectionHoverMenu: menu }) => ({
-    default: menu,
-  })),
-);
 
 
 type HeaderNavItem = {
@@ -313,7 +308,7 @@ function HeaderMenuDrawer({
               </div>
 
               {/* Collection items - visible on mobile/tablet */}
-              <div className="mt-2.5 grid content-start gap-1.5 pb-4 pr-1 lg:hidden">
+              <div className="mt-2.5 grid content-start gap-1.5 pb-4 pr-1">
                 {collections.map((collection) => {
                   const isExpanded = expandedCollectionHandle === collection.id;
                   const activeSubcollection = collection.items.find((item) =>
@@ -430,16 +425,6 @@ function HeaderMenuDrawer({
                 })}
               </div>
 
-              {/* Collection hover menu - visible on desktop */}
-              <div className="mt-2 hidden min-h-0 flex-1 lg:flex">
-                <Suspense fallback={<div className="min-h-0 flex-1" aria-hidden="true" />}>
-                  <CollectionHoverMenu
-                    className="min-h-0 flex-1"
-                    collections={collections}
-                    onLinkClick={() => onOpenChange(false)}
-                  />
-                </Suspense>
-              </div>
             </section>
 
             <div className="mt-2 rounded-[1rem] border border-border/70 bg-[linear-gradient(180deg,hsl(var(--background)/0.98),hsl(var(--card)/0.98))] p-2.5 pb-[calc(0.65rem+env(safe-area-inset-bottom))] shadow-[0_-16px_30px_-26px_rgba(15,23,42,0.3)]">

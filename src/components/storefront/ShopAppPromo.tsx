@@ -43,8 +43,8 @@ const ShopAppPromo = ({ variant = "card", className = "" }: ShopAppPromoProps) =
   if (variant === "footer") {
     return (
       <div className={`max-w-xs normal-case tracking-normal ${className}`.trim()}>
-        <p className="text-sm font-semibold text-white">Shop SALT in the Shop app</p>
-        <p className="mt-1 text-xs leading-5 text-white/70">{SHOP_APP_PITCH}</p>
+        <p className="text-sm font-semibold text-foreground">Shop SALT in the Shop app</p>
+        <p className="mt-1 text-sm leading-6 text-muted-foreground">{SHOP_APP_PITCH}</p>
         <div className="mt-3 flex items-center gap-3">
           <img
             src={shopAppQr}
@@ -52,7 +52,7 @@ const ShopAppPromo = ({ variant = "card", className = "" }: ShopAppPromoProps) =
             width={72}
             height={72}
             loading="lazy"
-            className="hidden h-[72px] w-[72px] shrink-0 rounded-lg bg-white p-1 sm:block"
+            className="hidden h-[72px] w-[72px] shrink-0 rounded-lg border border-border bg-white p-1 sm:block"
           />
           {link}
         </div>
