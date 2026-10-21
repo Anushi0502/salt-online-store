@@ -20,7 +20,10 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { createShopifyAdminGraphQLClient } from "./shopify-admin-graphql-client.mjs";
 import { cleanProductTitle } from "../src/lib/product-title-cleanup.js";
-import { buildSeoTitle, rebuildProductDescription } from "../src/lib/product-description-rebuild.js";
+import { buildSeoTitle, HEALTH_CLAIM_PATTERN, rebuildProductDescription } from "../src/lib/product-description-rebuild.js";
+
+// Claims a rebuilt title must never contain; such products go to manual review.
+const ATTRACTION_CLAIM_PATTERN = /\b(?:pheromones?|sexual(?:ly)?|flirt(?:ing)?|aphrodisiac|seduc\w*|attract (?:women|men))\b/i;
 
 const rootDir = process.cwd();
 const outputDir = resolve(rootDir, "output", "content-cleanup");
@@ -89,7 +92,10 @@ async function fetchByIds(ids) {
 function planProduct(product) {
   const title = cleanProductTitle(product);
   const description = rebuildProductDescription(product, title.title);
-  if (description.needsReview) return { review: true };
+  const claimText = `${product.title} ${title.title}`;
+  if (description.needsReview || HEALTH_CLAIM_PATTERN.test(claimText) || ATTRACTION_CLAIM_PATTERN.test(claimText)) {
+    return { review: true };
+  }
   if (!title.changed && !description.changed) return null;
 
   const update = { id: product.id };
@@ -103,13 +109,20 @@ function planProduct(product) {
 }
 
 // Products already finished by hand (the 49-product pilot) are never redone.
-async function loadFinishedIds() {
+async function readJson(path, fallback) {
   try {
-    const pilot = JSON.parse(await readFile(resolve(rootDir, "output", "backups", "pilot-50-plan.json"), "utf8"));
-    return new Set(pilot.map((entry) => entry.id));
+    return JSON.parse(await readFile(resolve(rootDir, path), "utf8"));
   } catch {
-    return new Set();
+    return fallback;
   }
+}
+
+// Products already finished by hand (the 49-product pilot plus
+// output/backups/finished-product-ids.json) are never redone.
+async function loadFinishedIds() {
+  const pilot = await readJson("output/backups/pilot-50-plan.json", []);
+  const finished = await readJson("output/backups/finished-product-ids.json", { ids: [] });
+  return new Set([...pilot.map((entry) => entry.id), ...(finished.ids || [])]);
 }
 
 async function dryRun() {
