@@ -20,7 +20,6 @@ import TrustStrip from "@/components/storefront/TrustStrip";
 import EverydayCarryEssentials from "@/components/storefront/EverydayCarryEssentials";
 
 import { minPrice, savingsPercent } from "@/lib/formatters";
-import { isDesignedCollectionBanner } from "@/lib/collection-banner";
 import { trackMetaPixelSearch } from "@/lib/meta-pixel";
 import { resolveShopBannerImageSelection } from "@/lib/shop-banner";
 import { buildShopifyCdnSrcSet } from "@/lib/responsive-image";
@@ -450,11 +449,6 @@ const ShopPage = () => {
     curatedCollection?.title ||
     selectedCollection?.title ||
     "Collection preview";
-  const showDesignedCollectionBanner = Boolean(
-      selectedCollectionImage &&
-      bannerImageSelection.source === "selected-collection" &&
-      (Boolean(bannerImageSelection.websiteOverride) || isDesignedCollectionBanner(selectedCollection)),
-  );
 
   const totalResults = productsPayload?.total ?? sortedProducts.length;
   const totalPages = productsPayload?.totalPages ?? Math.max(1, Math.ceil(totalResults / PAGE_SIZE));
@@ -996,82 +990,51 @@ const ShopPage = () => {
 
       {!hasSearchQuery ? (
         <Reveal>
-          {showDesignedCollectionBanner ? (
-            <div className="salt-editorial-shell salt-shop-channel-shell mt-3 flex justify-center overflow-hidden rounded-[1.35rem] p-0 shadow-[0_18px_45px_-30px_rgba(12,32,72,0.32)] sm:rounded-[1.7rem]">
-              {/* The designed banner carries the visible title as artwork; keep a real H1 for search engines and screen readers. */}
-              <h1 className="sr-only">
-                {curatedSubcollection?.title || curatedCollection?.title || selectedCollection?.title || "Explore the full SALT catalog"}
-              </h1>
-              <img
-                src={selectedCollectionImage}
-                srcSet={buildShopifyCdnSrcSet(selectedCollectionImage, [800, 1200, 1600, 2400])}
-                sizes="(min-width: 1280px) 1200px, 100vw"
-                alt={selectedCollectionImageAlt}
-                // Capped height keeps products on the first screen; the artwork scales, never crops.
-                className="block h-auto max-h-[14rem] w-auto max-w-full sm:max-h-[18rem] lg:max-h-[22rem]"
-                decoding="async"
-                fetchPriority="high"
-                loading="eager"
+          <div className="salt-editorial-shell salt-shop-channel-shell mt-3 overflow-hidden rounded-[1.35rem] p-0 shadow-[0_18px_45px_-30px_rgba(12,32,72,0.32)] sm:rounded-[1.7rem]">
+            {selectedCollectionImage ? (
+              // One frame for every collection: the whole image is shown centred (never cropped, so any
+              // text in the artwork stays readable) over a blurred copy that fills the remaining space.
+              <div className="relative aspect-[2/1] w-full overflow-hidden bg-muted sm:aspect-[5/2] lg:aspect-[3/1]">
+                <img
+                  src={selectedCollectionImage}
+                  srcSet={buildShopifyCdnSrcSet(selectedCollectionImage, [800, 1200, 1600, 2400])}
+                  sizes="(min-width: 1280px) 1200px, 100vw"
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-80 blur-2xl"
+                  decoding="async"
+                />
+                <img
+                  src={selectedCollectionImage}
+                  srcSet={buildShopifyCdnSrcSet(selectedCollectionImage, [800, 1200, 1600, 2400])}
+                  sizes="(min-width: 1280px) 1200px, 100vw"
+                  alt={selectedCollectionImageAlt}
+                  // Website photo banners carry no text, so they can fill the frame edge to edge.
+                  className={`absolute inset-0 h-full w-full object-center ${bannerImageSelection.websiteOverride ? "object-cover" : "object-contain"}`}
+                  decoding="async"
+                  fetchPriority="high"
+                  loading="eager"
+                />
+              </div>
+            ) : null}
+            <div className="relative p-4 sm:p-5 lg:p-6">
+              <SectionHeading
+                kicker={collectionHeroKicker}
+                title={curatedSubcollection?.title || curatedCollection?.title || selectedCollection?.title || "Explore the full SALT catalog"}
+                description={collectionHeroSummary}
+                as="h1"
               />
-            </div>
-          ) : (
-            <div
-              className="salt-editorial-shell salt-shop-channel-shell relative mt-3 overflow-hidden rounded-[1.35rem] p-4 sm:rounded-[1.7rem] sm:p-5 lg:p-6"
-            >
-              <div className="pointer-events-none absolute left-0 top-10 h-20 w-1 rounded-r-full bg-primary/55" />
-              <div
-                className={`grid gap-4 lg:gap-5${selectedCollectionImage ? " lg:grid-cols-[minmax(0,1.1fr)_minmax(17rem,0.9fr)] lg:items-center" : ""}`}
-              >
-                <div className="relative z-10">
-                  <SectionHeading
-                    className="mt-3"
-                    kicker={collectionHeroKicker}
-                    title={curatedSubcollection?.title || curatedCollection?.title || selectedCollection?.title || "Explore the full SALT catalog"}
-                    description={collectionHeroSummary}
-                    as="h1"
-                  />
-                  <TrustStrip
-                    className="mt-4"
-                    items={collectionTrustStrip.slice(0, 3).map((label, index) => ({
-                      icon: [Truck, ShieldCheck, Sparkles][index] || Sparkles,
-                      label,
-                    }))}
-                  />
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {[
-                      { label: "Results", value: `${totalResults.toLocaleString()} products` },
-                      { label: "Sort", value: sortLabel },
-                    ].map((item) => (
-                      <div
-                        key={`${item.label}-${item.value}`}
-                        className="salt-editorial-meta inline-flex items-baseline gap-2 px-3 py-1 text-xs"
-                      >
-                        <span className="font-semibold text-muted-foreground">{item.label}</span>
-                        <span className="max-w-[12rem] truncate font-semibold text-foreground">{item.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    {heroActions.map(renderHeroAction)}
-                  </div>
-                </div>
-
-                {selectedCollectionImage ? (
-                  <div className="relative order-first aspect-[4/3] max-h-[18rem] overflow-hidden rounded-[1.15rem] border border-border/70 bg-background/92 shadow-[0_16px_34px_-28px_rgba(12,32,72,0.18)] lg:order-none lg:max-h-[22rem]">
-                    <img
-                      src={selectedCollectionImage}
-                      srcSet={buildShopifyCdnSrcSet(selectedCollectionImage, [480, 720, 960])}
-                      sizes="(min-width: 1024px) 480px, 100vw"
-                      alt={selectedCollectionImageAlt}
-                      className="h-full w-full object-cover object-center transition duration-500"
-                      decoding="async"
-                    />
-                    <div className="absolute inset-0 bg-[linear-gradient(180deg,hsl(var(--background)/0.02),hsl(var(--foreground)/0.04)_54%,hsl(var(--foreground)/0.16))]" />
-                  </div>
-                ) : null}
+              <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <TrustStrip
+                  items={collectionTrustStrip.slice(0, 3).map((label, index) => ({
+                    icon: [Truck, ShieldCheck, Sparkles][index] || Sparkles,
+                    label,
+                  }))}
+                />
+                <div className="flex flex-wrap gap-3">{heroActions.map(renderHeroAction)}</div>
               </div>
             </div>
-          )}
+          </div>
         </Reveal>
       ) : null}
       {collectionDiscoveryGuides.length ? (

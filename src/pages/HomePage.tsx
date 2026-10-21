@@ -15,9 +15,7 @@ import { useHomeFeaturedProducts } from "@/lib/home-featured-products";
 import { useJudgeMeTestimonials } from "@/lib/judgeme";
 import { normalizeShopifyAssetUrl } from "@/lib/theme-assets";
 import kidsCollectionBanner from "@/assets/collection-banners/kids-collection-banner-square.webp";
-import footwearCollectionBanner from "@/assets/collection-banners/footwear-collection-banner-square.webp";
 import bestsellersCollectionBanner from "@/assets/collection-banners/bestsellers-collection-banner-square.webp";
-import luxuryFragrancesCollectionBanner from "@/assets/collection-banners/luxury-fragrances-collection-banner-square.webp";
 import menCollectionBanner from "@/assets/collection-banners/men-collection-banner-square.webp";
 import womenCollectionBanner from "@/assets/collection-banners/women-collection-banner-square.webp";
 import heroMain from "@/assets/hero-main.jpg";
@@ -44,11 +42,11 @@ const HOME_COLLECTION_SHELVES = [
   { key: "women", title: "Women", handle: "women" },
 ] as const;
 
+// Banners showing branded products (designer perfume bottles, a swoosh
+// sneaker) were removed to avoid trademark risk.
 const HOME_HERO_BANNERS = [
   { key: "kids", title: "Kids", handle: "kids", image: kidsCollectionBanner, alt: "Kids collection banner" },
-  { key: "footwear", title: "Footwear", handle: "footwear", image: footwearCollectionBanner, alt: "Footwear collection banner" },
   { key: "bestSellers", title: "Best Sellers", handle: "best-sellers", image: bestsellersCollectionBanner, alt: "Best Sellers collection banner" },
-  { key: "luxuryFragrances", title: "Luxury Fragrances", handle: "luxury-fragrances", image: luxuryFragrancesCollectionBanner, alt: "Luxury Fragrances collection banner" },
   { key: "men", title: "Men", handle: "men-collection", image: menCollectionBanner, alt: "Men collection banner" },
   { key: "women", title: "Women", handle: "women", image: womenCollectionBanner, alt: "Women collection banner" },
 ] as const;
