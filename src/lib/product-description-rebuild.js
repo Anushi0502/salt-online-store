@@ -68,6 +68,10 @@ const ADJECTIVE_FEATURES = new Set([
   "shockproof", "scratch resistant",
 ]);
 
+// The refund policy excludes personal care and beauty goods from returns.
+const PERSONAL_CARE_PATTERN =
+  /\b(?:perfume|fragrance|cologne|eyeliner|mascara|lipstick|lip (?:oil|gloss|balm|plump\w*)|makeup|cosmetic|foundation|concealer|eyeshadow|blush|serum|lotion|cream|shampoo|conditioner|hair (?:oil|perfume|mask)|essential oil|skincare|skin care|nail polish|deodorant)\b/i;
+
 // Health and medical claims need a person to check them before publishing.
 export const HEALTH_CLAIM_PATTERN =
   /\b(?:pain relief|relieve|relief|cure|cures|heal|healing|treat|treatment|therapy|therapeutic|arthritis|carpal tunnel|tendonitis|plantar fasciitis|weight loss|lose weight|fat burn|slimming|detox|anti[- ]?aging|medical|clinical|fda|orthopedic|diabetic|blood pressure|sleep apnea|anxiety)\b/i;
@@ -171,7 +175,13 @@ function listToText(values) {
 // shoppers or search engines; only real words are listed.
 function isMeaningfulOption(value) {
   const letters = value.replace(/[^a-z]/gi, "");
-  return letters.length >= 3 && !/^(?:style|type|color|colour|model)\s*[a-z0-9]{1,3}$/i.test(value) && !/\d{3,}/.test(value);
+  return (
+    letters.length >= 3 &&
+    !/^(?:style|type|color|colour|model)\s*[a-z0-9]{1,3}$/i.test(value) &&
+    !/\d{3,}/.test(value) &&
+    !/^[a-z]+[\s-]?\d+$/i.test(value) &&
+    !/\d+\s*(?:pcs?|pieces?|pairs?|packs?)\b/i.test(value)
+  );
 }
 
 function optionValues(product, pattern) {
@@ -196,16 +206,21 @@ export function rebuildProductDescription(product, cleanTitle) {
   const source = `${title} ${String(product?.handle || "").replace(/-/g, " ")}`;
   const rawNoun = facts.noun || String(product?.productType || product?.product_type || "").trim().toLowerCase();
   const noun = rawNoun && !GENERIC_NOUNS.test(rawNoun) ? rawNoun : "";
-  const material = uniqueValues([...(facts.material || []), ...findWords(source, MATERIAL_WORDS)].join(","))
+  const material = uniqueValues([...(facts.material || []), ...findWords(source, MATERIAL_WORDS)].map((value) => (/^wooden$/i.test(value) ? "wood" : value)).join(","))
     .filter((value) => !noun.includes(value.toLowerCase()))
     .slice(0, 3);
   const features = uniqueValues([...(facts.features || []), ...findWords(source, FEATURE_WORDS)].join(","))
+    .filter((value, index, list) => list.findIndex((other) => other.replace(/-/g, " ").toLowerCase() === value.replace(/-/g, " ").toLowerCase()) === index)
+    .filter((value) => !/^(?:automatic|manual)$/i.test(value))
     .map((value) => (/^(?:led|usb|uv400)$/i.test(value) ? value.toUpperCase() : value))
     .slice(0, 4);
   const audience = AUDIENCE_PATTERNS.filter(([pattern]) => pattern.test(title)).map(([, label]) => label);
   const uses = uniqueValues([...(facts.use || []), ...findWords(source, USE_WORDS)].map((value) => value.toLowerCase()).join(",")).slice(0, 3);
   const seasons = findWords(source, SEASON_WORDS);
-  const sizes = reconcileSizes(facts.size, title);
+  // Pack counts ("3pcs") are not sizes.
+  const sizes = reconcileSizes(facts.size, title).filter(
+    (value) => !/^\d+\s*(?:pcs?|pieces?|packs?|sets?|pairs?)$/i.test(value) && !/^0\s*(?:cm|mm|inch|in)$/i.test(value),
+  );
   const rawColors = optionValues(product, /colou?r/i);
   const colors = rawColors.filter(isMeaningfulOption).length === rawColors.length ? rawColors.slice(0, 12) : [];
   const sizeOptions = optionValues(product, /size/i).slice(0, 12);
@@ -252,10 +267,18 @@ export function rebuildProductDescription(product, cleanTitle) {
     "How long does delivery take?",
     `Delivery usually takes ${DELIVERY_ESTIMATE} with free, tracked US shipping. During holidays or carrier delays it can occasionally take up to ${DELIVERY_EXTENDED_MAX}.`,
   ]);
-  faqs.push([
-    "Can I return it?",
-    `Yes. Request a return within ${RETURN_WINDOW_DAYS} days of delivery. The item must be unused and in its original packaging.`,
-  ]);
+  const personalCare = PERSONAL_CARE_PATTERN.test(`${title} ${noun}`);
+  faqs.push(
+    personalCare
+      ? [
+          "Can I return it?",
+          "Personal care and beauty items cannot be returned. If your order arrives damaged or you receive the wrong item, contact us and we will make it right.",
+        ]
+      : [
+          "Can I return it?",
+          `Yes. Request a return within ${RETURN_WINDOW_DAYS} days of delivery. The item must be unused and in its original packaging.`,
+        ],
+  );
 
   const out = [`<p>${summary}</p>`];
   if (details.length) {
@@ -269,7 +292,7 @@ export function rebuildProductDescription(product, cleanTitle) {
 
   // Meta description: first sentence, then the store promise, within 155 chars.
   const firstSentence = plain(summary).split(/(?<=\.)\s/)[0];
-  const tail = ` Free US shipping, ${RETURN_WINDOW_DAYS}-day returns.`;
+  const tail = personalCare ? " Free US shipping." : ` Free US shipping, ${RETURN_WINDOW_DAYS}-day returns.`;
   const room = META_DESCRIPTION_MAX - tail.length;
   const lead =
     firstSentence.length <= room

@@ -251,8 +251,10 @@ function hasForeignCategorySuffix(titleList, handle) {
 }
 
 // Hand-curated titles ("Men's Plain Black Gym T-Shirt") are left alone.
+// Comma-separated names ("Wood Sunglasses, Polarized UV400") are how
+// hand-written titles read; supplier titles almost never use them.
 function looksCurated(title) {
-  return /\b[A-Z][a-z]+'s\b/.test(title) || /\s&\s/.test(title);
+  return /\b[A-Z][a-z]+'s\b/.test(title) || /\s&\s/.test(title) || /\w, [A-Z0-9]/.test(title);
 }
 
 // Supplier titles sometimes lose their first word ("Rate Monitor Strap" for
@@ -290,7 +292,7 @@ export function detectTitleProblems(product, { maxLength = MAX_TITLE_LENGTH } = 
   if (title.length > maxLength) problems.push("too-long");
   if (/\b(?:Iphone|Ipad|Airpods)\b/.test(title)) problems.push("casing");
   const list = words(title);
-  if (dropRepeats(list).length !== list.length) problems.push("repeated-words");
+  if (!looksCurated(title) && dropRepeats(list).length !== list.length) problems.push("repeated-words");
   if (list.length > 2 && DANGLING_END.has(list[list.length - 1].toLowerCase())) problems.push("cut-off");
   return [...new Set(problems)];
 }

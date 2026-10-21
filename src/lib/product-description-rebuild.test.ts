@@ -65,6 +65,12 @@ describe("rebuildProductDescription", () => {
     expect(result.needsReview).toBe(true);
   });
 
+  it("uses the personal care return exception for beauty products", () => {
+    const result = rebuildProductDescription({ descriptionHtml: templateHtml }, "0.05mm Slim Waterproof Eyeliner");
+    expect(result.html).toContain("Personal care and beauty items cannot be returned.");
+    expect(result.metaDescription).not.toContain("returns");
+  });
+
   it("keeps SEO titles within 70 characters", () => {
     expect(buildSeoTitle("Ceramic Ramen Bowl")).toBe("Ceramic Ramen Bowl | SALT");
     expect(buildSeoTitle("x".repeat(40) + " " + "y".repeat(40)).length).toBeLessThanOrEqual(70);
