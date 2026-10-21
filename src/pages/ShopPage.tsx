@@ -442,6 +442,26 @@ const ShopPage = () => {
     [collections, selectedCollection, typeFilter, routeCollectionAlias, routeSubcollectionAlias, activeCollectionParam],
   );
   const selectedCollectionImage = bannerImageSelection.image;
+  const collectionHeroTitle =
+    curatedSubcollection?.title || curatedCollection?.title || selectedCollection?.title || "Explore the full SALT catalog";
+  // Width / height of the loaded banner image, used to tell wide designed artwork from photos.
+  // Keyed by image URL so a new collection never reuses the previous banner's shape.
+  const [bannerShape, setBannerShape] = useState<{ src: string; aspect: number } | null>(null);
+  const bannerAspect = bannerShape && bannerShape.src === selectedCollectionImage ? bannerShape.aspect : null;
+  const readBannerAspect = (image: HTMLImageElement) => {
+    if (!selectedCollectionImage || !image.naturalWidth || !image.naturalHeight) return;
+    const aspect = image.naturalWidth / image.naturalHeight;
+    setBannerShape((current) =>
+      current?.src === selectedCollectionImage && current.aspect === aspect ? current : { src: selectedCollectionImage, aspect },
+    );
+  };
+  // Cached images can finish loading before React attaches onLoad.
+  const handleBannerImageRef = (image: HTMLImageElement | null) => {
+    if (image?.complete) readBannerAspect(image);
+  };
+  const bannerIsWideArtwork = Boolean(
+    selectedCollectionImage && !bannerImageSelection.websiteOverride && bannerAspect !== null && bannerAspect >= 2.6,
+  );
   const selectedCollectionImageAlt =
     bannerImageSelection.websiteOverride?.alt ||
     bannerImageSelection.collection?.title ||
@@ -991,48 +1011,74 @@ const ShopPage = () => {
       {!hasSearchQuery ? (
         <Reveal>
           <div className="salt-editorial-shell salt-shop-channel-shell mt-3 overflow-hidden rounded-[1.35rem] p-0 shadow-[0_18px_45px_-30px_rgba(12,32,72,0.32)] sm:rounded-[1.7rem]">
-            {selectedCollectionImage ? (
-              // One frame for every collection: the whole image is shown centred (never cropped, so any
-              // text in the artwork stays readable) over a blurred copy that fills the remaining space.
-              <div className="relative aspect-[2/1] w-full overflow-hidden bg-muted sm:aspect-[5/2] lg:aspect-[3/1]">
+            {/*
+              Every collection gets the same full-width banner, filled edge to edge:
+              - wide designed artwork (2400x750 style) fills the frame and carries its own title;
+              - anything else (square or tall photos, text-free website photos, no image) becomes a
+                navy title panel with the photo filling the right-hand side.
+            */}
+            <div
+              className={`relative w-full overflow-hidden bg-[#0f2547] ${bannerIsWideArtwork ? "" : "aspect-[2/1] sm:aspect-[5/2] lg:aspect-[16/5]"}`}
+              style={bannerIsWideArtwork && bannerAspect ? { aspectRatio: String(bannerAspect) } : undefined}
+            >
+              {selectedCollectionImage ? (
                 <img
-                  src={selectedCollectionImage}
-                  srcSet={buildShopifyCdnSrcSet(selectedCollectionImage, [800, 1200, 1600, 2400])}
-                  sizes="(min-width: 1280px) 1200px, 100vw"
-                  alt=""
-                  aria-hidden="true"
-                  className="absolute inset-0 h-full w-full scale-110 object-cover object-center opacity-80 blur-2xl"
-                  decoding="async"
-                />
-                <img
+                  ref={handleBannerImageRef}
+                  key={selectedCollectionImage}
                   src={selectedCollectionImage}
                   srcSet={buildShopifyCdnSrcSet(selectedCollectionImage, [800, 1200, 1600, 2400])}
                   sizes="(min-width: 1280px) 1200px, 100vw"
                   alt={selectedCollectionImageAlt}
-                  // Website photo banners carry no text, so they can fill the frame edge to edge.
-                  className={`absolute inset-0 h-full w-full object-center ${bannerImageSelection.websiteOverride ? "object-cover" : "object-contain"}`}
+                  onLoad={(event) => readBannerAspect(event.currentTarget)}
+                  className={`absolute inset-y-0 right-0 h-full object-cover object-center ${
+                    bannerIsWideArtwork || bannerImageSelection.websiteOverride ? "w-full" : "w-1/2 sm:w-[48%]"
+                  }`}
                   decoding="async"
                   fetchPriority="high"
                   loading="eager"
                 />
-              </div>
-            ) : null}
-            <div className="relative p-4 sm:p-5 lg:p-6">
-              <SectionHeading
-                kicker={collectionHeroKicker}
-                title={curatedSubcollection?.title || curatedCollection?.title || selectedCollection?.title || "Explore the full SALT catalog"}
-                description={collectionHeroSummary}
-                as="h1"
-              />
-              <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              ) : null}
+              {bannerIsWideArtwork ? (
+                <h1 className="sr-only">{collectionHeroTitle}</h1>
+              ) : (
+                <>
+                  <div
+                    className={`absolute inset-0 ${
+                      bannerImageSelection.websiteOverride
+                        ? "bg-[linear-gradient(90deg,rgba(15,37,71,0.82)_0%,rgba(15,37,71,0.45)_45%,rgba(15,37,71,0)_75%)]"
+                        : "bg-[linear-gradient(90deg,#0f2547_0%,#0f2547_50%,rgba(15,37,71,0)_62%)] sm:bg-[linear-gradient(90deg,#0f2547_0%,#0f2547_52%,rgba(15,37,71,0)_64%)]"
+                    }`}
+                  />
+                  <div
+                    className={`absolute inset-y-0 left-0 flex w-[56%] flex-col justify-center gap-1.5 p-4 transition-opacity duration-300 sm:w-1/2 sm:gap-2 sm:p-8 lg:p-10 ${
+                      selectedCollectionImage && bannerAspect === null ? "opacity-0" : "opacity-100"
+                    }`}
+                  >
+                    <p className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-white/80 sm:text-xs">{collectionHeroKicker}</p>
+                    <h1 className="font-display text-[clamp(1.35rem,3.6vw,3.25rem)] font-semibold leading-[1.05] tracking-[-0.03em] text-white">
+                      {collectionHeroTitle}
+                    </h1>
+                    {totalResults > 0 ? (
+                      <p className="text-xs font-medium text-white/85 sm:text-sm">{totalResults.toLocaleString()} products</p>
+                    ) : null}
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="relative flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between lg:gap-6 lg:p-6">
+              <div className="min-w-0">
+                {collectionHeroSummary ? (
+                  <p className="max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">{collectionHeroSummary}</p>
+                ) : null}
                 <TrustStrip
+                  className={collectionHeroSummary ? "mt-3" : undefined}
                   items={collectionTrustStrip.slice(0, 3).map((label, index) => ({
                     icon: [Truck, ShieldCheck, Sparkles][index] || Sparkles,
                     label,
                   }))}
                 />
-                <div className="flex flex-wrap gap-3">{heroActions.map(renderHeroAction)}</div>
               </div>
+              <div className="flex shrink-0 flex-wrap gap-3">{heroActions.map(renderHeroAction)}</div>
             </div>
           </div>
         </Reveal>
