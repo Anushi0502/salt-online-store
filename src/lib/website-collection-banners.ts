@@ -1,5 +1,4 @@
 import bestsellersBanner from "@/assets/collection-banners/bestsellers-collection-banner.webp";
-import footwearBanner from "@/assets/collection-banners/footwear-collection-banner.webp";
 import kidsBanner from "@/assets/collection-banners/kids-collection-banner.webp";
 import luxuryFragrancesBanner from "@/assets/collection-banners/luxury-fragrances-collection-banner.webp";
 import menBanner from "@/assets/collection-banners/men-collection-banner.webp";
@@ -15,10 +14,6 @@ const BANNERS_BY_HANDLE: Record<string, WebsiteCollectionBanner> = {
   kids: {
     image: kidsBanner,
     alt: "Kids collection banner",
-  },
-  footwear: {
-    image: footwearBanner,
-    alt: "Footwear collection banner",
   },
   "best-sellers": {
     image: bestsellersBanner,
