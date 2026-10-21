@@ -52,6 +52,14 @@ describe("cleanProductTitle", () => {
     ).toBe("Heart Rate Monitor Chest Strap Replacement Belt");
   });
 
+  it("leaves hand-written comma-style titles unchanged", () => {
+    const result = cleanProductTitle({
+      title: "KINGSEVEN Walnut Wood Round Sunglasses, Polarized UV400 Unisex",
+      handle: "kingseven-brand-walnut-sunglasses-men-women-polarized-uv400-lens-wood-round-frame-glasses",
+    });
+    expect(result.changed).toBe(false);
+  });
+
   it("leaves clean titles unchanged", () => {
     const result = cleanProductTitle({ title: "Baby Musical Feeding Bottle Pacifier Newborn Soft Teether Rattles" });
     expect(result.changed).toBe(false);
