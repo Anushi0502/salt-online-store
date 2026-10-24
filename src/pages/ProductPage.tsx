@@ -24,6 +24,8 @@ import SeoMetadata from "@/components/storefront/SeoMetadata";
 import SectionHeading from "@/components/storefront/SectionHeading";
 import ShopAppPromo from "@/components/storefront/ShopAppPromo";
 import TrustStrip from "@/components/storefront/TrustStrip";
+import BundleSaveOffer from "@/components/storefront/BundleSaveOffer";
+import { hasBundleSaveTag } from "@/lib/bundle-save";
 import {
   Accordion,
   AccordionContent,
@@ -578,7 +580,7 @@ const ProductPage = () => {
     }
 
     setSelectedVariantId(initialVariant?.id || 0);
-    setQuantity(1);
+    setQuantity(hasBundleSaveTag(product.tags) ? 2 : 1);
     setActiveImage(productVariantImage(product, initialVariant) || "");
   }, [initialVariant, product]);
 
@@ -1552,6 +1554,10 @@ const ProductPage = () => {
                   </section>
                 ))}
               </div>
+            ) : null}
+
+            {hasBundleSaveTag(product.tags) ? (
+              <BundleSaveOffer price={price} quantity={selectedQuantity} onSelectQuantity={setQuantity} />
             ) : null}
 
             <div className="mt-3.5">
