@@ -1436,6 +1436,8 @@ const sectionLiquid = `<div
       <h2>Shop by category</h2>
       <ul>
         <li><a href="/collections/holiday-gifts">Holiday Gifts</a></li>
+        <li><a href="/collections/gifts-under-25">Gifts Under $25</a></li>
+        <li><a href="/collections/gifts-under-50">Gifts Under $50</a></li>
         <li><a href="/collections/bundle-save">Bundle &amp; Save: buy 2, save 20%; 3 or more, save 30%</a></li>
         <li><a href="/collections/kitchen-gadgets">Kitchen Gadgets</a></li>
         <li><a href="/collections/cleaning-tools">Cleaning Tools</a></li>

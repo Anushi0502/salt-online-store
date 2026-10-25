@@ -5,11 +5,14 @@ import { Link } from "react-router-dom";
 // list on the focus collections in the 90-day sales plan.
 const HOME_CATEGORY_TILES = [
   { title: "Holiday Gifts", detail: "Easy wins for everyone on your list", href: "/collections/holiday-gifts" },
+  { title: "Gifts Under $25", detail: "Thoughtful gifts on a small budget", href: "/collections/gifts-under-25" },
+  { title: "Gifts Under $50", detail: "Watches, wallets, robes and more", href: "/collections/gifts-under-50" },
   { title: "Bundle & Save", detail: "Buy 2, save 20% · 3+, save 30%", href: "/collections/bundle-save" },
   { title: "Kitchen Gadgets", detail: "Small tools that solve daily jobs", href: "/collections/kitchen-gadgets" },
   { title: "Cleaning Tools", detail: "Faster, easier cleaning at home", href: "/collections/cleaning-tools" },
   { title: "Storage & Organization", detail: "Tidy drawers, closets and counters", href: "/collections/storage-organization" },
   { title: "Gifts for Seniors", detail: "Comfort and everyday helpers", href: "/collections/gifts-for-seniors" },
+  { title: "Senior Living & Planners", detail: "Organizers, planners and care tools", href: "/collections/senior-living-solutions" },
   { title: "Kids", detail: "Lunch, school and play", href: "/collections/kids" },
   { title: "Women", detail: "Clothing, bags and accessories", href: "/collections/women" },
   { title: "Men", detail: "Clothing, wallets and accessories", href: "/collections/men-collection" },
@@ -28,7 +31,7 @@ export function HomeCategoryTiles() {
       >
         Find what you came for
       </h2>
-      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {HOME_CATEGORY_TILES.map((tile) => (
           <Link
             key={tile.href}

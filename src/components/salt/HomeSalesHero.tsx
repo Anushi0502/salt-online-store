@@ -53,6 +53,15 @@ export function HomeSalesHero() {
               Buy 2, Save 20%
             </Link>
           </div>
+          <nav aria-label="Shop gifts by budget" className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[0.82rem]">
+            <span className="font-semibold text-foreground">Shop by budget:</span>
+            <Link to="/collections/gifts-under-25" className="font-semibold text-primary underline-offset-4 hover:underline">
+              Gifts under $25
+            </Link>
+            <Link to="/collections/gifts-under-50" className="font-semibold text-primary underline-offset-4 hover:underline">
+              Gifts under $50
+            </Link>
+          </nav>
         </div>
 
         <Link
