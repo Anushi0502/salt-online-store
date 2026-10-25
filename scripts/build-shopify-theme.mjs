@@ -1377,8 +1377,10 @@ const sectionLiquid = `<div
     Googlebot renders with JavaScript ON, so it ignores <noscript>. This markup
     lives inside #root instead: crawlers read it in the first HTML response, and
     React's createRoot().render() replaces it on load, so shoppers see the app.
+    It is visually hidden (still in the DOM for crawlers and screen readers) so
+    shoppers don't see an unstyled link list flash before the app mounts.
   {% endcomment %}
-  <div class="salt-ssr" style="max-width:1200px;margin:0 auto;padding:16px;font-family:Arial,sans-serif">
+  <div class="salt-ssr" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">
     <nav aria-label="Shop by category">
       <a href="/">Home</a> · <a href="/collections">All collections</a> · <a href="/collections/best-sellers">Best Sellers</a> · <a href="/collections/new-arrivals">New Arrivals</a>
       <ul>
