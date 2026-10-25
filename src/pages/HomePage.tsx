@@ -1,23 +1,19 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, ChevronLeft, ChevronRight, Star } from "lucide-react";
 import Reveal from "@/components/storefront/Reveal";
 import ProductCard from "@/components/storefront/ProductCard";
 import SeoMetadata from "@/components/storefront/SeoMetadata";
-import HomeHero, { type HomeHeroSlide } from "@/components/storefront/HomeHero";
 import { HomeShelfState } from "@/components/storefront/HomeShelfState";
-import GiftBanner from "@/components/salt/GiftBanner";
+import { HomeCategoryTiles } from "@/components/salt/HomeCategoryTiles";
+import { HomeFaq } from "@/components/salt/HomeFaq";
+import { HomeSalesHero } from "@/components/salt/HomeSalesHero";
 import { SaltFinds } from "@/components/salt/SaltFinds";
 import { polishPlainText } from "@/lib/formatters";
 import { SALT_BRAND_SHORT_DESCRIPTION } from "@/lib/salt-brand";
 import { useHomeCollectionProducts } from "@/lib/home-collection-products";
-import { useHomeFeaturedProducts } from "@/lib/home-featured-products";
 import { useJudgeMeTestimonials } from "@/lib/judgeme";
 import { normalizeShopifyAssetUrl } from "@/lib/theme-assets";
-import kidsCollectionBanner from "@/assets/collection-banners/kids-collection-banner-square.webp";
-import bestsellersCollectionBanner from "@/assets/collection-banners/bestsellers-collection-banner-square.webp";
-import menCollectionBanner from "@/assets/collection-banners/men-collection-banner-square.webp";
-import womenCollectionBanner from "@/assets/collection-banners/women-collection-banner-square.webp";
 import heroMain from "@/assets/hero-main.jpg";
 import type { ShopifyProduct } from "@/types/shopify";
 
@@ -34,21 +30,38 @@ const HOME_REVIEW_SCROLL_PX_PER_MS = 0.06;
 const REVIEW_DISPLAY_LIMIT = 24;
 const HOME_PRODUCT_DISPLAY_LIMIT = 12;
 
+// Focus collections from the 90-day sales plan, in page order. Shelves for
+// footwear (sizing issues) and designer-name fragrances (trademark risk) were
+// removed; the old Best Sellers shelf was not ranked by sales.
 const HOME_COLLECTION_SHELVES = [
-  { key: "kids", title: "Kids", handle: "kids" },
-  { key: "footwear", title: "Footwear", handle: "footwear" },
-  { key: "luxuryFragrances", title: "Luxury Fragrances", handle: "luxury-fragrances" },
-  { key: "men", title: "Men", handle: "men-collection" },
-  { key: "women", title: "Women", handle: "women" },
-] as const;
-
-// Banners showing branded products (designer perfume bottles, a swoosh
-// sneaker) were removed to avoid trademark risk.
-const HOME_HERO_BANNERS = [
-  { key: "kids", title: "Kids", handle: "kids", image: kidsCollectionBanner, alt: "Kids collection banner" },
-  { key: "bestSellers", title: "Best Sellers", handle: "best-sellers", image: bestsellersCollectionBanner, alt: "Best Sellers collection banner" },
-  { key: "men", title: "Men", handle: "men-collection", image: menCollectionBanner, alt: "Men collection banner" },
-  { key: "women", title: "Women", handle: "women", image: womenCollectionBanner, alt: "Women collection banner" },
+  {
+    key: "bundleSave",
+    eyebrow: "Bundle & Save",
+    title: "Buy 2, save 20%",
+    description: "Mix and match any items below. 20% off 2, 30% off 3 or more, applied automatically at checkout.",
+    handle: "bundle-save",
+  },
+  {
+    key: "holidayGifts",
+    eyebrow: "Gift season",
+    title: "Holiday Gifts",
+    description: "Practical presents that get used long after the holidays.",
+    handle: "holiday-gifts",
+  },
+  {
+    key: "kitchenGadgets",
+    eyebrow: "Kitchen edit",
+    title: "Kitchen Gadgets",
+    description: "Small tools that make cooking, prep and cleanup quicker.",
+    handle: "kitchen-gadgets",
+  },
+  {
+    key: "seniorPlanners",
+    eyebrow: "Instant download",
+    title: "Senior Living & Planners",
+    description: "Fillable planners and organizers for caregivers and families, plus everyday comfort helpers.",
+    handle: "senior-living-solutions",
+  },
 ] as const;
 
 
@@ -62,12 +75,22 @@ function formatReviewAverage(value: number): string {
   return Number(value.toFixed(2)).toString();
 }
 
-function SectionTitle({ title, to }: { title: string; to?: string }) {
+function SectionTitle({
+  title,
+  to,
+  eyebrow = "Curated edit",
+  description,
+}: {
+  title: string;
+  to?: string;
+  eyebrow?: string;
+  description?: string;
+}) {
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="max-w-2xl">
         <p className="text-[0.66rem] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-          Curated edit
+          {eyebrow}
         </p>
         <h2 className="mt-2 font-display text-[clamp(1.45rem,3vw,2.15rem)] leading-[0.96] tracking-[-0.035em] text-foreground">
           {to ? (
@@ -78,6 +101,9 @@ function SectionTitle({ title, to }: { title: string; to?: string }) {
             title
           )}
         </h2>
+        {description ? (
+          <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground sm:text-[0.94rem]">{description}</p>
+        ) : null}
       </div>
 
       {to ? (
@@ -112,8 +138,8 @@ type HomeCardSource = {
   reviewCount?: number | null;
 };
 
+// Homepage cards show the selling price only: no "was" price or % off badge.
 function toProductCardProduct(source: HomeCardSource): ShopifyProduct {
-  const compareAtPrice = Number(source.compareAtPrice || 0);
   const image = source.image ? { id: source.id, src: source.image, alt: source.title } : null;
 
   return {
@@ -134,7 +160,7 @@ function toProductCardProduct(source: HomeCardSource): ShopifyProduct {
         id: source.id,
         title: "Default",
         price: source.price.toFixed(2),
-        compare_at_price: compareAtPrice > source.price ? compareAtPrice.toFixed(2) : null,
+        compare_at_price: null,
         available: true,
       },
     ],
@@ -146,43 +172,18 @@ function toProductCardProduct(source: HomeCardSource): ShopifyProduct {
 const HomePage = () => {
   // Request only the small live Shopify collections used by this page. Product,
   // search, and collection routes independently fetch their current bounded view.
-  const homeFeaturedProductsQuery = useHomeFeaturedProducts();
-  const { data: homeFeaturedProductsPayload } = homeFeaturedProductsQuery;
   const homeCollectionProductsQuery = useHomeCollectionProducts();
   const { data: homeCollectionProductsPayload } = homeCollectionProductsQuery;
   const normalizedHeroMain = normalizeShopifyAssetUrl(heroMain) || heroMain;
-  const bestSellerTiles = useMemo(
-    () =>
-      (homeFeaturedProductsPayload?.bestSellerProducts || [])
-        .slice(0, HOME_PRODUCT_DISPLAY_LIMIT)
-        .map(toProductCardProduct),
-    [homeFeaturedProductsPayload?.bestSellerProducts],
-  );
-  const bestSellerDisplayTiles = bestSellerTiles;
-  const homeHeroSlides = useMemo<HomeHeroSlide[]>(
-    () =>
-      HOME_HERO_BANNERS.map((banner) => {
-        const section = homeCollectionProductsPayload?.sections[banner.key];
-
-        return {
-          key: banner.key,
-          title: section?.title || banner.title,
-          image: banner.image,
-          alt: banner.alt,
-          ctaHref: `/collections/${section?.handle || banner.handle}`,
-          description: `Explore the latest ${section?.title || banner.title.toLowerCase()} edit from SALT.`,
-          products: section?.products || [],
-        };
-      }),
-    [homeCollectionProductsPayload],
-  );
   const homeCollectionSections = useMemo(
     () =>
       HOME_COLLECTION_SHELVES.map((fallbackSection) => {
         const section = homeCollectionProductsPayload?.sections[fallbackSection.key];
 
         return {
-          title: section?.title || fallbackSection.title,
+          title: fallbackSection.title,
+          eyebrow: fallbackSection.eyebrow,
+          description: fallbackSection.description,
           to: `/collections/${section?.handle || fallbackSection.handle}`,
           products: (section?.products || []).slice(0, HOME_PRODUCT_DISPLAY_LIMIT).map(toProductCardProduct),
         };
@@ -354,81 +355,57 @@ const HomePage = () => {
   return (
     <section className="mt-1 w-full px-3 pb-3 sm:mt-3 sm:px-4 sm:pb-5 lg:px-5 lg:pb-6 xl:px-6">
       <SeoMetadata
-        title="SALT Online Store | Curated essentials and giftable finds"
+        title="SALT Online Store | Practical Gifts & Everyday Home Finds"
         description={homeDescription}
         canonicalPath="/"
         image={normalizedHeroMain}
       />
       <div className="space-y-4 sm:space-y-5">
-        <HomeHero slides={homeHeroSlides} loading={homeCollectionProductsQuery.isPending} />
-
-        <Reveal delayMs={80}>
-          <section className="salt-section-shell rounded-[1.75rem] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            <SectionTitle title="Best Sellers" />
-            {homeFeaturedProductsQuery.isPending ? (
-              <HomeShelfState shelfTitle="Best Sellers" state="loading" />
-            ) : homeFeaturedProductsQuery.isError ? (
-              <HomeShelfState
-                shelfTitle="Best Sellers"
-                state="error"
-                onRetry={() => void homeFeaturedProductsQuery.refetch()}
-                isRetrying={homeFeaturedProductsQuery.isFetching}
-              />
-            ) : bestSellerDisplayTiles.length > 0 ? (
-              <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-6 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5 lg:gap-5 xl:grid-cols-6 xl:gap-6">
-                {bestSellerDisplayTiles.map((product, index) => (
-                  <Reveal key={`${product.handle}-${index}`} delayMs={0} className="salt-reveal-instant">
-                    <ProductCard
-                      product={product}
-                      variant="shop"
-                      className="w-full max-w-[11rem] justify-self-center"
-                    />
-                  </Reveal>
-                ))}
-              </div>
-            ) : (
-              <HomeShelfState shelfTitle="Best Sellers" state="empty" />
-            )}
-          </section>
-        </Reveal>
+        <HomeSalesHero />
 
         {homeCollectionSections.map((section, sectionIndex) => (
-          <Reveal key={section.to} delayMs={100 + sectionIndex * 20}>
-            <section className="salt-section-shell rounded-[1.75rem] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-              <SectionTitle title={section.title} to={section.to} />
-              {homeCollectionProductsQuery.isPending ? (
-                <HomeShelfState shelfTitle={section.title} state="loading" />
-              ) : homeCollectionProductsQuery.isError ? (
-                <HomeShelfState
-                  shelfTitle={section.title}
-                  state="error"
-                  onRetry={() => void homeCollectionProductsQuery.refetch()}
-                  isRetrying={homeCollectionProductsQuery.isFetching}
+          <Fragment key={section.to}>
+            <Reveal delayMs={100 + sectionIndex * 20}>
+              <section className="salt-section-shell rounded-[1.75rem] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+                <SectionTitle
+                  title={section.title}
+                  to={section.to}
+                  eyebrow={section.eyebrow}
+                  description={section.description}
                 />
-              ) : section.products.length > 0 ? (
-                <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-6 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5 lg:gap-5 xl:grid-cols-6 xl:gap-6">
-                  {section.products.map((product, index) => (
-                    <Reveal key={`${product.handle}-${index}`} delayMs={0} className="salt-reveal-instant">
-                      <ProductCard
-                        product={product}
-                        variant="shop"
-                        className="w-full max-w-[11rem] justify-self-center"
-                      />
-                    </Reveal>
-                  ))}
-                </div>
-              ) : (
-                <HomeShelfState shelfTitle={section.title} state="empty" />
-              )}
-            </section>
-          </Reveal>
+                {homeCollectionProductsQuery.isPending ? (
+                  <HomeShelfState shelfTitle={section.title} state="loading" />
+                ) : homeCollectionProductsQuery.isError ? (
+                  <HomeShelfState
+                    shelfTitle={section.title}
+                    state="error"
+                    onRetry={() => void homeCollectionProductsQuery.refetch()}
+                    isRetrying={homeCollectionProductsQuery.isFetching}
+                  />
+                ) : section.products.length > 0 ? (
+                  <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-6 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5 lg:gap-5 xl:grid-cols-6 xl:gap-6">
+                    {section.products.map((product, index) => (
+                      <Reveal key={`${product.handle}-${index}`} delayMs={0} className="salt-reveal-instant">
+                        <ProductCard
+                          product={product}
+                          variant="shop"
+                          className="w-full max-w-[11rem] justify-self-center"
+                        />
+                      </Reveal>
+                    ))}
+                  </div>
+                ) : (
+                  <HomeShelfState shelfTitle={section.title} state="empty" />
+                )}
+              </section>
+            </Reveal>
+            {sectionIndex === 0 ? (
+              <Reveal delayMs={110}>
+                <HomeCategoryTiles />
+              </Reveal>
+            ) : null}
+          </Fragment>
         ))}
-
-        <Reveal delayMs={110}>
-          <section className="salt-section-shell rounded-[1.75rem] px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6">
-            <GiftBanner />
-          </section>
-        </Reveal>
 
         <Reveal delayMs={210}>
           <SaltFinds />
@@ -556,6 +533,10 @@ const HomePage = () => {
               </div>
             </div>
           </section>
+        </Reveal>
+
+        <Reveal delayMs={300}>
+          <HomeFaq />
         </Reveal>
       </div>
     </section>

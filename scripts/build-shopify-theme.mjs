@@ -151,13 +151,12 @@ function buildHomeCollectionSection(key, title, handle) {
   }`;
 }
 
+// Keep in sync with HOME_SECTIONS in src/lib/home-collection-products.ts.
 const homeCollectionSectionsLiquid = [
-  ["kids", "Kids", "kids"],
-  ["footwear", "Footwear", "footwear"],
-  ["bestSellers", "Best Sellers", "best-sellers"],
-  ["luxuryFragrances", "Luxury Fragrances", "luxury-fragrances"],
-  ["men", "Men", "men-collection"],
-  ["women", "Women", "women"],
+  ["bundleSave", "Bundle & Save", "bundle-save"],
+  ["holidayGifts", "Holiday Gifts", "holiday-gifts"],
+  ["kitchenGadgets", "Kitchen Gadgets", "kitchen-gadgets"],
+  ["seniorPlanners", "Senior Living & Planners", "senior-living-solutions"],
 ].map((entry) => buildHomeCollectionSection(...entry)).join(",\n");
 
 function buildThemeAssetMapEntries() {
@@ -1432,8 +1431,36 @@ const sectionLiquid = `<div
         {% endfor %}
       </ul>
     {% elsif request.page_type == 'index' %}
-      <h1>{{ shop.name | escape }}: practical, giftable finds for every home</h1>
-      <p>{{ shop.description | escape }}</p>
+      <h1>Practical gifts they'll actually use</h1>
+      <p>Everyday kitchen, home and gift finds from {{ shop.name | escape }}, most under $25. Free US shipping, 14-day returns, and Buy 2, save 20% on Bundle &amp; Save picks.</p>
+      <h2>Shop by category</h2>
+      <ul>
+        <li><a href="/collections/holiday-gifts">Holiday Gifts</a></li>
+        <li><a href="/collections/bundle-save">Bundle &amp; Save: buy 2, save 20%; 3 or more, save 30%</a></li>
+        <li><a href="/collections/kitchen-gadgets">Kitchen Gadgets</a></li>
+        <li><a href="/collections/cleaning-tools">Cleaning Tools</a></li>
+        <li><a href="/collections/storage-organization">Storage &amp; Organization</a></li>
+        <li><a href="/collections/gifts-for-seniors">Gifts for Seniors</a></li>
+        <li><a href="/collections/senior-living-solutions">Senior Living &amp; Planners</a></li>
+        <li><a href="/collections/kids">Kids</a></li>
+        <li><a href="/collections/women">Women</a></li>
+        <li><a href="/collections/men-collection">Men</a></li>
+      </ul>
+      <h2>Bundle &amp; Save picks</h2>
+      <ul>
+        {%- for salt_ssr_p in collections['bundle-save'].products limit: 12 %}
+        <li><a href="{{ salt_ssr_p.url }}">{{ salt_ssr_p.title | escape }}</a> – {{ salt_ssr_p.price | money }}</li>
+        {%- endfor %}
+      </ul>
+      <h2>Questions before you order</h2>
+      <h3>How long does delivery take?</h3>
+      <p>Orders are processed in 1–2 business days and usually arrive within 5–15 business days. During holidays or carrier delays, delivery can take up to 20 business days. Every order ships with tracking to all 50 US states.</p>
+      <h3>Is shipping free?</h3>
+      <p>Yes. Standard shipping is free on all US orders.</p>
+      <h3>How does Bundle &amp; Save work?</h3>
+      <p>Add any 2 items from the Bundle &amp; Save collection and 20% comes off automatically at checkout. Add 3 or more and you save 30%. No code needed.</p>
+      <h3>What is the return policy?</h3>
+      <p>You can request a return within 14 days of delivery for unused items in their original packaging. Email help@saltonlinestore.com with your order number.</p>
     {% elsif request.page_type == 'page' and page %}
       <h1>{{ page.title | escape }}</h1>
       <div>{{ page.content }}</div>
@@ -1443,7 +1470,7 @@ const sectionLiquid = `<div
 <noscript>
   <main>
     {% if request.page_type == 'product' and product %}
-      <h1>{{ product.title | escape }}</h1>
+      <h2>{{ product.title | escape }}</h2>
       {% if product.featured_image %}
         <img src="{{ product.featured_image | image_url: width: 800 }}" alt="{{ product.title | escape }}" loading="lazy" width="800" height="800">
       {% endif %}
@@ -1459,12 +1486,12 @@ const sectionLiquid = `<div
       <p>Availability: {% if product.available %}In stock{% else %}Currently unavailable{% endif %}</p>
       <p><a href="{{ product.url }}">View product details</a></p>
     {% elsif request.page_type == 'collection' and collection %}
-      <h1>{{ collection.title | escape }}</h1>
+      <h2>{{ collection.title | escape }}</h2>
       {% if collection.description != blank %}
         <p>{{ collection.description | strip_html | strip_newlines | truncate: 320 | escape }}</p>
       {% endif %}
     {% elsif request.path contains '/pages/faq' %}
-      <h1>FAQ</h1>
+      <h2>FAQ</h2>
       <p>Quick answers about SALT ordering, shipping, returns, and product support.</p>
       <section aria-labelledby="salt-noscript-faq-title">
         <h2 id="salt-noscript-faq-title">Frequently asked questions</h2>
@@ -1478,55 +1505,55 @@ const sectionLiquid = `<div
         <p>Use the Contact Us link for a support message and the team can route the request cleanly.</p>
       </section>
     {% elsif request.path == '/pages/about-us' %}
-      <h1>About SALT Online Store</h1>
+      <h2>About SALT Online Store</h2>
       <p>Learn how SALT makes practical products easy to discover, save, and buy.</p>
     {% elsif request.path == '/pages/contact-us' %}
-      <h1>Contact SALT Support</h1>
+      <h2>Contact SALT Support</h2>
       <p>Reach the SALT support team for delivery questions, product advice, returns, or order help.</p>
     {% elsif request.path == '/pages/interactive-stem-assembly-activities-for-kids' %}
-      <h1>Interactive STEM Assembly Activities for Kids</h1>
+      <h2>Interactive STEM Assembly Activities for Kids</h2>
       <p>Explore educational assembly toys and science-inspired build activities for kids, with wooden DIY projects and creative play from SALT.</p>
       <p><a href="{{ routes.collections_url }}/kids-toys-games">Browse Kids Toys &amp; Games</a></p>
     {% elsif request.path == '/pages/digital-circus-lunch-box-for-kids' %}
-      <h1>Digital Circus Lunch Box for Kids</h1>
+      <h2>Digital Circus Lunch Box for Kids</h2>
       <p>Explore a current SALT lunch box listing for school, picnic, camping, and travel use. Review the live product details before ordering.</p>
       <p><a href="/products/the-amazing-digital-circus-lunch-box-for-kids-school-cute-food-storage-containers-boys-girls-picnic-bento-children-birthday-gift">View the live lunch-box listing</a></p>
     {% elsif request.path == '/pages/kitchen-cookware-buying-guide' %}
-      <h1>Kitchen &amp; Cookware Buying Guide</h1>
+      <h2>Kitchen &amp; Cookware Buying Guide</h2>
       <p>Use SALT's Kitchen &amp; Cookware collection to compare cookware, food-preparation tools, dining essentials, and practical kitchen helpers by task.</p>
       <p><a href="{{ routes.collections_url }}/cookware">Browse Kitchen &amp; Cookware</a></p>
     {% elsif request.path == '/pages/jeans-denim-fit-guide' %}
-      <h1>Jeans &amp; Denim Fit Guide</h1>
+      <h2>Jeans &amp; Denim Fit Guide</h2>
       <p>Compare the live SALT Jeans collection by current product-title style signals, then check size details before ordering.</p>
       <p><a href="{{ routes.collections_url }}/jeans">Browse Jeans</a></p>
     {% elsif request.path == '/pages/mobwol-watch-guide' %}
-      <h1>Mobwol 40mm Watch Guide</h1>
+      <h2>Mobwol 40mm Watch Guide</h2>
       <p>Compare the SALT Mobwol-handle 40mm quartz watch with current watch listings, then review options and supplied details before ordering.</p>
       <p><a href="{{ routes.collections_url }}/watches">Browse Watches</a></p>
     {% elsif request.path == '/pages/realme-buds-case-compatibility-guide' %}
-      <h1>Realme Buds Case Compatibility Guide</h1>
+      <h2>Realme Buds Case Compatibility Guide</h2>
       <p>Compare live SALT Realme Buds cases by model wording, then review the selected option and supplied details before ordering.</p>
       <p><a href="{{ routes.collections_url }}/audio">Browse Audio</a></p>
     {% elsif request.path == '/pages/salt-earbuds-buying-guide' %}
-      <h1>Earbuds Buying Guide: Cases, Tips &amp; Wireless Earbuds</h1>
+      <h2>Earbuds Buying Guide: Cases, Tips &amp; Wireless Earbuds</h2>
       <p>Separate complete wireless earbuds from protective cases and replacement tips, then review the live listing before ordering.</p>
       <p><a href="{{ routes.collections_url }}/audio">Browse Audio</a></p>
     {% elsif request.path == '/pages/canvas-belt-sizing-style-guide' %}
-      <h1>Canvas Belt Sizing &amp; Style Guide</h1>
+      <h2>Canvas Belt Sizing &amp; Style Guide</h2>
       <p>Compare the live canvas belt listing by length and option wording, then check the selected details before ordering.</p>
       <p><a href="{{ routes.collections_url }}/mens-accessories">Browse Men's Accessories</a></p>
     {% elsif request.path == '/pages/blog' %}
-      <h1>SALT Journal</h1>
+      <h2>SALT Journal</h2>
       <p>Fresh stories, product education, and practical ideas from SALT.</p>
     {% elsif request.page_type == 'blog' and blog %}
-      <h1>SALT Journal</h1>
+      <h2>SALT Journal</h2>
       <p>Fresh stories, product education, and practical ideas from SALT.</p>
     {% elsif request.page_type == 'article' and article %}
-      <h1>{{ article.title | escape }}</h1>
+      <h2>{{ article.title | escape }}</h2>
       {% assign salt_noscript_article_description = article.excerpt | default: article.content | strip_html | strip_newlines | truncate: 320 %}
       <p>{{ salt_noscript_article_description | escape }}</p>
     {% else %}
-      <h1>{{ page_title | default: shop.name | escape }}</h1>
+      <h2>{{ page_title | default: shop.name | escape }}</h2>
       {% if page_description != blank %}
         <p>{{ page_description | strip_html | escape }}</p>
       {% endif %}
