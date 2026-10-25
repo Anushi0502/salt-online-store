@@ -441,7 +441,11 @@ const ShopPage = () => {
       }),
     [collections, selectedCollection, typeFilter, routeCollectionAlias, routeSubcollectionAlias, activeCollectionParam],
   );
-  const selectedCollectionImage = bannerImageSelection.image;
+  // A banner image that fails to load must not leave a blank navy box: drop it so
+  // the title panel shows instead.
+  const [failedBannerImage, setFailedBannerImage] = useState<string | null>(null);
+  const selectedCollectionImage =
+    bannerImageSelection.image && bannerImageSelection.image !== failedBannerImage ? bannerImageSelection.image : null;
   const collectionHeroTitle =
     curatedSubcollection?.title || curatedCollection?.title || selectedCollection?.title || "Explore the full SALT catalog";
   // Width / height of the loaded banner image, used to tell wide designed artwork from photos.
@@ -1030,6 +1034,7 @@ const ShopPage = () => {
                   sizes="(min-width: 1280px) 1200px, 100vw"
                   alt={selectedCollectionImageAlt}
                   onLoad={(event) => readBannerAspect(event.currentTarget)}
+                  onError={() => setFailedBannerImage(selectedCollectionImage)}
                   className={`absolute inset-y-0 right-0 h-full object-cover object-center ${
                     bannerIsWideArtwork || bannerImageSelection.websiteOverride ? "w-full" : "w-1/2 sm:w-[48%]"
                   }`}
