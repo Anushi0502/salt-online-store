@@ -847,11 +847,26 @@ async function writeThemeScaffold(settingsData = null, routeAssets = {}) {
       {% assign salt_schema_judgeme_rating_value = salt_schema_judgeme_rating | plus: 0 %}
       {% assign salt_schema_judgeme_review_count_value = salt_schema_judgeme_review_count | plus: 0 %}
       {% assign salt_schema_sku = 'salt-' | append: product.id %}
+      {%- comment -%}
+        SALT's own books carry an amazon-asin:<ASIN> tag. Amazon sells and ships
+        them (Shopify stock is held at 0 so Shopify never takes payment), so the
+        offer must point at Amazon and stay InStock.
+      {%- endcomment -%}
+      {% assign salt_amazon_asin = '' %}
+      {% for salt_tag in product.tags %}
+        {% assign salt_tag_lower = salt_tag | downcase %}
+        {% if salt_amazon_asin == blank and salt_tag_lower contains 'amazon-asin:' %}
+          {% assign salt_amazon_asin = salt_tag | split: ':' | last | strip | upcase %}
+        {% endif %}
+      {% endfor %}
       <script type="application/ld+json">
         {
           "@context": "https://schema.org",
-          "@type": "Product",
+          "@type": {% if salt_amazon_asin != blank %}["Product", "Book"]{% else %}"Product"{% endif %},
           "@id": {{ salt_schema_url | append: '#product' | json }},
+          {% if salt_amazon_asin != blank %}
+            "author": { "@type": "Person", "name": "Courtney R. Jones" },
+          {% endif %}
           "mainEntityOfPage": {{ salt_schema_url | json }},
           "name": {{ salt_schema_product_name | json }},
           "description": {{ salt_schema_description | json }},
@@ -866,10 +881,15 @@ async function writeThemeScaffold(settingsData = null, routeAssets = {}) {
           "url": {{ salt_schema_url | json }},
           "offers": {
             "@type": "Offer",
-            "url": {{ salt_schema_url | json }},
+            {% if salt_amazon_asin != blank %}
+              "url": {{ 'https://www.amazon.com/dp/' | append: salt_amazon_asin | json }},
+              "seller": { "@type": "Organization", "name": "Amazon.com" },
+            {% else %}
+              "url": {{ salt_schema_url | json }},
+            {% endif %}
             "priceCurrency": {{ shop.currency | json }},
             "price": {{ salt_schema_variant.price | divided_by: 100.0 | json }},
-            "availability": "{% if salt_schema_variant.available %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+            "availability": "{% if salt_amazon_asin != blank or salt_schema_variant.available %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
             "itemCondition": "https://schema.org/NewCondition",
             "shippingDetails": {
               "@type": "OfferShippingDetails",
@@ -1399,7 +1419,12 @@ const sectionLiquid = `<div
       {% if product.featured_image %}
         <img src="{{ product.featured_image | image_url: width: 600 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" width="600" height="600" loading="eager">
       {% endif %}
-      <p><strong>{{ salt_ssr_variant.price | money }}</strong> · {% if product.available %}In stock{% else %}Currently unavailable{% endif %}</p>
+      {%- comment -%} salt_amazon_asin is assigned with the product JSON-LD in <head>. {%- endcomment -%}
+      {% if salt_amazon_asin != blank %}
+        <p><strong>{{ salt_ssr_variant.price | money }}</strong> · Sold and shipped by Amazon · <a href="https://www.amazon.com/dp/{{ salt_amazon_asin }}">Buy on Amazon</a></p>
+      {% else %}
+        <p><strong>{{ salt_ssr_variant.price | money }}</strong> · {% if product.available %}In stock{% else %}Currently unavailable{% endif %}</p>
+      {% endif %}
       <div>{{ product.description }}</div>
       {% if product.collections.size > 0 %}
         <p>Found in:
@@ -1463,6 +1488,20 @@ const sectionLiquid = `<div
       <p>Add any 2 items from the Bundle &amp; Save collection and 20% comes off automatically at checkout. Add 3 or more and you save 30%. No code needed.</p>
       <h3>What is the return policy?</h3>
       <p>You can request a return within 14 days of delivery for unused items in their original packaging. Email help@saltonlinestore.com with your order number.</p>
+    {% elsif request.page_type == 'article' and article %}
+      <nav aria-label="Breadcrumb"><a href="/">Home</a> › <a href="{{ blog.url }}">{{ blog.title | escape }}</a> › {{ article.title | escape }}</nav>
+      <article>
+        <h1>{{ article.title | escape }}</h1>
+        <p>By {{ article.author | escape }}{% if article.published_at %} · <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">{{ article.published_at | date: '%B %-d, %Y' }}</time>{% endif %}</p>
+        <div>{{ article.content }}</div>
+      </article>
+    {% elsif request.page_type == 'blog' and blog %}
+      <h1>{{ blog.title | escape }}</h1>
+      <ul>
+        {% for salt_ssr_a in blog.articles limit: 50 %}
+          <li><a href="{{ salt_ssr_a.url }}">{{ salt_ssr_a.title | escape }}</a></li>
+        {% endfor %}
+      </ul>
     {% elsif request.page_type == 'page' and page %}
       <h1>{{ page.title | escape }}</h1>
       <div>{{ page.content }}</div>
