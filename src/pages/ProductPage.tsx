@@ -1238,15 +1238,25 @@ const ProductPage = () => {
               </div>
               <div className="mt-3 rounded-[1.45rem] border border-border/80 bg-background p-3">
                 <TrustStrip
-                  items={[
-                    { icon: Truck, label: "Free US shipping" },
-                    { icon: PackageCheck, label: `Delivery in ${DELIVERY_ESTIMATE}` },
-                    { icon: ShieldCheck, label: `${RETURN_WINDOW_DAYS}-day returns` },
-                    { icon: BadgeCheck, label: "Secure payment" },
-                  ]}
+                  items={
+                    sellsOnAmazon
+                      ? [
+                          { icon: Truck, label: "Shipped by Amazon" },
+                          { icon: PackageCheck, label: "Amazon delivery" },
+                          { icon: ShieldCheck, label: "Amazon returns" },
+                          { icon: BadgeCheck, label: "Secure Amazon checkout" },
+                        ]
+                      : [
+                          { icon: Truck, label: "Free US shipping" },
+                          { icon: PackageCheck, label: `Delivery in ${DELIVERY_ESTIMATE}` },
+                          { icon: ShieldCheck, label: `${RETURN_WINDOW_DAYS}-day returns` },
+                          { icon: BadgeCheck, label: "Secure payment" },
+                        ]
+                  }
                 />
               </div>
-              <ShopAppPromo className="mt-3" />
+              {/* The Shop app checks out through Shopify, which cannot sell Amazon books. */}
+              {sellsOnAmazon ? null : <ShopAppPromo className="mt-3" />}
 
               <Accordion type="multiple" className="mt-4 rounded-[1.45rem] border border-border/80 bg-card/86">
                 <AccordionItem value="shipping" className="border-border/70">
@@ -1254,6 +1264,13 @@ const ProductPage = () => {
                     Delivery, returns and payment
                   </AccordionTrigger>
                   <AccordionContent className="space-y-2.5 pb-4 text-sm leading-6 text-muted-foreground">
+                    {sellsOnAmazon ? (
+                      <p>
+                        This book is sold and shipped by Amazon. Delivery dates, payment and returns follow Amazon's
+                        policies and are shown at Amazon checkout.
+                      </p>
+                    ) : (
+                      <>
                     <p>
                       <strong className="font-semibold text-foreground">Delivery:</strong> {DELIVERY_DETAIL}
                     </p>
@@ -1288,6 +1305,8 @@ const ProductPage = () => {
                       </Link>
                       .
                     </p>
+                      </>
+                    )}
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="service" className="border-none">
@@ -1508,7 +1527,8 @@ const ProductPage = () => {
               </section>
             ) : null}
 
-            {variants.length > 0 ? (
+            {/* Amazon books have a single Shopify variant held at 0 stock; its picker would read "0 of 1 available". */}
+            {variants.length > 0 && !sellsOnAmazon ? (
               <div className="mt-5 space-y-5 border-t border-border/70 pt-5">
                 {fitGuidance ? (
                   <div className="rounded-[1.1rem] border border-primary/20 bg-primary/5 p-3">

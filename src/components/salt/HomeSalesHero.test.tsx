@@ -21,6 +21,24 @@ describe("homepage sales sections", () => {
     expect(screen.getByRole("link", { name: "Gifts under $50" })).toHaveAttribute("href", "/collections/gifts-under-50");
   });
 
+  it("shows four real products in the hero once the shelves load", () => {
+    const products = [1, 2, 3, 4].map((n) => ({
+      handle: `product-${n}`,
+      title: `Product ${n}`,
+      image: `https://cdn.example.com/${n}.jpg`,
+      price: 9.99 + n,
+    }));
+    render(
+      <MemoryRouter>
+        <HomeSalesHero products={products} />
+      </MemoryRouter>,
+    );
+    const picks = screen.getByRole("list", { name: "Popular picks" });
+    expect(picks.querySelectorAll("li")).toHaveLength(4);
+    expect(screen.getByRole("link", { name: /Product 1/ })).toHaveAttribute("href", "/products/product-1");
+    expect(screen.queryByAltText(/Wrapped holiday gifts/)).not.toBeInTheDocument();
+  });
+
   it("links category tiles only to focus collections", () => {
     render(
       <MemoryRouter>

@@ -7,7 +7,7 @@ import SeoMetadata from "@/components/storefront/SeoMetadata";
 import { HomeShelfState } from "@/components/storefront/HomeShelfState";
 import { HomeCategoryTiles } from "@/components/salt/HomeCategoryTiles";
 import { HomeFaq } from "@/components/salt/HomeFaq";
-import { HomeSalesHero } from "@/components/salt/HomeSalesHero";
+import { HomeSalesHero, type HomeHeroProduct } from "@/components/salt/HomeSalesHero";
 import { SaltFinds } from "@/components/salt/SaltFinds";
 import { polishPlainText } from "@/lib/formatters";
 import { SALT_BRAND_SHORT_DESCRIPTION } from "@/lib/salt-brand";
@@ -175,6 +175,25 @@ const HomePage = () => {
   const homeCollectionProductsQuery = useHomeCollectionProducts();
   const { data: homeCollectionProductsPayload } = homeCollectionProductsQuery;
   const normalizedHeroMain = normalizeShopifyAssetUrl(heroMain) || heroMain;
+  // Mix gifts, kitchen and Bundle & Save picks so the hero shows the
+  // "kitchen, home and gift finds" its headline promises.
+  const heroProducts = useMemo<HomeHeroProduct[]>(() => {
+    const sections = homeCollectionProductsPayload?.sections;
+    if (!sections) return [];
+    const lanes = [sections.holidayGifts, sections.kitchenGadgets, sections.bundleSave].map((section) => section?.products || []);
+    const picks: HomeHeroProduct[] = [];
+    const seen = new Set<string>();
+    for (let index = 0; picks.length < 4 && index < 8; index += 1) {
+      for (const lane of lanes) {
+        const product = lane[index];
+        if (product && !seen.has(product.handle) && picks.length < 4) {
+          seen.add(product.handle);
+          picks.push({ handle: product.handle, title: product.title, image: product.image, price: product.price });
+        }
+      }
+    }
+    return picks;
+  }, [homeCollectionProductsPayload]);
   const homeCollectionSections = useMemo(
     () =>
       HOME_COLLECTION_SHELVES.map((fallbackSection) => {
@@ -361,7 +380,7 @@ const HomePage = () => {
         image={normalizedHeroMain}
       />
       <div className="space-y-4 sm:space-y-5">
-        <HomeSalesHero />
+        <HomeSalesHero products={heroProducts} />
 
         {homeCollectionSections.map((section, sectionIndex) => (
           <Fragment key={section.to}>
