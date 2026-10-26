@@ -847,11 +847,26 @@ async function writeThemeScaffold(settingsData = null, routeAssets = {}) {
       {% assign salt_schema_judgeme_rating_value = salt_schema_judgeme_rating | plus: 0 %}
       {% assign salt_schema_judgeme_review_count_value = salt_schema_judgeme_review_count | plus: 0 %}
       {% assign salt_schema_sku = 'salt-' | append: product.id %}
+      {%- comment -%}
+        SALT's own books carry an amazon-asin:<ASIN> tag. Amazon sells and ships
+        them (Shopify stock is held at 0 so Shopify never takes payment), so the
+        offer must point at Amazon and stay InStock.
+      {%- endcomment -%}
+      {% assign salt_amazon_asin = '' %}
+      {% for salt_tag in product.tags %}
+        {% assign salt_tag_lower = salt_tag | downcase %}
+        {% if salt_amazon_asin == blank and salt_tag_lower contains 'amazon-asin:' %}
+          {% assign salt_amazon_asin = salt_tag | split: ':' | last | strip | upcase %}
+        {% endif %}
+      {% endfor %}
       <script type="application/ld+json">
         {
           "@context": "https://schema.org",
-          "@type": "Product",
+          "@type": {% if salt_amazon_asin != blank %}["Product", "Book"]{% else %}"Product"{% endif %},
           "@id": {{ salt_schema_url | append: '#product' | json }},
+          {% if salt_amazon_asin != blank %}
+            "author": { "@type": "Person", "name": "Courtney R. Jones" },
+          {% endif %}
           "mainEntityOfPage": {{ salt_schema_url | json }},
           "name": {{ salt_schema_product_name | json }},
           "description": {{ salt_schema_description | json }},
@@ -866,10 +881,15 @@ async function writeThemeScaffold(settingsData = null, routeAssets = {}) {
           "url": {{ salt_schema_url | json }},
           "offers": {
             "@type": "Offer",
-            "url": {{ salt_schema_url | json }},
+            {% if salt_amazon_asin != blank %}
+              "url": {{ 'https://www.amazon.com/dp/' | append: salt_amazon_asin | json }},
+              "seller": { "@type": "Organization", "name": "Amazon.com" },
+            {% else %}
+              "url": {{ salt_schema_url | json }},
+            {% endif %}
             "priceCurrency": {{ shop.currency | json }},
             "price": {{ salt_schema_variant.price | divided_by: 100.0 | json }},
-            "availability": "{% if salt_schema_variant.available %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+            "availability": "{% if salt_amazon_asin != blank or salt_schema_variant.available %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
             "itemCondition": "https://schema.org/NewCondition",
             "shippingDetails": {
               "@type": "OfferShippingDetails",
