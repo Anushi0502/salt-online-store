@@ -9,6 +9,7 @@ import type {
   ShopifyShop,
 } from "@/types/shopify";
 import { RETURN_WINDOW_DAYS } from "@/lib/store-promises";
+import { parseAmazonLinks, SALT_BOOK_AUTHOR } from "@/lib/amazon-buy";
 
 const BUSINESS_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].map(
   (day) => `https://schema.org/${day}`,
@@ -657,7 +658,12 @@ export function buildProductStructuredData(
 ): StructuredData {
   const rating = ratingSummary?.rating ?? getProductRating(product);
   const reviewCount = ratingSummary?.reviewCount ?? getProductReviewCount(product);
-  const availability = product.variants.some((variant) => variant.available) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock";
+  // SALT's own books are sold and shipped by Amazon; Shopify stock is held at 0
+  // on purpose, so the offer points at Amazon and stays in stock.
+  const amazonLink = parseAmazonLinks(product.tags)[0];
+  const availability = amazonLink || product.variants.some((variant) => variant.available)
+    ? "https://schema.org/InStock"
+    : "https://schema.org/OutOfStock";
   const currentPrice = selectedVariant ? Number(selectedVariant.price || 0) : minPrice(product);
   const comparePrice = selectedVariant ? Number(selectedVariant.compare_at_price || 0) || compareAt(product) : compareAt(product);
   const image = selectedVariant?.featured_image?.src || productImage(product);
@@ -682,8 +688,9 @@ export function buildProductStructuredData(
 
   return {
     "@context": "https://schema.org",
-    "@type": "Product",
+    "@type": amazonLink ? ["Product", "Book"] : "Product",
     "@id": `${canonicalProductUrl}#product`,
+    author: amazonLink ? { "@type": "Person", name: SALT_BOOK_AUTHOR } : undefined,
     name: productName,
     description,
     image: imageUrl ? [imageUrl] : undefined,
@@ -701,7 +708,8 @@ export function buildProductStructuredData(
       priceCurrency: normalizedCurrency,
       price: asNumber(currentPrice),
       availability,
-      url: canonicalProductUrl,
+      url: amazonLink?.url || canonicalProductUrl,
+      seller: amazonLink ? { "@type": "Organization", name: "Amazon.com" } : undefined,
       itemCondition: "https://schema.org/NewCondition",
       shippingDetails: {
         "@type": "OfferShippingDetails",

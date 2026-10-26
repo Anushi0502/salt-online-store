@@ -5,6 +5,8 @@ import { trackAnalyticsEvent } from "@/lib/analytics-events";
 // and the product page sends shoppers to Amazon instead of the Shopify cart.
 export const AMAZON_PRINT_TAG_PREFIX = "amazon-asin:";
 export const AMAZON_KINDLE_TAG_PREFIX = "amazon-kindle:";
+// Every SALT book is written by the founder of Senior and Living Today.
+export const SALT_BOOK_AUTHOR = "Courtney R. Jones";
 
 const ASIN_PATTERN = /^[A-Z0-9]{10}$/;
 
