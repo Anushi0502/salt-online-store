@@ -1419,7 +1419,12 @@ const sectionLiquid = `<div
       {% if product.featured_image %}
         <img src="{{ product.featured_image | image_url: width: 600 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" width="600" height="600" loading="eager">
       {% endif %}
-      <p><strong>{{ salt_ssr_variant.price | money }}</strong> · {% if product.available %}In stock{% else %}Currently unavailable{% endif %}</p>
+      {%- comment -%} salt_amazon_asin is assigned with the product JSON-LD in <head>. {%- endcomment -%}
+      {% if salt_amazon_asin != blank %}
+        <p><strong>{{ salt_ssr_variant.price | money }}</strong> · Sold and shipped by Amazon · <a href="https://www.amazon.com/dp/{{ salt_amazon_asin }}">Buy on Amazon</a></p>
+      {% else %}
+        <p><strong>{{ salt_ssr_variant.price | money }}</strong> · {% if product.available %}In stock{% else %}Currently unavailable{% endif %}</p>
+      {% endif %}
       <div>{{ product.description }}</div>
       {% if product.collections.size > 0 %}
         <p>Found in:
@@ -1483,6 +1488,20 @@ const sectionLiquid = `<div
       <p>Add any 2 items from the Bundle &amp; Save collection and 20% comes off automatically at checkout. Add 3 or more and you save 30%. No code needed.</p>
       <h3>What is the return policy?</h3>
       <p>You can request a return within 14 days of delivery for unused items in their original packaging. Email help@saltonlinestore.com with your order number.</p>
+    {% elsif request.page_type == 'article' and article %}
+      <nav aria-label="Breadcrumb"><a href="/">Home</a> › <a href="{{ blog.url }}">{{ blog.title | escape }}</a> › {{ article.title | escape }}</nav>
+      <article>
+        <h1>{{ article.title | escape }}</h1>
+        <p>By {{ article.author | escape }}{% if article.published_at %} · <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">{{ article.published_at | date: '%B %-d, %Y' }}</time>{% endif %}</p>
+        <div>{{ article.content }}</div>
+      </article>
+    {% elsif request.page_type == 'blog' and blog %}
+      <h1>{{ blog.title | escape }}</h1>
+      <ul>
+        {% for salt_ssr_a in blog.articles limit: 50 %}
+          <li><a href="{{ salt_ssr_a.url }}">{{ salt_ssr_a.title | escape }}</a></li>
+        {% endfor %}
+      </ul>
     {% elsif request.page_type == 'page' and page %}
       <h1>{{ page.title | escape }}</h1>
       <div>{{ page.content }}</div>
