@@ -1194,7 +1194,7 @@ const ProductPage = () => {
                   <div className="mt-3 grid gap-2 sm:grid-cols-2">
                     {[
                       { label: "Rating", value: reviewBadgeLabel },
-                      { label: "Availability", value: isAvailable ? "Ready to ship" : "Unavailable" },
+                      { label: "Availability", value: sellsOnAmazon ? "Ships from Amazon" : isAvailable ? "Ready to ship" : "Unavailable" },
                       {
                         label: "Value",
                         value: savingsAmount > 0 ? `${formatMoney(savingsAmount)} saved` : "Everyday value",
