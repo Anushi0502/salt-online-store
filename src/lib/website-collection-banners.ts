@@ -2,6 +2,7 @@ import bestsellersBanner from "@/assets/collection-banners/bestsellers-collectio
 import kidsBanner from "@/assets/collection-banners/kids-collection-banner.webp";
 import luxuryFragrancesBanner from "@/assets/collection-banners/luxury-fragrances-collection-banner.webp";
 import menBanner from "@/assets/collection-banners/men-collection-banner.webp";
+import saltBooksBanner from "@/assets/collection-banners/salt-books-collection-banner.webp";
 import womenBanner from "@/assets/collection-banners/women-collection-banner.webp";
 import { resolveThemeAsset } from "@/lib/theme-assets";
 import type { ShopifyCollection } from "@/types/shopify";
@@ -39,6 +40,10 @@ const BANNERS_BY_HANDLE: Record<string, WebsiteCollectionBanner> = {
   women: {
     image: womenBanner,
     alt: "Women collection banner",
+  },
+  "salt-books": {
+    image: saltBooksBanner,
+    alt: "The Living Legacy Planner editions and Relics of the Century by Courtney R. Jones",
   },
 };
 
