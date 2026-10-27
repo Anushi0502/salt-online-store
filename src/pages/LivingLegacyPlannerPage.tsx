@@ -2,46 +2,60 @@ import { Link } from "react-router-dom";
 import InnerBreadcrumbs from "@/components/storefront/InnerBreadcrumbs";
 import Reveal from "@/components/storefront/Reveal";
 import SeoMetadata from "@/components/storefront/SeoMetadata";
-import livingLegacyBanner from "@/assets/collection-banners/living-legacy-planner-banner.webp";
+import courtneySeated from "@/assets/living-legacy/courtney-r-jones-seated.webp";
+import courtneyPortrait from "@/assets/living-legacy/courtney-r-jones-portrait.webp";
+import colorCover from "@/assets/living-legacy/color-edition-cover.webp";
+import dailyBloomCover from "@/assets/living-legacy/daily-bloom-cover.webp";
+import hardcoverCover from "@/assets/living-legacy/hardcover-edition-cover.webp";
+import militaryBackCover from "@/assets/living-legacy/military-edition-back-cover.webp";
+import militaryCover from "@/assets/living-legacy/military-edition-cover.webp";
+import relicsCover from "@/assets/living-legacy/relics-of-the-century-cover.webp";
 
 const PAGE_PATH = "/pages/living-legacy-planner";
+const SITE = "https://www.saltonlinestore.com";
+
+// Amazon links are cleaned to the product ID only, so no tracking parameters are shared.
+const amazon = (asin: string) => `https://www.amazon.com/dp/${asin}`;
 
 const EDITIONS = [
   {
+    id: "hardcover",
     title: "The Living Legacy Planner",
-    edition: "Hardcover",
+    edition: "First edition · Black and white",
     price: "$29.95",
-    detail: "172 pages · 8.25 × 11 in",
-    handle: "the-living-legacy-planner",
+    detail: "172 pages · 8.25 × 11 in · Hardcover",
+    asin: "B0D4JDBFYQ",
+    shopHandle: "the-living-legacy-planner",
+    cover: hardcoverCover,
     summary:
-      "The full planner for seniors and families who want one clear place for their wishes, from medical care to the stories they want to pass on.",
+      "The full planner for seniors and families. One clear place for medical care, finances, insurance, funeral wishes and the stories you want to pass on.",
     emoji: "📘",
-    cover: "#0f2547",
-    accent: "#e8c46a",
   },
   {
-    title: "Color Edition",
+    id: "color",
+    title: "The Living Legacy Planner: Color Edition",
     edition: "Full color",
     price: "$52.00",
-    detail: "182 pages · 8.5 × 11 in",
-    handle: "products-living-legacy-planner-for-seniors",
+    detail: "182 pages · 8.5 × 11 in · Full-color interior",
+    asin: "1807382044",
+    shopHandle: "products-living-legacy-planner-for-seniors",
+    cover: colorCover,
     summary:
-      "The same planner in full color, so the sections are easier to find and the pages are a pleasure to fill in.",
+      "The same planner in full color, so each section is easier to find and the pages are a pleasure to fill in.",
     emoji: "🎨",
-    cover: "#3f6e8c",
-    accent: "#f2a65a",
   },
   {
-    title: "Military Deployment & Family Readiness",
-    edition: "Paperback",
+    id: "military",
+    title: "The Living Legacy Planner: Military Deployment & Family Readiness Edition",
+    edition: "Military edition",
     price: "$24.00",
-    detail: "79 pages · 8.5 × 11 in",
-    handle: "living-legacy-planner-military-deployment-family-readiness-edition",
+    detail: "79 pages · 8.5 × 11 in · Paperback",
+    asin: "B0HG7YS5JP",
+    shopHandle: "living-legacy-planner-military-deployment-family-readiness-edition",
+    cover: militaryCover,
     summary:
-      "For service members, veterans and the family members who keep things running while they are away.",
+      "Made for enlisted service members, veterans and their families. Keep life balanced and organized while you are away from home, deployed or temporarily disabled.",
     emoji: "🎖️",
-    cover: "#4a5a3a",
-    accent: "#e6d9b8",
   },
 ];
 
@@ -62,6 +76,13 @@ const WHY_FAMILIES = [
   { emoji: "🤝", title: "An easier first conversation", text: "A guide that helps you start the talk while everyone can still take part." },
 ];
 
+const MILITARY_PILLARS = [
+  { emoji: "🛡️", title: "Protect your family" },
+  { emoji: "🗃️", title: "Preserve what matters" },
+  { emoji: "🔒", title: "Prepare with confidence" },
+  { emoji: "💛", title: "Leave a legacy of love" },
+];
+
 const FAQS = [
   {
     question: "What is The Living Legacy Planner?",
@@ -71,12 +92,17 @@ const FAQS = [
   {
     question: "Which edition should I choose?",
     answer:
-      "The Hardcover is the full planner. The Color Edition has a full-color interior. The Military Deployment and Family Readiness Edition is a paperback for service members, veterans and their families who need a plan while away from home.",
+      "The first edition is the black-and-white planner. The Color Edition has a full-color interior. The Military Deployment and Family Readiness Edition is a paperback for service members, veterans and their families who need a plan while away from home.",
   },
   {
     question: "Where do I buy it, and how long does delivery take?",
     answer:
-      "Each edition is printed and shipped by Amazon. You check out on Amazon, and Amazon's delivery and return policy applies. Delivery dates are shown at checkout.",
+      "Each edition links to its Amazon listing. You check out on Amazon, and Amazon's delivery and return policy applies. Delivery dates are shown at checkout.",
+  },
+  {
+    question: "What is Daily Bloom?",
+    answer:
+      "The Daily Bloom: A Life Balance Guide is a companion book by Courtney R. Jones for balancing daily routines, notes and goals. It is available on Amazon.",
   },
   {
     question: "Who wrote it?",
@@ -86,25 +112,24 @@ const FAQS = [
 ];
 
 const structuredData = [
-  {
+  ...EDITIONS.map((edition) => ({
     "@context": "https://schema.org",
     "@type": "Book",
-    name: "The Living Legacy Planner",
+    name: edition.title,
+    bookFormat: edition.detail.includes("Paperback") ? "https://schema.org/Paperback" : "https://schema.org/Hardcover",
     author: { "@type": "Person", name: "Courtney R. Jones" },
     publisher: { "@type": "Organization", name: "Senior and Living Today (S.A.L.T.)" },
-    description:
-      "An end-of-life planner and final wishes organizer for seniors, adults who live alone, caregivers and families.",
-    url: `https://www.saltonlinestore.com${PAGE_PATH}`,
-    image: "https://www.saltonlinestore.com/assets/living-legacy-planner-banner.webp",
-    offers: EDITIONS.map((edition) => ({
+    description: edition.summary,
+    url: `${SITE}${PAGE_PATH}#${edition.id}`,
+    image: `${SITE}${PAGE_PATH}`,
+    offers: {
       "@type": "Offer",
-      name: `${edition.title}, ${edition.edition}`,
       price: edition.price.replace("$", ""),
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
-      url: `https://www.saltonlinestore.com/products/${edition.handle}`,
-    })),
-  },
+      url: amazon(edition.asin),
+    },
+  })),
   {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -136,30 +161,21 @@ const btnPrimary =
   "inline-flex min-h-12 items-center justify-center rounded-full bg-primary px-7 text-sm font-bold uppercase tracking-[0.08em] text-primary-foreground shadow-[0_18px_36px_-22px_rgba(37,99,235,0.7)] transition hover:-translate-y-px";
 const btnGhost =
   "inline-flex min-h-12 items-center justify-center rounded-full border border-border px-7 text-sm font-bold uppercase tracking-[0.08em] text-foreground transition hover:border-primary/40 hover:text-primary";
+const btnGold = "bg-[#e8c46a] text-[#0f2547] shadow-[0_18px_36px_-22px_rgba(232,196,106,0.7)]";
 
-// A simple illustrated planner cover, drawn in SVG so it works without image files.
-const BookCover = ({ color, accent, title, edition, className = "" }: { color: string; accent: string; title: string; edition: string; className?: string }) => (
-  <svg viewBox="0 0 300 400" role="img" aria-label={`${title}, ${edition} cover illustration`} className={className}>
-    <rect x="34" y="18" width="250" height="364" rx="18" fill={color} />
-    <rect x="34" y="18" width="26" height="364" rx="10" fill="rgba(0,0,0,0.22)" />
-    <circle cx="170" cy="130" r="54" fill={accent} opacity="0.9" />
-    <path d="M170 102 C152 118, 152 146, 170 158 C188 146, 188 118, 170 102Z" fill={color} opacity="0.85" />
-    <rect x="86" y="214" width="170" height="10" rx="5" fill={accent} opacity="0.85" />
-    <rect x="86" y="238" width="140" height="8" rx="4" fill="#ffffff" opacity="0.55" />
-    <rect x="86" y="258" width="150" height="8" rx="4" fill="#ffffff" opacity="0.55" />
-    <rect x="86" y="278" width="120" height="8" rx="4" fill="#ffffff" opacity="0.55" />
-    <text x="170" y="336" textAnchor="middle" fill="#ffffff" fontSize="20" fontFamily="Georgia, serif" fontWeight="700">The Living</text>
-    <text x="170" y="362" textAnchor="middle" fill="#ffffff" fontSize="20" fontFamily="Georgia, serif" fontWeight="700">Legacy Planner</text>
-  </svg>
+const AmazonButton = ({ asin, label, className = "" }: { asin: string; label: string; className?: string }) => (
+  <a href={amazon(asin)} target="_blank" rel="noopener noreferrer" className={`${btnPrimary} ${className}`}>
+    {label}
+  </a>
 );
 
 const LivingLegacyPlannerPage = () => (
   <>
     <SeoMetadata
       title="Living Legacy Planner: End-of-Life & Final Wishes Organizer | SALT"
-      description="From Senior and Living Today (S.A.L.T.): record medical wishes, finances, insurance, funeral plans and life stories in one planner by Courtney R. Jones."
+      description="Plan final wishes, medical care, finances and family readiness with The Living Legacy Planner by Courtney R. Jones. Hardcover, color and military editions, sold on Amazon."
       canonicalPath={PAGE_PATH}
-      image={livingLegacyBanner}
+      image={`${SITE}${militaryCover}`}
       structuredData={structuredData}
     />
     <style>{pageStyles}</style>
@@ -169,7 +185,7 @@ const LivingLegacyPlannerPage = () => (
         <InnerBreadcrumbs items={[{ label: "Home", to: "/" }, { label: "Living Legacy Planner" }]} />
       </Reveal>
 
-      {/* 1. Hero block */}
+      {/* 1. Hero */}
       <Reveal>
         <div className="relative overflow-hidden rounded-[2.25rem] bg-[#0f2547] text-white shadow-[0_40px_90px_-50px_rgba(15,23,42,0.6)]">
           <span aria-hidden="true" className="llp-glow pointer-events-none absolute -left-16 top-10 h-64 w-64 rounded-full bg-[#e8c46a]/25 blur-3xl" />
@@ -187,19 +203,24 @@ const LivingLegacyPlannerPage = () => (
               </p>
               <p className="mt-4 max-w-[52ch] text-base leading-7 text-white/75">
                 Medical care, finances, insurance, funeral arrangements and the stories you want to pass on, all in one
-                planner by Courtney R. Jones.
+                planner by Courtney R. Jones. Three editions for every family.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <a href="#editions" className={`${btnPrimary} bg-[#e8c46a] text-[#0f2547]`}>
+                <a href="#editions" className={`${btnPrimary} ${btnGold}`}>
                   Choose your edition
                 </a>
-                <Link to="/contact" className={`${btnGhost} border-white/40 text-white hover:text-[#e8c46a]`}>
-                  Ask us a question
-                </Link>
+                <a href={amazon(EDITIONS[0].asin)} target="_blank" rel="noopener noreferrer" className={`${btnGhost} border-white/40 text-white hover:text-[#e8c46a]`}>
+                  Buy on Amazon
+                </a>
               </div>
             </div>
-            <div className="relative mx-auto w-full max-w-[420px]">
-              <BookCover className="llp-float w-full drop-shadow-[0_40px_50px_rgba(0,0,0,0.45)]" color="#1d3d6e" accent="#e8c46a" title="The Living Legacy Planner" edition="Hardcover" />
+            <div className="relative mx-auto w-full max-w-[400px]">
+              <img
+                src={hardcoverCover}
+                alt="The Living Legacy Planner hardcover, by Courtney R. Jones"
+                className="llp-float mx-auto w-full max-w-[360px] rounded-[1.25rem] drop-shadow-[0_40px_50px_rgba(0,0,0,0.45)]"
+                fetchPriority="high"
+              />
             </div>
           </div>
           <p className="relative border-t border-white/10 px-6 py-4 text-sm text-white/75 sm:px-10">
@@ -208,57 +229,62 @@ const LivingLegacyPlannerPage = () => (
         </div>
       </Reveal>
 
-      {/* 2. Brand block */}
+      {/* 2. Founder and brand */}
       <Reveal>
-        <div className={`${panel} grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center`}>
-          <div className="relative mx-auto flex aspect-square w-full max-w-[360px] items-center justify-center">
-            <svg viewBox="0 0 300 300" role="img" aria-label="Senior and Living Today S.A.L.T. emblem" className="w-full">
-              <circle cx="150" cy="150" r="140" fill="#f6efe4" />
-              <circle cx="150" cy="150" r="120" fill="none" stroke="#0f2547" strokeWidth="2" strokeDasharray="6 8" className="llp-sway" />
-              <text x="150" y="140" textAnchor="middle" fill="#0f2547" fontSize="50" fontFamily="Georgia, serif" fontWeight="700" letterSpacing="4">S.A.L.T.</text>
-              <text x="150" y="175" textAnchor="middle" fill="#9a3b2e" fontSize="14" fontFamily="Arial, sans-serif" fontWeight="700" letterSpacing="3">SENIOR AND LIVING TODAY</text>
-              <path d="M150 200 C130 186, 120 204, 150 222 C180 204, 170 186, 150 200Z" fill="#9a3b2e" opacity="0.8" />
-            </svg>
-          </div>
+        <div className={`${panel} grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center`}>
           <div>
-            <p className={kicker}>Our brand</p>
-            <h2 className={h2}>Senior and Living Today</h2>
+            <p className={kicker}>✍️ From the author</p>
+            <h2 className={h2}>Courtney R. Jones</h2>
             <p className="mt-5 text-base leading-8 text-muted-foreground">
-              S.A.L.T. stands for Senior and Living Today. Based in Dayton, Ohio, it is the brand behind the planners
-              and resources on this site, built for older adults, families and caregivers who want clear, practical tools
-              for everyday life and for the planning that comes after.
+              Courtney R. Jones is the founder of Senior and Living Today (S.A.L.T.) in Dayton, Ohio, and a senior-care
+              advocate with more than 30 years of experience. She wrote The Living Legacy Planner, and the SALT Online
+              Store is the shop of Senior and Living Today.
             </p>
-            <p className="mt-4 text-base leading-8 text-muted-foreground">
-              Every product here is made in-house under this brand. ❤️
-            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <a href="#editions" className={btnPrimary}>
+                See the planners
+              </a>
+              <Link to="/contact" className={btnGhost}>
+                Talk to our team
+              </Link>
+            </div>
           </div>
+          <img
+            src={courtneySeated}
+            alt="Courtney R. Jones seated with a Living Legacy Planner and a SALT mug"
+            className="w-full rounded-[1.5rem] object-cover shadow-[0_24px_50px_-30px_rgba(15,23,42,0.4)]"
+            loading="lazy"
+          />
         </div>
       </Reveal>
 
-      {/* 3. Editions: one big block each */}
+      {/* 3. Editions: one big block each, with real covers */}
       <div id="editions" className="scroll-mt-28 space-y-8 sm:space-y-10">
         {EDITIONS.map((edition, index) => (
-          <Reveal key={edition.handle}>
-            <article className={`${panel} llp-lift grid gap-8 lg:grid-cols-2 lg:items-center ${index % 2 ? "lg:[&>*:first-child]:order-2" : ""}`}>
+          <Reveal key={edition.id}>
+            <article
+              id={edition.id}
+              className={`${panel} llp-lift grid gap-8 lg:grid-cols-2 lg:items-center ${index % 2 ? "lg:[&>*:first-child]:order-2" : ""}`}
+            >
               <div className="flex justify-center rounded-[1.5rem] bg-card p-6 sm:p-10">
-                <BookCover
-                  className="llp-float w-full max-w-[300px] drop-shadow-[0_30px_40px_rgba(15,23,42,0.3)]"
-                  color={edition.cover}
-                  accent={edition.accent}
-                  title={edition.title}
-                  edition={edition.edition}
+                <img
+                  src={edition.cover}
+                  alt={`${edition.title}, ${edition.edition} cover`}
+                  className="llp-float w-full max-w-[320px] rounded-[0.75rem] drop-shadow-[0_30px_40px_rgba(15,23,42,0.3)]"
+                  loading="lazy"
                 />
               </div>
               <div>
                 <p className={kicker}>
                   {edition.emoji} {edition.edition} · {edition.detail}
                 </p>
-                <h2 className={h2}>{edition.title}</h2>
+                <h3 className={h2}>{edition.title}</h3>
                 <p className="mt-5 text-base leading-8 text-muted-foreground">{edition.summary}</p>
                 <div className="mt-7 flex flex-wrap items-center gap-4">
                   <span className="font-display text-4xl text-foreground">{edition.price}</span>
-                  <Link to={`/products/${edition.handle}`} className={btnPrimary}>
-                    View and buy
+                  <AmazonButton asin={edition.asin} label="Buy on Amazon" />
+                  <Link to={`/products/${edition.shopHandle}`} className="text-sm font-bold text-primary hover:underline">
+                    Details on SALT →
                   </Link>
                 </div>
               </div>
@@ -267,7 +293,39 @@ const LivingLegacyPlannerPage = () => (
         ))}
       </div>
 
-      {/* 4. What's inside */}
+      {/* 4. Military edition spotlight */}
+      <Reveal>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className={`${panelBase} bg-[#3a2f22] text-[#f4ead8]`}>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#e8c46a]">🇺🇸 Military edition</p>
+            <h2 className="mt-3 font-display text-[clamp(2rem,4vw,3.25rem)] leading-[1.02] tracking-[-0.03em]">
+              Prepare today. Protect tomorrow.
+            </h2>
+            <p className="mt-5 text-base leading-8 text-[#f4ead8]/85">
+              Designed specifically for enlisted service members, veterans and their families. Use it to record your
+              medical preferences, finances and legacy wishes, plus the details your spouse or caregiver will need while
+              you are deployed or away.
+            </p>
+            <ul className="mt-7 grid grid-cols-2 gap-4">
+              {MILITARY_PILLARS.map((pillar) => (
+                <li key={pillar.title} className="rounded-[1.25rem] bg-white/5 p-4">
+                  <span className="text-2xl" aria-hidden="true">{pillar.emoji}</span>
+                  <p className="mt-2 text-sm font-semibold">{pillar.title}</p>
+                </li>
+              ))}
+            </ul>
+            <AmazonButton asin={EDITIONS[2].asin} label="Get the military edition" className={`${btnGold} mt-8`} />
+          </div>
+          <img
+            src={militaryBackCover}
+            alt="Back cover of the Military Deployment and Family Readiness Edition"
+            className="w-full rounded-[1.5rem] object-cover shadow-[0_30px_60px_-30px_rgba(15,23,42,0.5)]"
+            loading="lazy"
+          />
+        </div>
+      </Reveal>
+
+      {/* 5. What's inside */}
       <Reveal>
         <div className={panel}>
           <p className={kicker}>📖 What's inside</p>
@@ -284,7 +342,7 @@ const LivingLegacyPlannerPage = () => (
         </div>
       </Reveal>
 
-      {/* 5. Why families use it */}
+      {/* 6. Why families use it + gift */}
       <Reveal>
         <div className="grid gap-6 lg:grid-cols-2">
           <div className={`${panelBase} bg-[#f6efe4]`}>
@@ -307,25 +365,62 @@ const LivingLegacyPlannerPage = () => (
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#e8c46a]">🎁 A thoughtful gift</p>
               <h2 className="mt-3 font-display text-[clamp(2rem,4vw,3rem)] leading-tight">For a parent or grandparent</h2>
               <p className="mt-5 text-base leading-8 text-white/80">
-                It is also a gift that says, "I have thought about this for you." For seniors who live alone, caregivers,
-                and families who want a clear plan.
+                It says, "I have thought about this for you." It also suits seniors who live alone, caregivers, and
+                families who want a clear plan in place.
               </p>
             </div>
-            <Link to="#editions" className={`${btnPrimary} mt-8 self-start bg-[#e8c46a] text-[#0f2547]`}>
+            <a href="#editions" className={`${btnPrimary} ${btnGold} mt-8 self-start`}>
               Find the right edition
-            </Link>
+            </a>
           </div>
         </div>
       </Reveal>
 
-      {/* 6. Stories, reviews and sharing */}
+      {/* 7. Daily Bloom and Relics */}
+      <Reveal>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <article className={`${panel} llp-lift grid gap-6 sm:grid-cols-[0.8fr_1.2fr] sm:items-center`}>
+            <img src={dailyBloomCover} alt="The Daily Bloom: A Life Balance Guide cover by Courtney R. Jones" className="w-full rounded-[1rem] shadow-[0_20px_40px_-26px_rgba(15,23,42,0.4)]" loading="lazy" />
+            <div>
+              <p className={kicker}>🌼 Companion book</p>
+              <h2 className="mt-3 font-display text-3xl leading-tight text-foreground">The Daily Bloom: A Life Balance Guide</h2>
+              <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                Balance daily routines, notes and goals alongside the Living Legacy planners.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <AmazonButton asin="B0GY143Z4V" label="Buy on Amazon" />
+                <Link to="/products/the-daily-bloom" className="inline-flex min-h-12 items-center text-sm font-bold text-primary hover:underline">
+                  Monthly planner on SALT →
+                </Link>
+              </div>
+            </div>
+          </article>
+          <article className={`${panel} llp-lift grid gap-6 sm:grid-cols-[0.8fr_1.2fr] sm:items-center`}>
+            <img src={relicsCover} alt="Relics of the Century book cover" className="w-full rounded-[1rem] shadow-[0_20px_40px_-26px_rgba(15,23,42,0.4)]" loading="lazy" />
+            <div>
+              <p className={kicker}>🕰️ Keepsake</p>
+              <h2 className="mt-3 font-display text-3xl leading-tight text-foreground">Relics of the Century</h2>
+              <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                A nostalgic look at everyday items from past decades, for sharing memories across the generations.
+              </p>
+              <div className="mt-6">
+                <Link to="/products/relics-of-the-century-book" className={btnGhost}>
+                  View on SALT · $19.99
+                </Link>
+              </div>
+            </div>
+          </article>
+        </div>
+      </Reveal>
+
+      {/* 8. Stories, reviews and sharing */}
       <Reveal>
         <div className="grid gap-6 md:grid-cols-3">
           {[
             {
               emoji: "🌷",
               title: "Family stories",
-              text: "We are gathering stories from families who have used the planner. We only publish a story after the person who wrote it gives us permission.",
+              text: "We are gathering stories from families who have used the planner. We publish a story only after the person who wrote it gives permission.",
               cta: "Share your story",
               to: "/contact",
             },
@@ -356,24 +451,22 @@ const LivingLegacyPlannerPage = () => (
         </div>
       </Reveal>
 
-      {/* 7. Author block */}
+      {/* 9. Author portrait block */}
       <Reveal>
-        <div className={`${panel} grid gap-8 lg:grid-cols-[auto_1fr] lg:items-center`}>
-          <div className="mx-auto flex h-40 w-40 items-center justify-center rounded-full bg-[#0f2547] font-display text-5xl text-[#e8c46a]" aria-hidden="true">
-            CRJ
-          </div>
+        <div className={`${panel} grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-center`}>
+          <img src={courtneyPortrait} alt="Courtney R. Jones, founder of Senior and Living Today" className="mx-auto w-full max-w-[340px] rounded-[1.5rem] object-cover shadow-[0_24px_50px_-30px_rgba(15,23,42,0.4)]" loading="lazy" />
           <div>
-            <p className={kicker}>✍️ Meet the author</p>
+            <p className={kicker}>👩🏽‍💼 Meet the author</p>
             <h2 className={h2}>Courtney R. Jones</h2>
             <p className="mt-5 text-base leading-8 text-muted-foreground">
-              Courtney R. Jones is the founder of Senior and Living Today (S.A.L.T.) in Dayton, Ohio, and a senior-care
-              advocate with more than 30 years of experience. Courtney wrote The Living Legacy Planner.
+              Founder of Senior and Living Today (S.A.L.T.) in Dayton, Ohio, and a senior-care advocate with more than 30
+              years of experience. Her planners help families talk about the hard things while there is still time.
             </p>
           </div>
         </div>
       </Reveal>
 
-      {/* 8. FAQ */}
+      {/* 10. FAQ */}
       <Reveal>
         <div className={panel}>
           <p className={kicker}>❓ Questions</p>
@@ -389,7 +482,29 @@ const LivingLegacyPlannerPage = () => (
         </div>
       </Reveal>
 
-      {/* 9. Final call to action */}
+      {/* 11. Contact */}
+      <Reveal>
+        <div className={`${panel} grid gap-6 md:grid-cols-3`}>
+          <div className="md:col-span-3">
+            <p className={kicker}>📞 Talk to us</p>
+            <h2 className={h2}>Questions before you order? Ask the SALT team.</h2>
+          </div>
+          <a href="tel:+18888357211" className="rounded-[1.25rem] border border-border/70 bg-card p-5 text-foreground transition hover:border-primary/40">
+            <span className="text-2xl" aria-hidden="true">📱</span>
+            <p className="mt-2 font-semibold">+1 888-835-7211</p>
+          </a>
+          <a href="mailto:help@saltonlinestore.com" className="rounded-[1.25rem] border border-border/70 bg-card p-5 text-foreground transition hover:border-primary/40">
+            <span className="text-2xl" aria-hidden="true">✉️</span>
+            <p className="mt-2 font-semibold">help@saltonlinestore.com</p>
+          </a>
+          <Link to="/contact" className="rounded-[1.25rem] border border-border/70 bg-card p-5 text-foreground transition hover:border-primary/40">
+            <span className="text-2xl" aria-hidden="true">💬</span>
+            <p className="mt-2 font-semibold">Send a message</p>
+          </Link>
+        </div>
+      </Reveal>
+
+      {/* 12. Final call to action */}
       <Reveal>
         <div className="relative overflow-hidden rounded-[2.25rem] bg-[linear-gradient(135deg,#0f2547,#1d3d6e)] p-8 text-center text-white shadow-[0_40px_90px_-50px_rgba(15,23,42,0.6)] sm:p-14">
           <span aria-hidden="true" className="llp-glow pointer-events-none absolute left-1/2 top-0 h-48 w-48 -translate-x-1/2 rounded-full bg-[#e8c46a]/30 blur-3xl" />
@@ -401,9 +516,7 @@ const LivingLegacyPlannerPage = () => (
             Choose your edition, check out on Amazon, and start with the Temporary Instructions page.
           </p>
           <div className="relative mt-8 flex flex-wrap justify-center gap-3">
-            <a href="#editions" className={`${btnPrimary} bg-[#e8c46a] text-[#0f2547]`}>
-              Choose your edition
-            </a>
+            <AmazonButton asin={EDITIONS[0].asin} label="Buy on Amazon" className={btnGold} />
             <Link to="/contact" className={`${btnGhost} border-white/40 text-white hover:text-[#e8c46a]`}>
               Ask us a question
             </Link>
