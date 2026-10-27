@@ -21,7 +21,6 @@ const P = {
   petSeatBelt: "adjustable-pet-harness-cat-dog-seat-belt-for-travel",
   dogHarness: "soft-mesh-dog-harness-breathable-comfort-for-small-dogs-cats",
   relics: "relics-of-the-century-book",
-  helloKitty: "laopao-10w-wireless-charging-led-desk-lamp-dimmable-with-night-light",
   volcanoDiffuser: "volcano-flame-aroma-diffuser-360ml-jellyfish-humidifier",
   miniTrainDiffuser: "mini-train-shape-aromatherapy-diffuser-with-led-lamp",
   multicolorDiffuser: "multicolor-humidifier-aromatherapy-flame-diffuser",
@@ -156,7 +155,7 @@ export const RESOURCE_HUB_GUIDES: SiteResourceGuide[] = [
     handle: "gift-guides",
     summary: "Occasion-led gift ideas that feel personal, useful, and easy to choose when you want the present to be appreciated, not overthought.",
     collectionRoute: "/collections/gifts",
-    featuredProducts: featured(P.dailyBloom, P.planner, P.helloKitty),
+    featuredProducts: featured(P.dailyBloom, P.planner),
     topics: [
       {
         title: "Best Gifts for Mom",
@@ -191,7 +190,7 @@ export const RESOURCE_HUB_GUIDES: SiteResourceGuide[] = [
         handle: "holiday-gift-guides",
         summary: "Seasonal gift ideas that keep shopping organized and help you choose something meaningful without the last-minute scramble.",
         collectionRoute: "/collections/gifts",
-        featuredProducts: featured(P.dailyBloom, P.helloKitty, P.titanicDiffuser),
+        featuredProducts: featured(P.dailyBloom, P.titanicDiffuser),
       },
       {
         title: SALT_FINDS_WEEK_01.title,
@@ -265,7 +264,7 @@ export const RESOURCE_HUB_GUIDES: SiteResourceGuide[] = [
         handle: "creating-a-family-legacy",
         summary: "A page for capturing values, stories, and practical details that outlast a single season.",
         collectionRoute: "/collections/senior-living-solutions",
-        featuredProducts: featured(P.relics, P.dailyBloom, P.helloKitty),
+        featuredProducts: featured(P.relics, P.dailyBloom),
       },
       {
         title: "Planning for the Future",
