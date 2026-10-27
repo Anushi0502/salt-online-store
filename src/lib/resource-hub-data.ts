@@ -3,7 +3,7 @@ import { SALT_FINDS_WEEK_01 } from "@/lib/salt-brand";
 
 const P = {
   planner: "scented-decorative-candle-aromatherapy-nordic-room-decor",
-  dailyBloom: "the-living-legacy-planner",
+  dailyBloom: "the-daily-bloom",
   arthritisGloves: "square-ball-shaped-scented-candle-handcrafted-colorful-birthday-gift",
   laopaoLamp: "laopao-10w-wireless-charging-led-desk-lamp-dimmable-with-night-light",
   digitalClock: "digital-wall-clock-time-day-and-temperature-display",
@@ -19,7 +19,7 @@ const P = {
   catBed: "cozy-winter-cat-bed-cave-nest-for-cats-small-dogs",
   petSeatBelt: "adjustable-pet-harness-cat-dog-seat-belt-for-travel",
   dogHarness: "soft-mesh-dog-harness-breathable-comfort-for-small-dogs-cats",
-  relics: "the-living-legacy-planner",
+  relics: "relics-of-the-century-book",
   helloKitty: "laopao-10w-wireless-charging-led-desk-lamp-dimmable-with-night-light",
   volcanoDiffuser: "volcano-flame-aroma-diffuser-360ml-jellyfish-humidifier",
   miniTrainDiffuser: "mini-train-shape-aromatherapy-diffuser-with-led-lamp",
