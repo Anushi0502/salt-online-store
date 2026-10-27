@@ -2,20 +2,21 @@ import type { SiteResourceGuide } from "@/lib/site-navigation";
 import { SALT_FINDS_WEEK_01 } from "@/lib/salt-brand";
 
 const P = {
-  planner: "scented-decorative-candle-aromatherapy-nordic-room-decor",
+  planner: "the-living-legacy-planner",
   dailyBloom: "the-daily-bloom",
   arthritisGloves: "square-ball-shaped-scented-candle-handcrafted-colorful-birthday-gift",
   laopaoLamp: "laopao-10w-wireless-charging-led-desk-lamp-dimmable-with-night-light",
-  digitalClock: "digital-wall-clock-time-day-and-temperature-display",
+  digitalClock: "9-inch-digital-wall-clock-usb-powered-with-temp-humidity-display",
   nonstickCookware: "9-piece-nonstick-cookware-set-champagne-lightweight-durable",
   stainlessCookware: "12pc-stainless-cookware-set-cook-n-home-kitchen",
   meshBags:
     "hodr-mesh-bags-lightweight-mesh-stuff-sack-drawstring-storage-bags-compression-pouches-for-camping-hiking-laundry-grocery",
   storageBag: "8pcs-vacuum-storage-bags-space-saver-travel-storage-with-hand-pump",
-  catHarness: "adjustable-cartoon-bee-cat-harness-with-leash-dogs-cats",
+  catHarness: "adjustable-mesh-cat-harness-with-lead-leash-small-medium-dogs-kittens",
   petBrush: "3-in-1-pet-spray-brush-steam-massage-hair-removal-comb",
   dogPoopBags: "dog-poop-bags-10-rolls-portable-pet-waste-bags",
-  dogWaterBottle: "portable-dog-water-bottle-travel-water-dispenser-for-pets",
+  dogWaterBottle:
+    "portable-dog-cat-water-bottle-with-storage-food-and-water-container-for-puppy-pets-dogs-feeder-bowl-outdoor-travel-pet-supplies",
   catBed: "cozy-winter-cat-bed-cave-nest-for-cats-small-dogs",
   petSeatBelt: "adjustable-pet-harness-cat-dog-seat-belt-for-travel",
   dogHarness: "soft-mesh-dog-harness-breathable-comfort-for-small-dogs-cats",
