@@ -430,6 +430,24 @@ const HomePage = () => {
           </section>
         </Reveal>
 
+        <Reveal delayMs={150}>
+          <section className="salt-section-shell rounded-[1.75rem] px-4 py-5 text-center sm:px-6 sm:py-6 lg:px-8">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Holiday gift guide</p>
+            <h2 className="mt-2 font-display text-[clamp(1.6rem,3.6vw,2.6rem)] leading-tight text-foreground">
+              Gifts for everyone on your list
+            </h2>
+            <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
+              Practical gifts for family, friends, seniors and kids, with links to every gift collection.
+            </p>
+            <Link
+              to="/blogs/posts/holiday-gift-guide-gifts-for-everyone-on-your-list"
+              className="mt-4 inline-flex min-h-11 items-center rounded-full bg-primary px-6 text-sm font-bold uppercase tracking-[0.08em] text-primary-foreground"
+            >
+              Read the gift guide
+            </Link>
+          </section>
+        </Reveal>
+
         <Reveal delayMs={210}>
           <SaltFinds />
         </Reveal>
