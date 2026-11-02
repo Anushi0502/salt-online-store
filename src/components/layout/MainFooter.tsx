@@ -377,6 +377,18 @@ const MainFooter = () => {
 
       {/* Bottom bar */}
       <div className="border-t border-border">
+        <div className="mx-auto flex w-full max-w-[1360px] justify-center overflow-x-auto px-4 py-4 sm:px-6">
+          <div className="flex flex-nowrap items-center justify-center gap-2 text-muted-foreground" aria-label="Accepted payment methods">
+            {paymentIcons.map((icon) => (
+              <span key={icon.id} className="inline-flex h-8 w-12 shrink-0 items-center justify-center rounded-md border border-border/60 bg-background px-1" title={icon.label}>
+                {icon.render()}
+                <span className="sr-only">{icon.label}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="border-t border-border">
         <div className="mx-auto flex w-full max-w-[1360px] flex-col items-start justify-between gap-4 px-4 py-5 text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground sm:px-6 lg:flex-row lg:items-center lg:px-10">
           <div className="flex flex-wrap items-center gap-2">
             {/* Live sync status indicator */}
@@ -410,16 +422,6 @@ const MainFooter = () => {
             <span className="rounded-full border border-border bg-muted/60 px-3 py-1 text-xs tracking-[0.12em] text-foreground/85">
               {RETURN_WINDOW_DAYS}-day returns
             </span>
-          </div>
-
-          {/* Payment icons */}
-          <div className="flex flex-wrap items-center gap-2.5 text-muted-foreground" aria-label="Accepted payment methods">
-            {paymentIcons.map((icon) => (
-              <span key={icon.id} className="inline-flex h-7 w-12 items-center justify-center rounded-md border border-border/60 bg-background px-1" title={icon.label}>
-                {icon.render()}
-                <span className="sr-only">{icon.label}</span>
-              </span>
-            ))}
           </div>
 
           <div className="flex flex-wrap items-center gap-5">
