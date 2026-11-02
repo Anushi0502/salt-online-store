@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronRight, Search } from "lucide-react";
 import { conciseTitle, formatMoney, minPrice, productImage } from "@/lib/formatters";
 import { useCollectionPreviewProducts, usePredictiveSearch } from "@/lib/live-product-listings";
+import { useBlogPosts } from "@/lib/shopify-data";
 import type { ShopifyProduct } from "@/types/shopify";
 
 // Based on the best-selling products of the last 12 months.
@@ -127,6 +128,17 @@ const HeaderSearchResults = ({
   const productsLoading = hasSearchQuery
     ? canMatchProducts && predictiveFetching && !dropdownProducts.length
     : popularPending;
+  const { data: blogData } = useBlogPosts();
+  const matchingArticles = useMemo(() => {
+    if (!canMatchProducts || !blogData?.posts?.length) return [];
+    return blogData.posts
+      .filter((post) => {
+        const haystack = `${post.title} ${post.excerpt ?? ""}`.toLowerCase();
+        return queryTokens.length > 0 && queryTokens.every((token) => haystack.includes(token));
+      })
+      .slice(0, 3)
+      .map((post) => ({ handle: post.handle, title: post.title }));
+  }, [blogData, canMatchProducts, queryTokens]);
   const productSectionLabel = hasSearchQuery ? "Products" : "Trending now";
   const predictiveQuerySuggestions = useMemo(
     () =>
@@ -225,6 +237,21 @@ const HeaderSearchResults = ({
                 {entry.label}
               </Link>
             ))}
+          </div>
+        ) : null}
+
+        {hasSearchQuery && matchingArticles.length ? (
+          <div className="border-t border-border/60 px-2 py-2">
+            <p className="px-1 pb-1 text-xs font-semibold text-muted-foreground">Guides and articles</p>
+            <ul className="grid gap-0.5">
+              {matchingArticles.map((article) => (
+                <li key={article.handle}>
+                  <Link to={`/blogs/posts/${article.handle}`} onClick={onClose} className="block rounded-lg px-2 py-1.5 text-sm text-foreground hover:bg-muted/60">
+                    {article.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         ) : null}
 
