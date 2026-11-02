@@ -1961,6 +1961,9 @@ async function copyAssets(entryJsPath, entryCssPath) {
   const themeAssetResolver = `const __saltThemeAsset=(path)=>{const rawBase=globalThis.SALT_THEME_ASSET_BASE||new URL("./",import.meta.url).href;const base=rawBase.startsWith("//")?window.location.protocol+rawBase:rawBase;const file=String(path);return new URL(file.startsWith("./")?file.slice(2):file,base).href};\n`;
   const themeEntrySource = themeAssetResolver + entrySource
     .replace(/(["'])assets\//g, "$1./")
+    // Imported images are emitted as "/assets/<file>". On Shopify the theme
+    // assets live under /cdn/shop/..., so resolve them against this bundle.
+    .replace(/"\/assets\/([^"]+)"/g, 'new URL("./$1", import.meta.url).href')
     // The lazy route imports and their modulepreload maps are generated as
     // relative URLs. Shopify resolves these from the current storefront path
     // on product pages, so point both mechanisms at the theme CDN explicitly.
@@ -1985,6 +1988,16 @@ async function copyAssets(entryJsPath, entryCssPath) {
   // runtime and Shopify's CDN cannot retain a stale entry bundle.
   // Rewrite only the current build's chunks. Historical chunks stay byte-for-
   // byte compatible with the entry bundle that originally referenced them.
+  // Every theme chunk (current or historical) must resolve imported images
+  // against its own folder, or Shopify requests /assets/* at the store root.
+  for (const asset of await readdir(themeAssetsDir)) {
+    if (!asset.endsWith(".js")) continue;
+    const assetPath = resolve(themeAssetsDir, asset);
+    const source = await readFile(assetPath, "utf8");
+    const rewritten = source.replace(/"\/assets\/([^"]+)"/g, 'new URL("./$1", import.meta.url).href');
+    if (rewritten !== source) await writeFile(assetPath, rewritten);
+  }
+
   for (const asset of currentDistAssets) {
     if (!asset.endsWith(".js") || asset === entryJs || asset === themeEntryJs) {
       continue;
@@ -1999,6 +2012,7 @@ async function copyAssets(entryJsPath, entryCssPath) {
       // so those must be relative to that chunk rather than nested under a
       // second `/assets/` path.
       .replace(/(["'])assets\//g, "$1./")
+      .replace(/"\/assets\/([^"]+)"/g, 'new URL("./$1", import.meta.url).href')
       .replaceAll(`./${entryJs}`, `./${themeEntryJs}`)
       // A prior theme build may already have rewritten a lazy chunk to an
       // older salt-entry file. Repoint every such import so React has exactly
