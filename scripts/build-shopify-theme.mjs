@@ -437,6 +437,9 @@ async function writeThemeScaffold(settingsData = null, routeAssets = {}) {
     {% elsif salt_route == '/pages/affiliate-program' %}
       {% assign salt_seo_title = 'Affiliate Program | SALT Online Store' %}
       {% assign salt_seo_description = 'Learn how to partner with SALT and share useful products with your audience.' %}
+    {% elsif salt_route == '/pages/living-legacy-planner' %}
+      {% assign salt_seo_title = 'Living Legacy Planner: End-of-Life & Final Wishes Organizer | SALT' %}
+      {% assign salt_seo_description = 'From Senior and Living Today (S.A.L.T.): record medical wishes, finances, insurance, funeral plans and life stories in one planner by Courtney R. Jones.' %}
     {% elsif salt_route == '/pages/mission-vision' %}
       {% assign salt_seo_title = 'Mission & Vision | SALT Online Store' %}
       {% assign salt_seo_description = 'Learn what SALT is building and how we make everyday shopping easier.' %}
