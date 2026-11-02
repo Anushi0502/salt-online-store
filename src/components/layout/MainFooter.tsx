@@ -206,7 +206,7 @@ const MainFooter = () => {
   return (
     <footer className="mt-6 border-t border-border bg-card text-foreground sm:mt-8">
       <div className="mx-auto w-full max-w-[1360px] px-4 py-12 sm:px-6 lg:px-10">
-        <div className="grid gap-10 lg:grid-cols-[1.25fr_0.9fr_0.9fr_0.9fr_1.1fr]">
+        <div className="grid items-start gap-10 lg:grid-cols-[1.25fr_0.9fr_0.9fr_0.9fr_1.1fr]">
           {/* Brand column */}
           <div className="flex flex-col items-start">
             <BrandLogo withWordmark size="lg" />
