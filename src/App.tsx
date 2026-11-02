@@ -36,6 +36,7 @@ const ContactPage = lazy(() => import("@/pages/ContactPage"));
 const FaqPage = lazy(() => import("@/pages/FaqPage"));
 const FinancePage = lazy(() => import("@/pages/FinancePage"));
 const MissionVisionPage = lazy(() => import("@/pages/MissionVisionPage"));
+const LivingLegacyPlannerPage = lazy(() => import("@/pages/LivingLegacyPlannerPage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const OrderHistoryPage = lazy(() => import("@/pages/OrderHistoryPage"));
 const PrivacyPolicyPage = lazy(() => import("@/pages/PrivacyPolicyPage"));
@@ -158,6 +159,7 @@ const AppShell = () => (
                 <Route path="/pages/mission-vision" element={<MissionVisionPage />} />
                 <Route path="/affiliate-program" element={<AffiliateProgramPage />} />
                 <Route path="/pages/affiliate-program" element={<AffiliateProgramPage />} />
+                <Route path="/pages/living-legacy-planner" element={<LivingLegacyPlannerPage />} />
                 <Route path="/resources" element={<Navigate to="/pages/resources" replace />} />
                 <Route path="/pages/resources" element={<StorefrontResourceRoute />} />
                 <Route

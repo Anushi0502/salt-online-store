@@ -9,21 +9,21 @@ const P = {
   dailyBloom: "the-daily-bloom-life-balance-guide",
   arthritisGloves: "square-ball-shaped-scented-candle-handcrafted-colorful-birthday-gift",
   laopaoLamp: "laopao-10w-wireless-charging-led-desk-lamp-dimmable-with-night-light",
-  digitalClock: "digital-wall-clock-time-day-and-temperature-display",
+  digitalClock: "9-inch-digital-wall-clock-usb-powered-with-temp-humidity-display",
   nonstickCookware: "9-piece-nonstick-cookware-set-champagne-lightweight-durable",
   stainlessCookware: "12pc-stainless-cookware-set-cook-n-home-kitchen",
   meshBags:
     "hodr-mesh-bags-lightweight-mesh-stuff-sack-drawstring-storage-bags-compression-pouches-for-camping-hiking-laundry-grocery",
   storageBag: "8pcs-vacuum-storage-bags-space-saver-travel-storage-with-hand-pump",
-  catHarness: "adjustable-cartoon-bee-cat-harness-with-leash-dogs-cats",
+  catHarness: "adjustable-mesh-cat-harness-with-lead-leash-small-medium-dogs-kittens",
   petBrush: "3-in-1-pet-spray-brush-steam-massage-hair-removal-comb",
   dogPoopBags: "dog-poop-bags-10-rolls-portable-pet-waste-bags",
-  dogWaterBottle: "portable-dog-water-bottle-travel-water-dispenser-for-pets",
+  dogWaterBottle:
+    "portable-dog-cat-water-bottle-with-storage-food-and-water-container-for-puppy-pets-dogs-feeder-bowl-outdoor-travel-pet-supplies",
   catBed: "cozy-winter-cat-bed-cave-nest-for-cats-small-dogs",
   petSeatBelt: "adjustable-pet-harness-cat-dog-seat-belt-for-travel",
   dogHarness: "soft-mesh-dog-harness-breathable-comfort-for-small-dogs-cats",
   relics: "relics-of-the-century-book",
-  helloKitty: "laopao-10w-wireless-charging-led-desk-lamp-dimmable-with-night-light",
   volcanoDiffuser: "volcano-flame-aroma-diffuser-360ml-jellyfish-humidifier",
   miniTrainDiffuser: "mini-train-shape-aromatherapy-diffuser-with-led-lamp",
   multicolorDiffuser: "multicolor-humidifier-aromatherapy-flame-diffuser",
@@ -158,7 +158,7 @@ export const RESOURCE_HUB_GUIDES: SiteResourceGuide[] = [
     handle: "gift-guides",
     summary: "Occasion-led gift ideas that feel personal, useful, and easy to choose when you want the present to be appreciated, not overthought.",
     collectionRoute: "/collections/gifts",
-    featuredProducts: featured(P.dailyBloom, P.planner, P.helloKitty),
+    featuredProducts: featured(P.dailyBloom, P.planner),
     topics: [
       {
         title: "Best Gifts for Mom",
@@ -193,7 +193,7 @@ export const RESOURCE_HUB_GUIDES: SiteResourceGuide[] = [
         handle: "holiday-gift-guides",
         summary: "Seasonal gift ideas that keep shopping organized and help you choose something meaningful without the last-minute scramble.",
         collectionRoute: "/collections/gifts",
-        featuredProducts: featured(P.dailyBloom, P.helloKitty, P.titanicDiffuser),
+        featuredProducts: featured(P.dailyBloom, P.titanicDiffuser),
       },
       {
         title: SALT_FINDS_WEEK_01.title,
