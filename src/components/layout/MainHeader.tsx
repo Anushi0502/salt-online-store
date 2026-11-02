@@ -5,6 +5,7 @@ import {
   CircleUserRound,
   Heart,
   Menu,
+  Mic,
   Search,
   ShoppingCart,
   X,
@@ -30,6 +31,24 @@ import { useWishlist } from "@/lib/wishlist";
 import BrandLogo from "@/components/layout/BrandLogo";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 
+type VoiceRecognitionResult = { results: ArrayLike<ArrayLike<{ transcript: string }>> };
+type VoiceRecognition = {
+  lang: string;
+  interimResults: boolean;
+  maxAlternatives: number;
+  onresult: ((event: VoiceRecognitionResult) => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+  start: () => void;
+};
+
+// Browser speech input (Chrome, Edge, Safari). Returns null where it is not supported.
+function createVoiceRecognition(): VoiceRecognition | null {
+  if (typeof window === "undefined") return null;
+  const speechWindow = window as unknown as Record<string, (new () => VoiceRecognition) | undefined>;
+  const Recognition = speechWindow.SpeechRecognition ?? speechWindow.webkitSpeechRecognition;
+  return Recognition ? new Recognition() : null;
+}
 const HeaderSearchResults = lazy(() => import("@/components/layout/HeaderSearchResults"));
 const CollectionHoverMenu = lazy(() =>
   import("@/components/layout/CollectionHoverMenu").then(({ CollectionHoverMenu: menu }) => ({
@@ -522,6 +541,8 @@ const MainHeader = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
+  const [isVoiceListening, setIsVoiceListening] = useState(false);
+  const voiceSearchSupported = typeof window !== "undefined" && ("SpeechRecognition" in window || "webkitSpeechRecognition" in window);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const resourcesNavItem = utilityNavItems.find((item) => item.label === "Resources") || utilityNavItems[0];
   const supportNavItem = utilityNavItems.find((item) => item.label === "Support") || utilityNavItems[0];
@@ -801,6 +822,34 @@ const MainHeader = () => {
                 className="h-full w-full min-w-0 border-0 bg-transparent pl-10 pr-3 text-[0.92rem] text-foreground outline-none placeholder:text-muted-foreground"
               />
             </label>
+
+            <button
+              type="button"
+              onClick={() => {
+                const recognition = createVoiceRecognition();
+                if (!recognition) return;
+                recognition.lang = "en-US";
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+                recognition.onresult = (event) => {
+                  const spoken = event.results[0]?.[0]?.transcript?.trim();
+                  if (spoken) {
+                    setSearchQuery(spoken);
+                    setSearchDropdownOpen(true);
+                  }
+                };
+                recognition.onend = () => setIsVoiceListening(false);
+                recognition.onerror = () => setIsVoiceListening(false);
+                setIsVoiceListening(true);
+                recognition.start();
+              }}
+              hidden={!voiceSearchSupported}
+              aria-label={isVoiceListening ? "Listening" : "Search by voice"}
+              title="Search by voice"
+              className={`inline-flex h-full w-10 shrink-0 items-center justify-center border-l border-border/60 text-muted-foreground transition hover:text-primary ${isVoiceListening ? "text-primary" : ""}`}
+            >
+              <Mic className={`h-4 w-4 ${isVoiceListening ? "animate-pulse" : ""}`} />
+            </button>
 
             <button
               type="submit"
