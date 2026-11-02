@@ -21,6 +21,7 @@ import {
   buildCartRecommendations,
   buildProductCollectionIndex,
 } from "@/lib/sales-optimization";
+import { isAmazonProduct } from "@/lib/amazon-buy";
 
 function normalizeHandleLookup(input: string): string {
   return input
@@ -161,7 +162,10 @@ const CartPage = () => {
     [collectionIndex, items, productsPayload?.products],
   );
   const recommendedProducts = useMemo(
-    () => [...recommendationPlan.relatedProducts, ...recommendationPlan.complementaryProducts],
+    () =>
+      [...recommendationPlan.relatedProducts, ...recommendationPlan.complementaryProducts].filter(
+        (product) => !isAmazonProduct(product.tags),
+      ),
     [recommendationPlan],
   );
 

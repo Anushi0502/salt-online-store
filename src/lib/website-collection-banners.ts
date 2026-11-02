@@ -2,7 +2,9 @@ import bestsellersBanner from "@/assets/collection-banners/bestsellers-collectio
 import kidsBanner from "@/assets/collection-banners/kids-collection-banner.webp";
 import luxuryFragrancesBanner from "@/assets/collection-banners/luxury-fragrances-collection-banner.webp";
 import menBanner from "@/assets/collection-banners/men-collection-banner.webp";
+import saltBooksBanner from "@/assets/collection-banners/salt-books-collection-banner.webp";
 import womenBanner from "@/assets/collection-banners/women-collection-banner.webp";
+import { resolveThemeAsset } from "@/lib/theme-assets";
 import type { ShopifyCollection } from "@/types/shopify";
 
 export type WebsiteCollectionBanner = {
@@ -39,7 +41,18 @@ const BANNERS_BY_HANDLE: Record<string, WebsiteCollectionBanner> = {
     image: womenBanner,
     alt: "Women collection banner",
   },
+  "salt-books": {
+    image: saltBooksBanner,
+    alt: "The Living Legacy Planner editions and Relics of the Century by Courtney R. Jones",
+  },
 };
+
+// Bundled images are emitted as /assets/<file>, which only exists on the Vite
+// server. On the Shopify storefront they live on the theme CDN, so resolve the
+// path when it is read (the theme asset map is set at runtime).
+function withThemeAsset(banner: WebsiteCollectionBanner | undefined): WebsiteCollectionBanner | null {
+  return banner ? { ...banner, image: resolveThemeAsset(banner.image) } : null;
+}
 
 function normalizeBannerHandle(value: string | null | undefined): string {
   return String(value || "")
@@ -61,12 +74,12 @@ export function getWebsiteCollectionBanner(
     typeof collectionOrHandle === "string" ? collectionOrHandle : collectionOrHandle.handle;
   const byHandle = BANNERS_BY_HANDLE[normalizeBannerHandle(handle)];
   if (byHandle) {
-    return byHandle;
+    return withThemeAsset(byHandle);
   }
 
   if (typeof collectionOrHandle === "string") {
     return null;
   }
 
-  return BANNERS_BY_HANDLE[normalizeBannerHandle(collectionOrHandle.title)] || null;
+  return withThemeAsset(BANNERS_BY_HANDLE[normalizeBannerHandle(collectionOrHandle.title)]);
 }

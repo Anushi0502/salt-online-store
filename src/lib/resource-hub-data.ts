@@ -2,8 +2,11 @@ import type { SiteResourceGuide } from "@/lib/site-navigation";
 import { SALT_FINDS_WEEK_01 } from "@/lib/salt-brand";
 
 const P = {
+  // SALT's own books (sold on Amazon); see /collections/salt-books.
   planner: "the-living-legacy-planner",
-  dailyBloom: "the-daily-bloom",
+  legacyColor: "products-living-legacy-planner-for-seniors",
+  legacyMilitary: "living-legacy-planner-military-deployment-family-readiness-edition",
+  dailyBloom: "the-daily-bloom-life-balance-guide",
   arthritisGloves: "square-ball-shaped-scented-candle-handcrafted-colorful-birthday-gift",
   laopaoLamp: "laopao-10w-wireless-charging-led-desk-lamp-dimmable-with-night-light",
   digitalClock: "9-inch-digital-wall-clock-usb-powered-with-temp-humidity-display",
@@ -242,36 +245,36 @@ export const RESOURCE_HUB_GUIDES: SiteResourceGuide[] = [
     title: "Family & Legacy",
     handle: "family-legacy",
     summary: "Thoughtful planning pages that help families preserve memories, organize key information, and make the future feel less scattered.",
-    collectionRoute: "/collections/senior-living-solutions",
-    featuredProducts: featured(P.planner, P.relics, P.dailyBloom),
+    collectionRoute: "/collections/salt-books",
+    featuredProducts: featured(P.planner, P.legacyColor, P.legacyMilitary),
     topics: [
       {
         title: "Preserving Family Memories",
         handle: "preserving-family-memories",
         summary: "A gentle guide to saving stories, notes, and keepsakes so family history stays available and meaningful.",
-        collectionRoute: "/collections/senior-living-solutions",
+        collectionRoute: "/collections/salt-books",
         featuredProducts: featured(P.relics, P.dailyBloom, P.planner),
       },
       {
         title: "Why Every Family Should Have Important Information Organized",
         handle: "why-every-family-should-have-important-information-organized",
         summary: "A clear case for keeping essential household and care information in one place before life gets complicated.",
-        collectionRoute: "/collections/senior-living-solutions",
-        featuredProducts: featured(P.planner, P.digitalClock, P.dailyBloom),
+        collectionRoute: "/collections/salt-books",
+        featuredProducts: featured(P.planner, P.legacyColor, P.legacyMilitary),
       },
       {
         title: "Creating a Family Legacy",
         handle: "creating-a-family-legacy",
         summary: "A page for capturing values, stories, and practical details that outlast a single season.",
-        collectionRoute: "/collections/senior-living-solutions",
-        featuredProducts: featured(P.relics, P.dailyBloom),
+        collectionRoute: "/collections/salt-books",
+        featuredProducts: featured(P.planner, P.relics, P.dailyBloom),
       },
       {
         title: "Planning for the Future",
         handle: "planning-for-the-future",
         summary: "A calm, practical page that helps families think ahead without making the conversation feel heavy.",
-        collectionRoute: "/collections/senior-living-solutions",
-        featuredProducts: featured(P.planner, P.digitalClock, P.dailyBloom),
+        collectionRoute: "/collections/salt-books",
+        featuredProducts: featured(P.planner, P.legacyColor, P.legacyMilitary),
       },
     ],
   },

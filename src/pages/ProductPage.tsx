@@ -24,6 +24,10 @@ import SeoMetadata from "@/components/storefront/SeoMetadata";
 import SectionHeading from "@/components/storefront/SectionHeading";
 import ShopAppPromo from "@/components/storefront/ShopAppPromo";
 import TrustStrip from "@/components/storefront/TrustStrip";
+import BundleSaveOffer from "@/components/storefront/BundleSaveOffer";
+import { hasBundleSaveTag } from "@/lib/bundle-save";
+import AmazonBuyBox from "@/components/storefront/AmazonBuyBox";
+import { parseAmazonLinks, trackAmazonClick } from "@/lib/amazon-buy";
 import {
   Accordion,
   AccordionContent,
@@ -578,7 +582,7 @@ const ProductPage = () => {
     }
 
     setSelectedVariantId(initialVariant?.id || 0);
-    setQuantity(1);
+    setQuantity(hasBundleSaveTag(product.tags) ? 2 : 1);
     setActiveImage(productVariantImage(product, initialVariant) || "");
   }, [initialVariant, product]);
 
@@ -838,6 +842,8 @@ const ProductPage = () => {
   const comparePriceCandidate = Number(selectedVariant?.compare_at_price || 0) || compareAt(product);
   const comparePrice = isPlausibleComparePrice(price, comparePriceCandidate) ? comparePriceCandidate : 0;
   const isAvailable = isVariantAvailable(selectedVariant);
+  const amazonLinks = parseAmazonLinks(product.tags);
+  const sellsOnAmazon = amazonLinks.length > 0;
   const savingsAmount = comparePrice > price ? comparePrice - price : 0;
 
   const selectedQuantity = Math.max(quantityFloor, Math.floor(quantity || 1));
@@ -1188,7 +1194,7 @@ const ProductPage = () => {
                   <div className="mt-3 grid gap-2 sm:grid-cols-2">
                     {[
                       { label: "Rating", value: reviewBadgeLabel },
-                      { label: "Availability", value: isAvailable ? "Ready to ship" : "Unavailable" },
+                      { label: "Availability", value: sellsOnAmazon ? "Ships from Amazon" : isAvailable ? "Ready to ship" : "Unavailable" },
                       {
                         label: "Value",
                         value: savingsAmount > 0 ? `${formatMoney(savingsAmount)} saved` : "Everyday value",
@@ -1232,15 +1238,25 @@ const ProductPage = () => {
               </div>
               <div className="mt-3 rounded-[1.45rem] border border-border/80 bg-background p-3">
                 <TrustStrip
-                  items={[
-                    { icon: Truck, label: "Free US shipping" },
-                    { icon: PackageCheck, label: `Delivery in ${DELIVERY_ESTIMATE}` },
-                    { icon: ShieldCheck, label: `${RETURN_WINDOW_DAYS}-day returns` },
-                    { icon: BadgeCheck, label: "Secure payment" },
-                  ]}
+                  items={
+                    sellsOnAmazon
+                      ? [
+                          { icon: Truck, label: "Shipped by Amazon" },
+                          { icon: PackageCheck, label: "Amazon delivery" },
+                          { icon: ShieldCheck, label: "Amazon returns" },
+                          { icon: BadgeCheck, label: "Secure Amazon checkout" },
+                        ]
+                      : [
+                          { icon: Truck, label: "Free US shipping" },
+                          { icon: PackageCheck, label: `Delivery in ${DELIVERY_ESTIMATE}` },
+                          { icon: ShieldCheck, label: `${RETURN_WINDOW_DAYS}-day returns` },
+                          { icon: BadgeCheck, label: "Secure payment" },
+                        ]
+                  }
                 />
               </div>
-              <ShopAppPromo className="mt-3" />
+              {/* The Shop app checks out through Shopify, which cannot sell Amazon books. */}
+              {sellsOnAmazon ? null : <ShopAppPromo className="mt-3" />}
 
               <Accordion type="multiple" className="mt-4 rounded-[1.45rem] border border-border/80 bg-card/86">
                 <AccordionItem value="shipping" className="border-border/70">
@@ -1248,6 +1264,13 @@ const ProductPage = () => {
                     Delivery, returns and payment
                   </AccordionTrigger>
                   <AccordionContent className="space-y-2.5 pb-4 text-sm leading-6 text-muted-foreground">
+                    {sellsOnAmazon ? (
+                      <p>
+                        This book is sold and shipped by Amazon. Delivery dates, payment and returns follow Amazon's
+                        policies and are shown at Amazon checkout.
+                      </p>
+                    ) : (
+                      <>
                     <p>
                       <strong className="font-semibold text-foreground">Delivery:</strong> {DELIVERY_DETAIL}
                     </p>
@@ -1282,6 +1305,8 @@ const ProductPage = () => {
                       </Link>
                       .
                     </p>
+                      </>
+                    )}
                   </AccordionContent>
                 </AccordionItem>
                 <AccordionItem value="service" className="border-none">
@@ -1502,7 +1527,8 @@ const ProductPage = () => {
               </section>
             ) : null}
 
-            {variants.length > 0 ? (
+            {/* Amazon books have a single Shopify variant held at 0 stock; its picker would read "0 of 1 available". */}
+            {variants.length > 0 && !sellsOnAmazon ? (
               <div className="mt-5 space-y-5 border-t border-border/70 pt-5">
                 {fitGuidance ? (
                   <div className="rounded-[1.1rem] border border-primary/20 bg-primary/5 p-3">
@@ -1554,50 +1580,60 @@ const ProductPage = () => {
               </div>
             ) : null}
 
-            <div className="mt-3.5">
-              <p className="text-sm font-semibold">Quantity</p>
-              <div className="mt-2 inline-flex h-11 w-full items-center justify-between rounded-full border border-border bg-background sm:w-auto">
+            {sellsOnAmazon ? (
+              <AmazonBuyBox links={amazonLinks} productId={product.id} productTitle={product.title} price={price} />
+            ) : (
+              <>
+                {hasBundleSaveTag(product.tags) ? (
+                  <BundleSaveOffer price={price} quantity={selectedQuantity} onSelectQuantity={setQuantity} />
+                ) : null}
+
+                <div className="mt-3.5">
+                  <p className="text-sm font-semibold">Quantity</p>
+                  <div className="mt-2 inline-flex h-11 w-full items-center justify-between rounded-full border border-border bg-background sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((value) => Math.max(quantityFloor, value - 1))}
+                      disabled={quantity <= quantityFloor}
+                      className="inline-flex h-11 w-11 items-center justify-center disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </button>
+                    <span className="min-w-10 text-center text-sm font-bold">{quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQuantity((value) => Math.min(99, value + 1))}
+                      className="inline-flex h-11 w-11 items-center justify-center"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
                 <button
                   type="button"
-                  onClick={() => setQuantity((value) => Math.max(quantityFloor, value - 1))}
-                  disabled={quantity <= quantityFloor}
-                  className="inline-flex h-11 w-11 items-center justify-center disabled:cursor-not-allowed disabled:opacity-40"
-                  aria-label="Decrease quantity"
+                  onClick={addToCart}
+                  disabled={!isAvailable}
+                  className="salt-primary-cta mt-5 h-12 w-full gap-2 rounded-full px-5 text-base font-semibold transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <Minus className="h-4 w-4" />
+                  <ShoppingBag className="h-4 w-4" />
+                  {isAvailable ? "Add to cart" : "Unavailable"}
                 </button>
-                <span className="min-w-10 text-center text-sm font-bold">{quantity}</span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity((value) => Math.min(99, value + 1))}
-                  className="inline-flex h-11 w-11 items-center justify-center"
-                  aria-label="Increase quantity"
+
+                <a
+                  href={checkoutTargetUrl}
+                  onClick={handleBuyNowClick}
+                  aria-disabled={isAvailable ? "false" : "true"}
+                  className={`mt-2 inline-flex h-12 w-full items-center justify-center rounded-full bg-foreground px-5 text-base font-semibold text-background transition hover:-translate-y-[1px] hover:opacity-90 ${
+                    isAvailable ? "" : "pointer-events-none opacity-60"
+                  }`}
                 >
-                  <Plus className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={addToCart}
-              disabled={!isAvailable}
-              className="salt-primary-cta mt-5 h-12 w-full gap-2 rounded-full px-5 text-base font-semibold transition hover:-translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <ShoppingBag className="h-4 w-4" />
-              {isAvailable ? "Add to cart" : "Unavailable"}
-            </button>
-
-            <a
-              href={checkoutTargetUrl}
-              onClick={handleBuyNowClick}
-              aria-disabled={isAvailable ? "false" : "true"}
-              className={`mt-2 inline-flex h-12 w-full items-center justify-center rounded-full bg-foreground px-5 text-base font-semibold text-background transition hover:-translate-y-[1px] hover:opacity-90 ${
-                isAvailable ? "" : "pointer-events-none opacity-60"
-              }`}
-            >
-              Buy now
-            </a>
+                  Buy now
+                </a>
+              </>
+            )}
 
             <button
               type="button"
@@ -1735,7 +1771,7 @@ const ProductPage = () => {
         <div className="mx-auto flex w-[min(1280px,100%)] items-center gap-3">
           <div className="min-w-0 shrink-0">
             <p className="text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
-              {isAvailable ? "Ready to ship" : "Unavailable"}
+              {sellsOnAmazon ? "Ships from Amazon" : isAvailable ? "Ready to ship" : "Unavailable"}
             </p>
             <p className="font-display text-[1.45rem] leading-none text-primary">{formatMoney(price)}</p>
           </div>
@@ -1752,15 +1788,27 @@ const ProductPage = () => {
           >
             <Heart className={`h-4 w-4 ${wishlisted ? "fill-red-500 text-red-500" : ""}`} />
           </button>
-          <button
-            type="button"
-            onClick={addToCart}
-            disabled={!isAvailable}
-            className="salt-yellow-cta h-12 flex-1 gap-2 rounded-full px-5 text-sm font-bold uppercase tracking-[0.08em] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <ShoppingBag className="h-4 w-4" />
-            {isAvailable ? "Add to cart" : "Unavailable"}
-          </button>
+          {sellsOnAmazon ? (
+            <a
+              href={amazonLinks[0].url}
+              target="_blank"
+              rel="noopener"
+              onClick={() => trackAmazonClick(amazonLinks[0], product.id, product.title, price)}
+              className="salt-yellow-cta inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-full px-5 text-sm font-bold uppercase tracking-[0.08em]"
+            >
+              Buy on Amazon
+            </a>
+          ) : (
+            <button
+              type="button"
+              onClick={addToCart}
+              disabled={!isAvailable}
+              className="salt-yellow-cta h-12 flex-1 gap-2 rounded-full px-5 text-sm font-bold uppercase tracking-[0.08em] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <ShoppingBag className="h-4 w-4" />
+              {isAvailable ? "Add to cart" : "Unavailable"}
+            </button>
+          )}
         </div>
       </div>
 

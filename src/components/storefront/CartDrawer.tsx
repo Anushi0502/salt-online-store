@@ -17,6 +17,7 @@ import {
   buildProductCollectionIndex,
 } from "@/lib/sales-optimization";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { isAmazonProduct } from "@/lib/amazon-buy";
 
 const CartDrawer = () => {
   const location = useLocation();
@@ -129,7 +130,10 @@ const CartDrawer = () => {
     [collectionIndex, isDrawerOpen, items, productsPayload?.products],
   );
   const recommendedProducts = useMemo(
-    () => [...recommendationPlan.relatedProducts, ...recommendationPlan.complementaryProducts],
+    () =>
+      [...recommendationPlan.relatedProducts, ...recommendationPlan.complementaryProducts].filter(
+        (product) => !isAmazonProduct(product.tags),
+      ),
     [recommendationPlan],
   );
 

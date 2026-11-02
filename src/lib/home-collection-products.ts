@@ -24,12 +24,10 @@ export type HomeCollectionProductsPayload = {
   generatedAt: string;
   source: string;
   sections: {
-    kids: HomeCollectionSection;
-    footwear: HomeCollectionSection;
-    bestSellers: HomeCollectionSection;
-    luxuryFragrances: HomeCollectionSection;
-    men: HomeCollectionSection;
-    women: HomeCollectionSection;
+    bundleSave: HomeCollectionSection;
+    holidayGifts: HomeCollectionSection;
+    kitchenGadgets: HomeCollectionSection;
+    seniorPlanners: HomeCollectionSection;
   };
 };
 
@@ -43,12 +41,10 @@ const EMPTY_PAYLOAD: HomeCollectionProductsPayload = {
   generatedAt: "",
   source: "",
   sections: {
-    kids: EMPTY_SECTION("Kids", "kids"),
-    footwear: EMPTY_SECTION("Footwear", "footwear"),
-    bestSellers: EMPTY_SECTION("Best Sellers", "best-sellers"),
-    luxuryFragrances: EMPTY_SECTION("Luxury Fragrances", "luxury-fragrances"),
-    men: EMPTY_SECTION("Men", "men-collection"),
-    women: EMPTY_SECTION("Women", "women"),
+    bundleSave: EMPTY_SECTION("Bundle & Save", "bundle-save"),
+    holidayGifts: EMPTY_SECTION("Holiday Gifts", "holiday-gifts"),
+    kitchenGadgets: EMPTY_SECTION("Kitchen Gadgets", "kitchen-gadgets"),
+    seniorPlanners: EMPTY_SECTION("Senior Living & Planners", "senior-living-solutions"),
   },
 };
 
@@ -56,13 +52,13 @@ type SaltHomeCollectionPreloadWindow = Window & {
   __SALT_HOME_COLLECTION_PREFETCH__?: unknown;
 };
 
+// Keep in sync with homeCollectionSectionsLiquid in scripts/build-shopify-theme.mjs,
+// which prefetches the same shelves in the first HTML response.
 const HOME_SECTIONS = [
-  ["kids", "Kids", "kids"],
-  ["footwear", "Footwear", "footwear"],
-  ["bestSellers", "Best Sellers", "best-sellers"],
-  ["luxuryFragrances", "Luxury Fragrances", "luxury-fragrances"],
-  ["men", "Men", "men-collection"],
-  ["women", "Women", "women"],
+  ["bundleSave", "Bundle & Save", "bundle-save"],
+  ["holidayGifts", "Holiday Gifts", "holiday-gifts"],
+  ["kitchenGadgets", "Kitchen Gadgets", "kitchen-gadgets"],
+  ["seniorPlanners", "Senior Living & Planners", "senior-living-solutions"],
 ] as const;
 
 function toHomeCollectionProduct(product: ShopifyProduct): HomeCollectionProduct | null {

@@ -167,8 +167,10 @@ function pumpRequestQueue() {
   while (requestActive < requestConcurrency && requestWaiters.length) {
     const waitMs = Math.max(0, requestLastStartAt + requestSpacingMs - Date.now());
     if (waitMs > 0) {
+      // Keep this timer ref'd: when every pending request is waiting on the
+      // spacing delay, it is the only thing keeping Node alive. An unref'd
+      // timer let the process exit 0 mid-sync without writing products.json.
       requestPumpTimer = setTimeout(pumpRequestQueue, waitMs);
-      requestPumpTimer.unref?.();
       return;
     }
 

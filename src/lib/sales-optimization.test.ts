@@ -282,6 +282,25 @@ describe("sales optimization", () => {
     expect(priceSpecification.priceCurrency).toBe("USD");
   });
 
+  it("marks SALT's Amazon books as in-stock Amazon offers even at zero Shopify stock", () => {
+    const product = makeProduct({
+      id: 44,
+      title: "The Living Legacy Planner",
+      handle: "the-living-legacy-planner",
+      tags: ["salt-books", "amazon-asin:B0D4JDBFYQ"],
+    });
+    product.variants[0].available = false;
+
+    const structuredData = buildProductStructuredData(product, "https://example.com", null, "USD");
+    const offers = structuredData.offers as Record<string, unknown>;
+
+    expect(structuredData["@type"]).toEqual(["Product", "Book"]);
+    expect(structuredData.author).toEqual({ "@type": "Person", name: "Courtney R. Jones" });
+    expect(offers.availability).toBe("https://schema.org/InStock");
+    expect(offers.url).toBe("https://www.amazon.com/dp/B0D4JDBFYQ");
+    expect(offers.seller).toEqual({ "@type": "Organization", name: "Amazon.com" });
+  });
+
   it("uses a safe product SKU and complete offer policy metadata", () => {
     const product = makeProduct({
       id: 43,
