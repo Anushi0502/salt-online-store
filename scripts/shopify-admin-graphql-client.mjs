@@ -3,6 +3,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { promisify } from "node:util";
+import { assertShopifyWriteAllowed, isMutationDocument } from "./shopify-write-approval-gate.mjs";
 import {
   boundedInteger,
   createInFlightCache,
@@ -88,6 +89,13 @@ export function createShopifyAdminGraphQLClient({ rootDir, agentName }) {
     const requestMaxAttempts = Math.max(1, Number(requestedMaxAttempts) || maxAttempts);
     const requestMaxRetryDelayMs = Math.max(1000, Number(requestedMaxRetryDelayMs) || maxRetryDelayMs);
     const effectiveRequestTimeoutMs = Math.max(10_000, Number(requestedRequestTimeoutMs) || requestTimeoutMs);
+    if (isMutationDocument(query)) {
+      // Mutations need an explicit opt-in on every transport (the token path
+      // used to send them even without allowMutations), and protected writes
+      // need a reviewed approval. Refusals are not retried.
+      if (!allowMutations) throw new Error(`${operation} refused: mutation sent without allowMutations`);
+      assertShopifyWriteAllowed({ query, variables, operation, repoRoot: rootDir });
+    }
 
     let attempt = 0;
     while (true) {

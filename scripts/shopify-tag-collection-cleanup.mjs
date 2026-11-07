@@ -7,6 +7,7 @@ import { tmpdir } from "node:os";
 import { promisify } from "node:util";
 
 import { createShopifyAdminGraphQLClient, asArray, normalizeText } from "./shopify-admin-graphql-client.mjs";
+import { assertHumanApprovedDestructiveRun, logDestructiveOperation } from "./destructive-operation-guard.mjs";
 
 const rootDir = resolve(import.meta.dirname, "..");
 const outputDir = resolve(rootDir, "output");
@@ -957,6 +958,17 @@ async function main() {
     return;
   }
 
+  const plannedCollectionRetirements = plan.duplicateCollectionMerges.filter((task) => task.status === "planned").length;
+  if (plannedCollectionRetirements > 0) {
+    // Retiring duplicates unpublishes and deletes collections.
+    try {
+      assertHumanApprovedDestructiveRun({ operation: "collection-retire", plannedCount: plannedCollectionRetirements });
+    } catch (error) {
+      await logDestructiveOperation({ operation: "collection-retire", plannedCount: plannedCollectionRetirements, status: "refused", reason: error.message });
+      throw error;
+    }
+    await logDestructiveOperation({ operation: "collection-retire", plannedCount: plannedCollectionRetirements, status: "approved", collections: plan.duplicateCollectionMerges.filter((task) => task.status === "planned").map((task) => task.duplicateHandle) });
+  }
   await addSimpleTags(plan.productTasks);
   for (const task of plan.productTasks) if (task.status === "planned") task.status = "simple-tags-added-pending";
   const afterAdd = await snapshot();

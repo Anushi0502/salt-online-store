@@ -62,14 +62,8 @@ test("repair routes rewind known failed gates to their guarded prerequisite", ()
   const cases = [
     ["Validate refreshed catalog taxonomy", "taxonomy override validation failed", "Regenerate catalog taxonomy and preserved-tag audit"],
     ["Require image-backed taxonomy evidence", "visual classification review failed", "Build visual taxonomy review queue"],
-    ["Apply exact full-catalog collection reconciliation", "collection membership mismatch", "Dry-run exact full-catalog collection reconciliation"],
-    ["Verify exact collection membership and price rules", "collectionless product found", "Apply final current-generation collection reconciliation"],
     ["Verify every active product has product-specific SEO and metafields", "product-specificity verification failed", "Reconcile and verify Shopify SEO/product fields"],
-    ["Verify full-catalog cost-band variant pricing and compare-at values", "variant price readback mismatch", "Dry-run full-catalog cost-band variant pricing"],
     ["Verify variant-aware SEO profiles for every active variant", "variant SEO readback mismatch", "Reconcile variant-aware SEO profiles after final catalog writes"],
-    ["Verify daily manual collection shuffle", "shuffle order readback mismatch", "Dry-run daily manual collection shuffle"],
-    ["Strict live audit of repaired collection classification", "collection source audit failed", "Repair final governed collection sources before strict audit"],
-    ["Final live-readback gate against the applied catalog generation", "final collection readback mismatch", "Repair final governed collection sources before strict audit"],
   ];
 
   for (const [failedLabel, error, startLabel] of cases) {

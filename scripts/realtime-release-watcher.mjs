@@ -2125,6 +2125,23 @@ async function checkOnce(state) {
     await log(`release mode: ${resume ? "resume from checkpoint" : "full catalog run"}`);
     await log(`release profile: ${releaseLaunch.profile}; command=${releaseLaunch.script}; mode=${releaseLaunch.seoMode}; scope=${releaseLaunch.seoScope}`);
     const scheduledReleaseDate = scheduledRun?.dateKey || "";
+    if (process.env.SALT_RELEASE_WATCHER_AUTORUN !== "1") {
+      // Store-safety policy 2026-11-07: the watcher only reports drift. A
+      // person must review it and start the release manually. Set
+      // SALT_RELEASE_WATCHER_AUTORUN=1 only for a supervised session.
+      await log(`release NOT started automatically (manual approval required): ${reasons.join(" | ").slice(0, 500)}`);
+      const notified = await notifyUser(state, {
+        key: `manual-approval-needed:${reasons.join("|").slice(0, 300)}`,
+        title: "SALT release needs manual approval",
+        message: "The watcher detected catalog drift. Review it and start the release manually; nothing was changed.",
+      });
+      return {
+        ...notified,
+        watcherPid: process.pid,
+        releaseStatus: "awaiting_manual_approval",
+        lastCheckedAt: new Date().toISOString(),
+      };
+    }
     let monitorState = await notifyUser(state, {
       key: `repair-start:${resume ? "resume" : "full"}:${reasons.join("|").slice(0, 300)}`,
       title: "SALT release repair started",
