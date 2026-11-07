@@ -38,6 +38,50 @@ The CLI-attributed deletions match the automation in this repository:
    - no CI, no release pipeline and no watcher.
 5. **Every destructive attempt**, refused or approved, is appended to `output/destructive-operations-log.jsonl`.
 
+## Approval gate for protected writes (added 2026-11-07)
+
+`scripts/shopify-write-approval-gate.mjs` checks every GraphQL request before it is sent. It runs in the shared client and in the five scripts that have their own transport:
+- `ensure-shopify-finance-redirect`
+- `ensure-shopify-product-metafields`
+- `shopify-catalog-taxonomy-apply`
+- `shopify-orders-bundle-update`
+- `shopify-seo-batch-update`
+
+| Class | Examples |
+|---|---|
+| DELETE | productDelete, collectionDelete, variant/media/redirect/metafield-definition deletes |
+| STATUS | productChangeStatus, productSet, productUpdate with `status` |
+| PUBLICATION | publishablePublish / Unpublish |
+| PRICE | variant updates with `price` or `compareAtPrice` |
+| COLLECTION_RULES | collectionUpdate/Create with rules or sources |
+| COLLECTION_MEMBERSHIP | collectionAdd/Remove/ReorderProducts, productUpdate with collectionsToJoin/Leave |
+| TAGS | tagsAdd, tagsRemove, productUpdate with `tags` |
+| BULK | bulkOperationRunMutation, unless the inner mutation only sets metafields |
+
+A protected write is refused:
+- inside the release pipeline, the release watcher, or CI / GitHub Actions, even with an approval;
+- unless `SALT_SHOPIFY_WRITE_APPROVAL_FILE` names a file in `approvals/` that:
+  - is identical to its copy on `origin/main`;
+  - is unexpired, with a window of 24 hours or less;
+  - lists the class;
+  - lists every Product/Variant/Collection ID in the request.
+- DELETE approvals are capped at 25 IDs.
+
+Reads and SEO/metafield-only writes are not gated. See `approvals/README.md`.
+
+The release no longer applies these steps. It runs their dry runs only:
+- full-catalog collection-rule reconciliation;
+- cost-band repricing;
+- publication to all channels (full catalog and new cohort);
+- the daily collection shuffle;
+- governed collection-source repair.
+
+The verify steps that only pass after those writes were removed with them. Run each apply by hand with an approval.
+
+The watcher LaunchAgent installer refuses to run unless `SALT_ALLOW_RELEASE_WATCHER_INSTALL=I_HAVE_WRITTEN_OWNER_APPROVAL` is set.
+
+Limits: this protects against this repository's own scripts. It does not stop someone who holds a valid Shopify token from calling the API directly. Credential rotation and branch protection on `main` remain required.
+
 ## What to do on each machine
 
 On any Mac that ran the SALT release automation:

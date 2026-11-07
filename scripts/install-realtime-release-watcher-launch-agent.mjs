@@ -58,6 +58,15 @@ async function unload(serviceLabel) {
 }
 
 async function main() {
+  // Refused by default since 2026-11-07: this LaunchAgent started the
+  // unattended releases that deleted products. Reinstall only after the
+  // store owner approves it in writing, by setting the variable below for
+  // this one command. See docs/destructive-operations-policy.md.
+  if (process.env.SALT_ALLOW_RELEASE_WATCHER_INSTALL !== "I_HAVE_WRITTEN_OWNER_APPROVAL") {
+    throw new Error(
+      "Refusing to install the SALT release watcher LaunchAgent. Set SALT_ALLOW_RELEASE_WATCHER_INSTALL=I_HAVE_WRITTEN_OWNER_APPROVAL only with the store owner's written approval.",
+    );
+  }
   const npmPath = await findExecutable("npm");
   const pathValue = [
     resolve(homeDir, ".npm-global", "bin"),

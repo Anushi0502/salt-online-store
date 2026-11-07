@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { assertShopifyWriteAllowed } from "./shopify-write-approval-gate.mjs";
 import { spawn } from "node:child_process";
 import { writeFile, mkdir } from "node:fs/promises";
 import { dirname, basename, resolve } from "node:path";
@@ -220,6 +221,7 @@ function runShopifyCli(args) {
 }
 
 async function executeStoreGraphQL(query, variables, { allowMutations = false } = {}) {
+  assertShopifyWriteAllowed({ query, variables, operation: "orders bundle update" });
   const args = [
     "store",
     "execute",

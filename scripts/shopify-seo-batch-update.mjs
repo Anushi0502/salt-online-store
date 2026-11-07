@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { assertShopifyWriteAllowed } from "./shopify-write-approval-gate.mjs";
 import { spawn } from "node:child_process";
 import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { basename, dirname, extname, resolve } from "node:path";
@@ -385,6 +386,7 @@ function runShopifyCli(args, { input } = {}) {
 }
 
 async function fetchShopifyGraphQL(query, variables) {
+  assertShopifyWriteAllowed({ query, variables, operation: "SEO batch update" });
   if (!ADMIN_ACCESS_TOKEN) {
     throw new Error("Shopify Admin API token not configured");
   }
@@ -525,6 +527,7 @@ async function searchShopifyTaxonomyCategory(searchText, apiClient) {
 }
 
 async function executeStoreGraphQL(query, variables, { allowMutations = false } = {}) {
+  assertShopifyWriteAllowed({ query, variables, operation: "SEO batch update" });
   if (ADMIN_ACCESS_TOKEN) {
     return fetchShopifyGraphQLWithRetry(query, variables);
   }

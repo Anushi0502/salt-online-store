@@ -417,18 +417,6 @@ const RELEASE_REPAIR_ROUTES = Object.freeze([
     reason: "image-backed taxonomy evidence was incomplete; rebuilding the persisted review queue",
   },
   {
-    failedLabel: "Apply exact full-catalog collection reconciliation",
-    startLabel: "Dry-run exact full-catalog collection reconciliation",
-    matches: /collection|classification|tag|membership|govern/i,
-    reason: "collection reconciliation failed; replaying its guarded dry-run and apply pair",
-  },
-  {
-    failedLabel: "Verify exact collection membership and price rules",
-    startLabel: "Apply final current-generation collection reconciliation",
-    matches: /collection|classification|price|membership|collectionless|govern/i,
-    reason: "collection or price membership readback found drift; replaying the final governed collection apply",
-  },
-  {
     failedLabel: "Reconcile and verify Shopify SEO/product fields",
     startLabel: "Reconcile and verify Shopify SEO/product fields",
     matches: /seo|product|metafield|specificity|readback/i,
@@ -441,34 +429,10 @@ const RELEASE_REPAIR_ROUTES = Object.freeze([
     reason: "product-specificity verification failed; replaying the live SEO/product-field stage",
   },
   {
-    failedLabel: "Verify full-catalog cost-band variant pricing and compare-at values",
-    startLabel: "Dry-run full-catalog cost-band variant pricing",
-    matches: /pricing|price|cost|compare-at|variant/i,
-    reason: "pricing readback failed; replaying the approved cost-band dry-run and apply stages",
-  },
-  {
     failedLabel: "Verify variant-aware SEO profiles for every active variant",
     startLabel: "Reconcile variant-aware SEO profiles after final catalog writes",
     matches: /variant|seo|readback|metafield/i,
     reason: "variant-aware SEO readback failed; replaying the final variant SEO reconciliation",
-  },
-  {
-    failedLabel: "Verify daily manual collection shuffle",
-    startLabel: "Dry-run daily manual collection shuffle",
-    matches: /shuffle|order|collection|readback/i,
-    reason: "collection shuffle readback failed; replaying the same-seed shuffle plan",
-  },
-  {
-    failedLabel: "Strict live audit of repaired collection classification",
-    startLabel: "Repair final governed collection sources before strict audit",
-    matches: /collection|classification|membership|source|audit/i,
-    reason: "strict collection audit found drift; replaying the final governed source repair",
-  },
-  {
-    failedLabel: "Final live-readback gate against the applied catalog generation",
-    startLabel: "Repair final governed collection sources before strict audit",
-    matches: /readback|collection|classification|membership|price|tag/i,
-    reason: "final live readback found governed drift; replaying the bounded final repair gates",
   },
 ]);
 
@@ -1475,12 +1439,9 @@ function buildCatalogReleaseSteps({
       args: ["run", "shopify:catalog-integrity:dry-run", "--", ...integrityArgs],
       cwd: releaseRootDir,
     },
-    {
-      label: "Apply exact full-catalog collection reconciliation",
-      command: npmBin,
-      args: ["run", "shopify:catalog-integrity:apply", "--", ...collectionApplyArgs],
-      cwd: releaseRootDir,
-    },
+    // Removed 2026-11-07 (approval gate): full-catalog collection-rule reconciliation rewrites rules and membership. The release only plans it;
+    // a human runs the apply script with a reviewed approval file. See
+    // docs/destructive-operations-policy.md.
     ...buildSyncDataSteps({
       releaseRootDir,
       labelPrefix: "Refresh Shopify data after collection reconciliation",
@@ -1515,18 +1476,9 @@ function buildCatalogReleaseSteps({
       args: ["run", "shopify:variant-cost-price:dry-run"],
       cwd: releaseRootDir,
     },
-    {
-      label: "Apply full-catalog cost-band variant pricing",
-      command: npmBin,
-      args: ["run", "shopify:variant-cost-price:apply"],
-      cwd: releaseRootDir,
-    },
-    {
-      label: "Verify full-catalog cost-band variant pricing and compare-at values",
-      command: npmBin,
-      args: ["run", "shopify:variant-cost-price:verify"],
-      cwd: releaseRootDir,
-    },
+    // Removed 2026-11-07 (approval gate): full-catalog repricing (and its verify, which fails until the reprice is applied). The release only plans it;
+    // a human runs the apply script with a reviewed approval file. See
+    // docs/destructive-operations-policy.md.
     ...(process.env.SALT_RELEASE_SEO_MODE === "gpt" ? [
       {
         label: "Prepare GPT SEO enrichment in 500-product checkpoints",
@@ -1556,9 +1508,9 @@ function buildCatalogReleaseSteps({
       cwd: releaseRootDir,
     },
     {
-      label: "Publish every active product to all sales channels",
+      label: "Plan publication of active products (dry run, publishes nothing)",
       command: npmBin,
-      args: ["run", "shopify:publications:all:apply"],
+      args: ["run", "shopify:publications:all:dry-run"],
       cwd: releaseRootDir,
     },
     ...buildSyncDataSteps({
@@ -1590,9 +1542,9 @@ function buildCatalogReleaseSteps({
       cwd: releaseRootDir,
     },
     {
-      label: "Apply final current-generation collection reconciliation",
+      label: "Plan final current-generation collection reconciliation (dry run)",
       command: npmBin,
-      args: ["run", "shopify:catalog-integrity:apply", "--", ...integrityArgs],
+      args: ["run", "shopify:catalog-integrity:dry-run", "--", ...integrityArgs],
       cwd: releaseRootDir,
     },
     ...buildSyncDataSteps({
@@ -1600,12 +1552,9 @@ function buildCatalogReleaseSteps({
       labelPrefix: "Refresh live merchandising data after final catalog writes",
       finalLabel: "Refresh live merchandising data after final catalog writes",
     }),
-    {
-      label: "Verify exact collection membership and price rules",
-      command: npmBin,
-      args: ["run", "shopify:catalog-integrity:verify", "--", ...verificationIntegrityArgs, "--reuse-prior-manifest"],
-      cwd: releaseRootDir,
-    },
+    // Removed 2026-11-07 (approval gate): the exact-membership verify only passes after an applied reconciliation. The release only plans it;
+    // a human runs the apply script with a reviewed approval file. See
+    // docs/destructive-operations-policy.md.
     {
       label: "Verify Shopify merchandising backfill",
       command: npmBin,
@@ -1670,43 +1619,10 @@ function buildCatalogReleaseSteps({
       args: ["run", "shopify:collections:shuffle:dry-run"],
       cwd: releaseRootDir,
     },
-    {
-      label: "Apply daily manual collection shuffle with live readback",
-      command: npmBin,
-      args: ["run", "shopify:collections:shuffle:apply"],
-      cwd: releaseRootDir,
-    },
-    {
-      label: "Verify daily manual collection shuffle",
-      command: npmBin,
-      args: ["run", "shopify:collections:shuffle:verify"],
-      cwd: releaseRootDir,
-    },
-    {
-      label: "Repair final governed collection sources before strict audit",
-      command: nodeBin,
-      args: ["scripts/repair-shopify-governed-collection-sources.mjs"],
-      cwd: releaseRootDir,
-    },
-    {
-      label: "Strict live audit of repaired collection classification",
-      command: npmBin,
-      args: [
-        "run",
-        "shopify:collections:classification:audit",
-        "--",
-        "--strict",
-        "--manifest",
-        "output/shopify-catalog-integrity-applied-generation.json",
-      ],
-      cwd: releaseRootDir,
-    },
-    {
-      label: "Final live-readback gate against the applied catalog generation",
-      command: npmBin,
-      args: ["run", "shopify:catalog-integrity:verify", "--", ...finalIntegrityArgs],
-      cwd: releaseRootDir,
-    },
+    // Removed 2026-11-07 (approval gate): the daily collection shuffle, governed collection-source repair, and the
+    // strict audits that only pass after those writes. The release only plans it;
+    // a human runs the apply script with a reviewed approval file. See
+    // docs/destructive-operations-policy.md.
     ...(includeMobile ? [
       {
         label: "Sync iOS Capacitor shell",
@@ -1759,9 +1675,9 @@ function buildProductReleaseSteps({
       cwd: releaseRootDir,
     },
     {
-      label: "Publish new-cohort products to all sales channels",
+      label: "Plan publication of new-cohort products (dry run, publishes nothing)",
       command: npmBin,
-      args: ["run", "shopify:publications:all:apply", "--", "--product-handles-file", cohortHandlesArg],
+      args: ["run", "shopify:publications:all:dry-run", "--", "--product-handles-file", cohortHandlesArg],
       cwd: releaseRootDir,
     },
     {
@@ -2366,7 +2282,7 @@ async function main() {
         });
       }
 
-      if (step.label === "Apply final current-generation collection reconciliation") {
+      if (step.label === "Plan final current-generation collection reconciliation (dry run)") {
         await copyFile(resolve(rootDir, "output", "shopify-catalog-integrity-manifest.json"), appliedIntegrityManifestPath);
       }
 

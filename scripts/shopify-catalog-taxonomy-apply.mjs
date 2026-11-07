@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { assertShopifyWriteAllowed } from "./shopify-write-approval-gate.mjs";
 import { execFile } from "node:child_process";
 import { mkdir, mkdtemp, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { basename, dirname, join, resolve } from "node:path";
@@ -224,6 +225,7 @@ function isRetryable(error) {
 let lastRequestFinishedAt = 0;
 
 async function runShopifyGraphQL(query, variables, { allowMutations = false, operation = "Shopify request", retryInfo = [] } = {}) {
+  assertShopifyWriteAllowed({ query, variables, operation: operation });
   const waitFor = requestDelayMs - (Date.now() - lastRequestFinishedAt);
   if (waitFor > 0) {
     await sleep(waitFor);
