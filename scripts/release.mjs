@@ -231,8 +231,9 @@ for (const [key, value] of Object.entries({
   SALT_VARIANT_MARKET_PRICE_MARGIN_PERCENT: "0.20",
   SALT_VARIANT_MARKET_PRICE_MARGIN_MODE: "markup",
   SALT_VARIANT_MARKET_PRICE_MARGIN_POLICY_ID: "live-market-anchor-plus-20pct-2026-09-08",
-  SALT_DELETE_MISSING_COST_PRODUCTS_APPROVED: "1",
-  SALT_DELETE_MISSING_COST_PRODUCTS_APPROVAL_ID: "salt-missing-cost-deletion-2026-08-27-approved",
+  // Store-safety policy 2026-11-07: the release never pre-approves product
+  // deletion. SALT_RELEASE_CONTEXT makes every destructive guard refuse.
+  SALT_RELEASE_CONTEXT: "1",
 })) {
   if (!process.env[key]) process.env[key] = value;
 }
@@ -1378,9 +1379,9 @@ function buildCatalogReleaseSteps({
       cwd: releaseRootDir,
     },
     {
-      label: "Scan and remove active products missing live variant cost",
+      label: "Report active products missing live variant cost (report only, never deletes)",
       command: npmBin,
-      args: ["run", "shopify:products:missing-cost:apply"],
+      args: ["run", "shopify:products:missing-cost:dry-run"],
       cwd: releaseRootDir,
     },
     ...buildSyncDataSteps({
@@ -1393,18 +1394,9 @@ function buildCatalogReleaseSteps({
       args: ["run", "shopify:product-anomalies:repair:dry-run"],
       cwd: releaseRootDir,
     },
-    {
-      label: "Apply deterministic option repairs and draft high-cost outliers",
-      command: npmBin,
-      args: ["run", "shopify:product-anomalies:repair:apply"],
-      cwd: releaseRootDir,
-    },
-    {
-      label: "Verify product anomaly repairs with live readback",
-      command: npmBin,
-      args: ["run", "shopify:product-anomalies:repair:verify"],
-      cwd: releaseRootDir,
-    },
+    // Removed 2026-11-07: automatic option repairs and automatic drafting of
+    // products are bulk cleanups and now need a separate, human-approved run
+    // (npm run shopify:product-anomalies:repair:apply after reviewing the dry run).
     ...buildSyncDataSteps({
       releaseRootDir,
       labelPrefix: "Refresh Shopify data after product anomaly repairs",
@@ -1558,9 +1550,9 @@ function buildCatalogReleaseSteps({
       cwd: releaseRootDir,
     },
     {
-      label: "Delete verified active zero-image products",
+      label: "Report active zero-image products (report only, never deletes)",
       command: npmBin,
-      args: ["run", "shopify:products:zero-images:apply"],
+      args: ["run", "shopify:products:zero-images:dry-run"],
       cwd: releaseRootDir,
     },
     {
@@ -1644,12 +1636,8 @@ function buildCatalogReleaseSteps({
       args: ["run", "shopify:collection-merges:dry-run"],
       cwd: releaseRootDir,
     },
-    {
-      label: "Apply approved similar-purpose collection merges with live readback",
-      command: npmBin,
-      args: ["run", "shopify:collection-merges:apply:approved"],
-      cwd: releaseRootDir,
-    },
+    // Removed 2026-11-07: collection merges unpublish collections and now need
+    // a separate, human-approved run after reviewing the dry run above.
     {
       label: "Snapshot and dry-run guarded SALT tag and collection cleanup",
       command: npmBin,
@@ -1662,12 +1650,8 @@ function buildCatalogReleaseSteps({
       args: ["run", "shopify:tag-collection-cleanup:dry-run"],
       cwd: releaseRootDir,
     },
-    {
-      label: "Apply verified SALT tag and collection cleanup with live readback",
-      command: npmBin,
-      args: ["run", "shopify:tag-collection-cleanup:apply"],
-      cwd: releaseRootDir,
-    },
+    // Removed 2026-11-07: the tag and collection cleanup can delete and
+    // unpublish collections, so it never runs inside the release.
     {
       label: "Reconcile variant-aware SEO profiles after final catalog writes",
       command: nodeBin,
@@ -1769,9 +1753,9 @@ function buildProductReleaseSteps({
       cwd: releaseRootDir,
     },
     {
-      label: "Delete verified zero-image products in the new cohort",
+      label: "Report zero-image products in the new cohort (report only, never deletes)",
       command: npmBin,
-      args: ["run", "shopify:products:zero-images:apply", "--", "--product-handles-file", cohortHandlesArg],
+      args: ["run", "shopify:products:zero-images:dry-run", "--", "--product-handles-file", cohortHandlesArg],
       cwd: releaseRootDir,
     },
     {

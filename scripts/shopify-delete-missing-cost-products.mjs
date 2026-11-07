@@ -7,6 +7,7 @@ import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
 import { asArray, createShopifyAdminGraphQLClient, normalizeText } from "./shopify-admin-graphql-client.mjs";
+import { logDestructiveOperation, refusePolicyForbiddenProductDeletion } from "./destructive-operation-guard.mjs";
 
 const execFileAsync = promisify(execFile);
 const rootDir = resolve(import.meta.dirname, "..");
@@ -366,6 +367,7 @@ async function writeManifest(filePath, manifest) {
 }
 
 function refreshSummary(manifest) {
+  manifest.summary.reportOnly = asArray(manifest.tasks).filter((task) => task.status === "report-only").length;
   const tasks = asArray(manifest.tasks);
   manifest.summary.wouldDelete = tasks.filter((task) => task.status === "would-delete").length;
   manifest.summary.deletedVerified = tasks.filter((task) => task.status === "deleted-verified").length;
@@ -420,7 +422,10 @@ async function waitForDeleteOperation(operationId, productId, retryInfo) {
 
 async function main() {
   const args = parseArgs(process.argv);
-  if (args.mode === "apply") await verifyApprovalForApply();
+  if (args.mode === "apply") {
+    await logDestructiveOperation({ operation: "missing-cost-product-delete", status: "refused-by-policy" });
+    refusePolicyForbiddenProductDeletion("missing variant cost");
+  }
   const retryInfo = [];
   const sourceHandles = await readSourceHandles(args.sourceManifest);
   const activeProducts = await fetchActiveProducts(retryInfo);
@@ -463,10 +468,10 @@ async function main() {
   };
 
   if (args.mode === "dry-run") {
-    for (const task of manifest.tasks) task.status = "would-delete";
+    for (const task of manifest.tasks) task.status = "report-only";
     refreshSummary(manifest);
     await writeManifest(args.output, manifest);
-    process.stdout.write(`Missing-cost dry run complete: ${manifest.summary.wouldDelete} active product(s) would be permanently deleted after fresh re-read.\n`);
+    process.stdout.write(`Missing-cost report complete: ${manifest.tasks.length} active product(s) have at least one variant without a unit cost. Nothing was changed; deletion is disabled by store policy.\n`);
     return;
   }
 
