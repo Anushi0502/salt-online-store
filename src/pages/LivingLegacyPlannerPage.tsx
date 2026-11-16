@@ -10,6 +10,7 @@ import hardcoverCover from "@/assets/living-legacy/hardcover-edition-cover.webp"
 import militaryBackCover from "@/assets/living-legacy/military-edition-back-cover.webp";
 import militaryCover from "@/assets/living-legacy/military-edition-cover.webp";
 import relicsCover from "@/assets/living-legacy/relics-of-the-century-cover.webp";
+import sealCover from "@/assets/living-legacy/seal-the-deal-journal-cover.webp";
 
 const PAGE_PATH = "/pages/living-legacy-planner";
 const SITE = "https://www.saltonlinestore.com";
@@ -416,6 +417,28 @@ const LivingLegacyPlannerPage = () => (
                 <Link to="/products/relics-of-the-century-book" className={btnGhost}>
                   View on SALT · $19.99
                 </Link>
+              </div>
+            </div>
+          </article>
+        </div>
+      </Reveal>
+
+      {/* 7b. Seal the Deal Buyers Journal (source: seniorandlivingtoday.com) */}
+      <Reveal>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <article className={`${panel} llp-lift grid gap-6 sm:grid-cols-[0.8fr_1.2fr] sm:items-center`}>
+            <img src={sealCover} alt="Seal the Deal Buyers Journal cover: a hand passing house keys under a gold Seal the Deal emblem" className="w-full rounded-[1rem] shadow-[0_20px_40px_-26px_rgba(15,23,42,0.4)]" loading="lazy" />
+            <div>
+              <p className={kicker}>🏡 Home buying</p>
+              <h2 className="mt-3 font-display text-3xl leading-tight text-foreground">Seal the Deal Buyers Journal</h2>
+              <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                A step-by-step home buying journal: from finding a realtor and getting financing to inspection, appraisal, closing and the important numbers for your new home.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <AmazonButton asin="B0GXKVB7BF" label="Buy on Amazon" />
+                <a href="https://www.seniorandlivingtoday.com/books/#look-deal" target="_blank" rel="noopener noreferrer" className={btnGhost}>
+                  📖 Read Now
+                </a>
               </div>
             </div>
           </article>
