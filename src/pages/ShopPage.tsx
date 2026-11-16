@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import InnerBreadcrumbs from "@/components/storefront/InnerBreadcrumbs";
 import ProductCard from "@/components/storefront/ProductCard";
+import SupplementalBookCard, { SUPPLEMENTAL_BOOKS } from "@/components/storefront/SupplementalBookCard";
 import CollectionGridState from "@/components/storefront/CollectionGridState";
 import Reveal from "@/components/storefront/Reveal";
 import SeoMetadata from "@/components/storefront/SeoMetadata";
@@ -1321,6 +1322,13 @@ const ShopPage = () => {
                         />
                       </Reveal>
                     ))}
+                    {collectionHandle === "salt-books" && currentPage === 1 && !query.trim()
+                      ? SUPPLEMENTAL_BOOKS.map((book) => (
+                          <Reveal key={book.id} delayMs={0} className="salt-reveal-instant h-full w-full">
+                            <SupplementalBookCard book={book} />
+                          </Reveal>
+                        ))
+                      : null}
                   </div>
                 </div>
 
