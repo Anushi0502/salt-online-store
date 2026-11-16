@@ -39,7 +39,7 @@ const EDITIONS = [
     edition: "Full color",
     price: "$52.00",
     detail: "182 pages · 8.5 × 11 in · Full-color interior",
-    asin: "1807382044",
+    asin: "B0GY1BY1FP",
     shopHandle: "products-living-legacy-planner-for-seniors",
     preview: "https://www.seniorandlivingtoday.com/books/living-legacy-planner/#look-second",
     cover: colorCover,
