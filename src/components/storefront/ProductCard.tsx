@@ -24,9 +24,10 @@ type ProductCardProps = {
   variant?: ProductCardVariant;
   reviewSummary?: JudgeMeReviewSummary | null;
   className?: string;
+  fullTitle?: boolean;
 };
 
-const ProductCard = ({ product, variant = "default", reviewSummary, className = "" }: ProductCardProps) => {
+const ProductCard = ({ product, variant = "default", reviewSummary, className = "", fullTitle = false }: ProductCardProps) => {
   const cardRef = useRef<HTMLElement | null>(null);
   const [hasEnteredViewport, setHasEnteredViewport] = useState(false);
 
@@ -168,8 +169,10 @@ const ProductCard = ({ product, variant = "default", reviewSummary, className = 
           <Link
             to={`/products/${product.handle}`}
             state={productRouteState}
-            className={`block truncate font-display font-semibold leading-[1.15] tracking-[-0.02em] text-foreground ${
-              isHero ? "text-[clamp(0.78rem,1.1vw,1.02rem)]" : "text-[clamp(0.92rem,1.45vw,1.22rem)]"
+            className={`block font-display font-semibold leading-[1.2] tracking-[-0.02em] text-foreground ${
+              fullTitle ? "" : "truncate"
+            } ${
+              isHero ? "text-[clamp(0.78rem,1.1vw,1.02rem)]" : fullTitle ? "text-[clamp(1.05rem,1.6vw,1.35rem)]" : "text-[clamp(0.92rem,1.45vw,1.22rem)]"
             }`}
           >
             {title}

@@ -2,8 +2,6 @@ import firstEditionCover from "@/assets/supplemental-books/living-legacy-planner
 import colorEditionCover from "@/assets/supplemental-books/living-legacy-planner-color-2nd-edition.webp";
 import sealCover from "@/assets/supplemental-books/seal-the-deal-buyers-journal.webp";
 
-// Amazon-only books from the Senior and Living Today master reference.
-// They are not Shopify products, so there is no price and no product page.
 export const SUPPLEMENTAL_BOOKS = [
   {
     id: "living-legacy-planner-first-edition",
@@ -37,11 +35,53 @@ export const SUPPLEMENTAL_BOOKS = [
   },
 ];
 
+// Read Now and Buy on Amazon for the three Shopify book products, from the master source.
+// null readNowUrl means Senior and Living Today has no preview for that book.
+export const SHOP_BOOK_ACTIONS: Record<string, { readNowUrl: string | null; amazonUrl: string }> = {
+  "relics-of-the-century-book": { readNowUrl: null, amazonUrl: "https://www.amazon.com/dp/B0DH537CC3" },
+  "the-daily-bloom-life-balance-guide": {
+    readNowUrl: "https://www.seniorandlivingtoday.com/books/#look-bloom",
+    amazonUrl: "https://www.amazon.com/dp/B0GY143Z4V",
+  },
+  "living-legacy-planner-military-deployment-family-readiness-edition": {
+    readNowUrl: "https://www.seniorandlivingtoday.com/books/military-edition/#look-inside",
+    amazonUrl: "https://www.amazon.com/dp/B0HG7YS5JP",
+  },
+};
+
+// Shared Read Now and Buy on Amazon row. A missing preview is shown as text, not as a link.
+export const BookActions = ({ readNowUrl, amazonUrl }: { readNowUrl: string | null; amazonUrl: string }) => (
+  <div className="mt-5 flex flex-wrap gap-3">
+    {readNowUrl ? (
+      <a
+        href={readNowUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex min-h-12 items-center justify-center rounded-full border border-border px-5 text-sm font-bold uppercase tracking-[0.06em] text-foreground transition hover:border-primary/40 hover:text-primary"
+      >
+        📖 Read Now
+      </a>
+    ) : (
+      <span className="inline-flex min-h-12 items-center rounded-full border border-dashed border-border px-5 text-sm text-muted-foreground">
+        Preview not available
+      </span>
+    )}
+    <a
+      href={amazonUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex min-h-12 items-center justify-center rounded-full bg-primary px-5 text-sm font-bold uppercase tracking-[0.06em] text-primary-foreground transition hover:-translate-y-px"
+    >
+      Buy on Amazon
+    </a>
+  </div>
+);
+
 type SupplementalBook = (typeof SUPPLEMENTAL_BOOKS)[number];
 
 // Same outer structure and classes as the shop-variant ProductCard, without the wishlist button.
 const SupplementalBookCard = ({ book }: { book: SupplementalBook }) => (
-  <article className="group relative flex min-w-0 flex-col h-full">
+  <article className="group relative flex min-w-0 h-full flex-col">
     <div className="relative overflow-hidden rounded-[1.65rem] border border-border/70 bg-muted shadow-[0_14px_30px_-24px_rgba(15,23,42,0.42)] transition duration-300 group-hover:-translate-y-0.5 group-hover:border-primary/35 group-hover:shadow-[0_22px_40px_-24px_rgba(15,23,42,0.45)]">
       <a href={book.readNowUrl} target="_blank" rel="noopener noreferrer" className="relative block overflow-hidden aspect-square">
         <img
@@ -53,29 +93,12 @@ const SupplementalBookCard = ({ book }: { book: SupplementalBook }) => (
         />
       </a>
     </div>
-    <div className="min-w-0 px-1 pt-4 sm:pt-5">
-      <h3 className="font-display font-semibold leading-[1.15] tracking-[-0.02em] text-foreground text-[clamp(0.92rem,1.45vw,1.22rem)]">
+    <div className="min-w-0 flex-1 px-1 pt-4 sm:pt-5">
+      <h3 className="font-display font-semibold leading-[1.2] tracking-[-0.02em] text-foreground text-[clamp(1.05rem,1.6vw,1.35rem)]">
         {book.title}
       </h3>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">{book.description}</p>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <a
-          href={book.readNowUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-xs font-bold uppercase tracking-[0.08em] text-foreground transition hover:border-primary/40 hover:text-primary"
-        >
-          📖 Read Now
-        </a>
-        <a
-          href={book.amazonUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-4 text-xs font-bold uppercase tracking-[0.08em] text-primary-foreground transition hover:-translate-y-px"
-        >
-          Buy on Amazon
-        </a>
-      </div>
+      <p className="mt-3 text-base leading-7 text-muted-foreground">{book.description}</p>
+      <BookActions readNowUrl={book.readNowUrl} amazonUrl={book.amazonUrl} />
     </div>
   </article>
 );

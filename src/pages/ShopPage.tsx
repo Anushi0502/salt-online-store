@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import InnerBreadcrumbs from "@/components/storefront/InnerBreadcrumbs";
 import ProductCard from "@/components/storefront/ProductCard";
-import SupplementalBookCard, { SUPPLEMENTAL_BOOKS } from "@/components/storefront/SupplementalBookCard";
+import SupplementalBookCard, { BookActions, SHOP_BOOK_ACTIONS, SUPPLEMENTAL_BOOKS } from "@/components/storefront/SupplementalBookCard";
 import CollectionGridState from "@/components/storefront/CollectionGridState";
 import Reveal from "@/components/storefront/Reveal";
 import SeoMetadata from "@/components/storefront/SeoMetadata";
@@ -1313,13 +1313,31 @@ const ShopPage = () => {
           ) : (
             <>
                 <div className="salt-section-shell mt-5 rounded-[1.45rem] p-3 sm:mt-6 sm:rounded-[1.7rem] sm:p-4 lg:p-5">
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 lg:gap-5 xl:grid-cols-6 xl:gap-6">
+                  <div
+                    className={
+                      collectionHandle === "salt-books"
+                        ? "grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-10"
+                        : "grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 lg:gap-5 xl:grid-cols-6 xl:gap-6"
+                    }
+                  >
                     {visibleProducts.map((product) => (
                       <Reveal key={product.id} delayMs={0} className="salt-reveal-instant h-full w-full">
-                        <ProductCard
-                          product={product}
-                          variant="shop"
-                        />
+                        {collectionHandle === "salt-books" ? (
+                          <div className="flex h-full flex-col">
+                            <ProductCard product={product} variant="shop" fullTitle />
+                            {SHOP_BOOK_ACTIONS[product.handle] ? (
+                              <BookActions
+                                readNowUrl={SHOP_BOOK_ACTIONS[product.handle].readNowUrl}
+                                amazonUrl={SHOP_BOOK_ACTIONS[product.handle].amazonUrl}
+                              />
+                            ) : null}
+                          </div>
+                        ) : (
+                          <ProductCard
+                            product={product}
+                            variant="shop"
+                          />
+                        )}
                       </Reveal>
                     ))}
                     {collectionHandle === "salt-books" && currentPage === 1 && !query.trim()
