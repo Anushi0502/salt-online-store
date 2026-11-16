@@ -869,14 +869,19 @@ export const SITE_RESOURCE_GUIDES: SiteResourceGuide[] = RESOURCE_HUB_GUIDES;
 
 export const SITE_FOOTER_COMPANY_LINKS: SiteFooterLink[] = [
   { label: "About SALT", to: "/pages/about-us" },
+  { label: "Meet Courtney R. Jones", to: "/blogs/posts/who-is-courtney-r-jones-the-founder-behind-senior-and-living-today" },
+  { label: "Customer Reviews", to: "/products/the-living-legacy-planner/reviews" },
   { label: "Contact Us", to: "/pages/contact-us" },
   { label: "Track Order", href: TRACK_ORDER_URL },
   { label: "FAQ", to: "/pages/faq" },
 ];
 
 export const SITE_FOOTER_RESOURCE_LINKS: SiteFooterLink[] = [
+  { label: "Living Legacy Planner", to: "/pages/living-legacy-planner" },
+  { label: "Senior Living & Planners", to: "/collections/senior-living-solutions" },
+  { label: "Holiday Gift Guide", to: "/blogs/posts/holiday-gift-guide-gifts-for-everyone-on-your-list" },
   { label: "Resource Hub", to: "/pages/resources" },
-  { label: "Blog", to: "/pages/blog" },
+  { label: "SALT Journal (Blog)", to: "/pages/blog" },
   { label: "Wholesale Inquiries", to: "/pages/wholesale-inquiries" },
   { label: "Affiliate Program", to: "/pages/affiliate-program" },
 ];

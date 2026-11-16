@@ -1977,10 +1977,30 @@ async function copyAssets(entryJsPath, entryCssPath) {
       /(="modulepreload",[A-Za-z_$][\w$]*=function\((\w+)\)\{return)"\/"\+\2(\})/,
       "$1 $2$3",
   );
-  const entryCacheKey = createHash("sha256").update(themeEntrySource).digest("hex").slice(0, 12);
+  // Shopify's CDN keeps serving the first copy of a file name, so a chunk whose
+  // contents change must get a new name. Names come from the original Vite
+  // output plus this script, so they are known before anything is rewritten.
+  const buildKey = createHash("sha256").update(await readFile(new URL(import.meta.url), "utf8")).digest("hex").slice(0, 8);
+  const chunkRenames = new Map();
+  for (const asset of currentDistAssets) {
+    if (!asset.endsWith(".js") || asset === entryJs) continue;
+    const original = await readFile(resolve(distDir, "assets", asset), "utf8");
+    const sha = createHash("sha256").update(buildKey + original).digest("hex").slice(0, 8);
+    const stem = asset.replace(/\.js$/, "").replace(/-[A-Za-z0-9_-]{6,}$/, "");
+    chunkRenames.set(asset, `${stem}-${sha}.js`);
+  }
+  const applyChunkRenames = (text) => {
+    let out = text;
+    for (const [from, to] of chunkRenames) {
+      out = out.split(`./${from}`).join(`./${to}`).split(`"${from}"`).join(`"${to}"`);
+    }
+    return out;
+  };
+  const renamedEntrySource = applyChunkRenames(themeEntrySource);
+  const entryCacheKey = createHash("sha256").update(buildKey + renamedEntrySource).digest("hex").slice(0, 12);
   const themeEntryJs = `salt-entry-${entryCacheKey}.js`;
   const themeEntryAssetPath = resolve(themeAssetsDir, themeEntryJs);
-  await writeFile(themeEntryAssetPath, themeEntrySource);
+  await writeFile(themeEntryAssetPath, renamedEntrySource);
   await rm(entryAssetPath);
 
   // Some lazy chunks import the Vite entry directly. Point every one at the
@@ -2005,6 +2025,8 @@ async function copyAssets(entryJsPath, entryCssPath) {
 
     const assetPath = resolve(themeAssetsDir, asset);
     const assetSource = await readFile(assetPath, "utf8");
+    const outName = chunkRenames.get(asset);
+    const outPath = resolve(themeAssetsDir, outName);
     const needsVitePreloadResolver = assetSource.includes("__vite__mapDeps");
     const rewrittenAssetBody = assetSource
       // Vite's nested lazy chunks keep preload maps such as
@@ -2022,9 +2044,7 @@ async function copyAssets(entryJsPath, entryCssPath) {
       ? `const __saltThemeAsset=(path)=>{const value=String(path);return new URL(value.startsWith("./")?value.slice(2):value,import.meta.url).href};\n${rewrittenAssetBody}`
           .replace(/=>i\.map\(i=>d\[i\]\)/g, "=>i.map(i=>__saltThemeAsset(d[i]))")
       : rewrittenAssetBody;
-    if (rewrittenAssetSource !== assetSource) {
-      await writeFile(assetPath, rewrittenAssetSource);
-    }
+    await writeFile(outPath, applyChunkRenames(rewrittenAssetSource));
   }
 
   // Do not duplicate the Vite entry bundle under a second filename. Lazy
