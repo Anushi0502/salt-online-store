@@ -1324,7 +1324,7 @@ const ShopPage = () => {
                       <Reveal key={product.id} delayMs={0} className="salt-reveal-instant h-full w-full">
                         {collectionHandle === "salt-books" ? (
                           <div className="flex h-full flex-col">
-                            <ProductCard product={product} variant="shop" fullTitle />
+                            <ProductCard product={product} variant="shop" fullTitle className="flex-1" />
                             {SHOP_BOOK_ACTIONS[product.handle] ? (
                               <BookActions
                                 readNowUrl={SHOP_BOOK_ACTIONS[product.handle].readNowUrl}

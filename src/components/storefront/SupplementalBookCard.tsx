@@ -93,11 +93,12 @@ const SupplementalBookCard = ({ book }: { book: SupplementalBook }) => (
         />
       </a>
     </div>
-    <div className="min-w-0 flex-1 px-1 pt-4 sm:pt-5">
+    <div className="flex min-w-0 flex-1 flex-col px-1 pt-4 sm:pt-5">
       <h3 className="font-display font-semibold leading-[1.2] tracking-[-0.02em] text-foreground text-[clamp(1.05rem,1.6vw,1.35rem)]">
         {book.title}
       </h3>
       <p className="mt-3 text-base leading-7 text-muted-foreground">{book.description}</p>
+      <div className="flex-1" />
       <BookActions readNowUrl={book.readNowUrl} amazonUrl={book.amazonUrl} />
     </div>
   </article>

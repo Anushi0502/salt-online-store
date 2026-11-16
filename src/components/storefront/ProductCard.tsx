@@ -71,7 +71,7 @@ const ProductCard = ({ product, variant = "default", reviewSummary, className = 
   const imageLoading = hasEnteredViewport ? "eager" : "lazy";
   const cardImage = responsiveShopifyImageUrl(image, 720);
   const cardImageSrcSet = responsiveShopifyImageSrcSet(image);
-  const title = conciseTitle(product.title, isShop ? 64 : isDense ? 58 : 64);
+  const title = fullTitle ? product.title : conciseTitle(product.title, isShop ? 64 : isDense ? 58 : 64);
   const highlights = (product.customData?.highlights || []).filter(Boolean).slice(0, 2);
   const wishlisted = isWishlisted(product.handle);
   const fallbackSummary =
