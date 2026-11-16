@@ -34,7 +34,7 @@ const EDITIONS = [
   },
   {
     id: "color",
-    title: "The Living Legacy Planner: Color Edition",
+    title: "The Living Legacy Planner: Color Edition (2nd Edition)",
     edition: "Full color",
     price: "$52.00",
     detail: "182 pages · 8.5 × 11 in · Full-color interior",
