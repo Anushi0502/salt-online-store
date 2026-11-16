@@ -26,7 +26,7 @@ const EDITIONS = [
     price: "$29.95",
     detail: "172 pages · 8.25 × 11 in · Hardcover",
     asin: "B0D4JDBFYQ",
-    shopHandle: "the-living-legacy-planner",
+    shopHandle: null, // SALT product page not live; Buy on Amazon is the purchase link
     preview: "https://www.seniorandlivingtoday.com/books/living-legacy-planner/#look-first",
     cover: hardcoverCover,
     summary:
@@ -40,7 +40,7 @@ const EDITIONS = [
     price: "$52.00",
     detail: "182 pages · 8.5 × 11 in · Full-color interior",
     asin: "B0GY1BY1FP",
-    shopHandle: "products-living-legacy-planner-for-seniors",
+    shopHandle: null, // SALT product page not live; Buy on Amazon is the purchase link
     preview: "https://www.seniorandlivingtoday.com/books/living-legacy-planner/#look-second",
     cover: colorCover,
     summary:
@@ -290,9 +290,11 @@ const LivingLegacyPlannerPage = () => (
                   <a href={edition.preview} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-primary hover:underline">
                     📖 Read Now
                   </a>
-                  <Link to={`/products/${edition.shopHandle}`} className="text-sm font-bold text-primary hover:underline">
-                    Details on SALT →
-                  </Link>
+                  {edition.shopHandle && (
+                    <Link to={`/products/${edition.shopHandle}`} className="text-sm font-bold text-primary hover:underline">
+                      Details on SALT →
+                    </Link>
+                  )}
                 </div>
               </div>
             </article>
@@ -399,8 +401,8 @@ const LivingLegacyPlannerPage = () => (
                 <a href="https://www.seniorandlivingtoday.com/books/#look-bloom" target="_blank" rel="noopener noreferrer" className={btnGhost}>
                   📖 Read Now
                 </a>
-                <Link to="/products/the-daily-bloom" className="inline-flex min-h-12 items-center text-sm font-bold text-primary hover:underline">
-                  Monthly planner on SALT →
+                <Link to="/products/the-daily-bloom-life-balance-guide" className="inline-flex min-h-12 items-center text-sm font-bold text-primary hover:underline">
+                  View on SALT →
                 </Link>
               </div>
             </div>
@@ -459,9 +461,9 @@ const LivingLegacyPlannerPage = () => (
             {
               emoji: "⭐",
               title: "Reviews",
-              text: "Read what buyers say about each edition on its product page, where reviews are kept with the product.",
-              cta: "Read the hardcover reviews",
-              to: "/products/the-living-legacy-planner/reviews",
+              text: "Read what buyers say about the planner on Amazon, where the reviews are kept.",
+              cta: "Read reviews on Amazon",
+              to: amazon("B0D4JDBFYQ"),
             },
             {
               emoji: "📸",
@@ -475,9 +477,15 @@ const LivingLegacyPlannerPage = () => (
               <span className="text-4xl" aria-hidden="true">{item.emoji}</span>
               <h2 className="mt-4 font-display text-2xl text-foreground">{item.title}</h2>
               <p className="mt-3 flex-1 text-sm leading-7 text-muted-foreground">{item.text}</p>
-              <Link to={item.to} className="mt-5 inline-flex text-sm font-bold text-primary hover:underline">
-                {item.cta} →
-              </Link>
+              {item.to.startsWith("http") ? (
+                <a href={item.to} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex text-sm font-bold text-primary hover:underline">
+                  {item.cta} →
+                </a>
+              ) : (
+                <Link to={item.to} className="mt-5 inline-flex text-sm font-bold text-primary hover:underline">
+                  {item.cta} →
+                </Link>
+              )}
             </div>
           ))}
         </div>
