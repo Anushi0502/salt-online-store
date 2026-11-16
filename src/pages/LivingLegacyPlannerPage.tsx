@@ -26,6 +26,7 @@ const EDITIONS = [
     detail: "172 pages · 8.25 × 11 in · Hardcover",
     asin: "B0D4JDBFYQ",
     shopHandle: "the-living-legacy-planner",
+    preview: "https://www.seniorandlivingtoday.com/books/living-legacy-planner/#look-first",
     cover: hardcoverCover,
     summary:
       "The full planner for seniors and families. One clear place for medical care, finances, insurance, funeral wishes and the stories you want to pass on.",
@@ -39,6 +40,7 @@ const EDITIONS = [
     detail: "182 pages · 8.5 × 11 in · Full-color interior",
     asin: "1807382044",
     shopHandle: "products-living-legacy-planner-for-seniors",
+    preview: "https://www.seniorandlivingtoday.com/books/living-legacy-planner/#look-second",
     cover: colorCover,
     summary:
       "The same planner in full color, so each section is easier to find and the pages are a pleasure to fill in.",
@@ -52,6 +54,7 @@ const EDITIONS = [
     detail: "79 pages · 8.5 × 11 in · Paperback",
     asin: "B0HG7YS5JP",
     shopHandle: "living-legacy-planner-military-deployment-family-readiness-edition",
+    preview: "https://www.seniorandlivingtoday.com/books/military-edition/#look-inside",
     cover: militaryCover,
     summary:
       "Made for enlisted service members, veterans and their families. Keep life balanced and organized while you are away from home, deployed or temporarily disabled.",
@@ -283,6 +286,9 @@ const LivingLegacyPlannerPage = () => (
                 <div className="mt-7 flex flex-wrap items-center gap-4">
                   <span className="font-display text-4xl text-foreground">{edition.price}</span>
                   <AmazonButton asin={edition.asin} label="Buy on Amazon" />
+                  <a href={edition.preview} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-primary hover:underline">
+                    📖 Read Now
+                  </a>
                   <Link to={`/products/${edition.shopHandle}`} className="text-sm font-bold text-primary hover:underline">
                     Details on SALT →
                   </Link>
@@ -389,6 +395,9 @@ const LivingLegacyPlannerPage = () => (
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <AmazonButton asin="B0GY143Z4V" label="Buy on Amazon" />
+                <a href="https://www.seniorandlivingtoday.com/books/#look-bloom" target="_blank" rel="noopener noreferrer" className={btnGhost}>
+                  📖 Read Now
+                </a>
                 <Link to="/products/the-daily-bloom" className="inline-flex min-h-12 items-center text-sm font-bold text-primary hover:underline">
                   Monthly planner on SALT →
                 </Link>
