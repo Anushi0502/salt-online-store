@@ -63,7 +63,7 @@ export const BookActions = ({ readNowUrl, amazonUrl }: { readNowUrl: string | nu
       </a>
     ) : (
       <span className="inline-flex min-h-12 items-center rounded-full border border-dashed border-border px-5 text-sm text-muted-foreground">
-        Preview not available
+        Preview coming soon
       </span>
     )}
     <a
