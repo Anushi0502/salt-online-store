@@ -1,3 +1,4 @@
+import { assertShopifyWriteAllowed } from "./shopify-write-approval-gate.mjs";
 const shopBase = process.env.SALT_SHOP_URL || "https://0309d3-72.myshopify.com";
 const apiVersion = process.env.SHOPIFY_ADMIN_API_VERSION || "2026-07";
 const accessToken =
@@ -11,6 +12,7 @@ if (!accessToken) {
 }
 
 async function graphql(query, variables = {}) {
+  assertShopifyWriteAllowed({ query, variables, operation: "finance redirect" });
   const response = await fetch(graphqlUrl, {
     method: "POST",
     headers: {

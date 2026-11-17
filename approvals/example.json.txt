@@ -1,0 +1,11 @@
+{
+  "approvedBy": "Store owner name",
+  "reason": "Publish 25 reviewed batch products (batch 01), plan output/batch01-plan.json",
+  "classes": ["PUBLICATION"],
+  "targets": [
+    "gid://shopify/Product/1234567890"
+  ],
+  "targetsSha256": "<sha256 of the sorted targets joined with newlines>",
+  "approvedAt": "2026-11-08T09:00:00Z",
+  "expiresAt": "2026-11-08T21:00:00Z"
+}

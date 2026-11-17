@@ -7,6 +7,7 @@ import { promisify } from "node:util";
 
 import { isActiveShopifyProduct } from "../src/lib/catalog-taxonomy-release.js";
 import { asArray, createShopifyAdminGraphQLClient, normalizeText } from "./shopify-admin-graphql-client.mjs";
+import { logDestructiveOperation, refusePolicyForbiddenProductDeletion } from "./destructive-operation-guard.mjs";
 
 const execFileAsync = promisify(execFile);
 const rootDir = resolve(import.meta.dirname, "..");
@@ -220,6 +221,7 @@ async function writeManifest(filePath, manifest) {
 }
 
 function refreshSummary(manifest) {
+  manifest.summary.reportOnly = asArray(manifest.tasks).filter((task) => task.status === "report-only").length;
   const tasks = asArray(manifest.tasks);
   manifest.summary.wouldDelete = tasks.filter((task) => task.status === "would-delete").length;
   manifest.summary.deletedVerified = tasks.filter((task) => task.status === "deleted-verified").length;
@@ -244,7 +246,10 @@ function taskFromProduct(product, status = "pending") {
 
 async function main() {
   const args = parseArgs(process.argv);
-  if (args.mode === "apply") await verifyApprovalForApply();
+  if (args.mode === "apply") {
+    await logDestructiveOperation({ operation: "zero-image-product-delete", status: "refused-by-policy" });
+    refusePolicyForbiddenProductDeletion("no product images");
+  }
 
   const retryInfo = [];
   const productHandles = await readProductHandles(args.productHandlesFile);
@@ -291,11 +296,11 @@ async function main() {
   };
 
   if (args.mode === "dry-run") {
-    for (const task of manifest.tasks) task.status = "would-delete";
+    for (const task of manifest.tasks) task.status = "report-only";
     manifest.completedAt = new Date().toISOString();
     refreshSummary(manifest);
     await writeManifest(args.output, manifest);
-    process.stdout.write(`Zero-image dry run complete: ${manifest.summary.wouldDelete} active products would be permanently deleted after fresh re-read.\n`);
+    process.stdout.write(`Zero-image report complete: ${manifest.tasks.length} active product(s) have no images. Nothing was changed; deletion is disabled by store policy.\n`);
     return;
   }
 

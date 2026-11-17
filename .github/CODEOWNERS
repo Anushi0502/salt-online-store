@@ -1,0 +1,23 @@
+# Changes to the files below can delete, draft, unpublish, reprice or remap
+# live Shopify products and collections. They need the store owner's review.
+# This only takes effect when branch protection on main requires code-owner
+# review (Settings > Branches > main > Require review from Code Owners).
+
+/approvals/                                        @Anushi0502
+/.github/                                          @Anushi0502
+/scripts/release.mjs                               @Anushi0502
+/scripts/realtime-release-watcher.mjs              @Anushi0502
+/scripts/install-*launch-agent*.mjs                @Anushi0502
+/scripts/shopify-write-approval-gate.mjs           @Anushi0502
+/scripts/destructive-operation-guard.mjs           @Anushi0502
+/scripts/shopify-admin-graphql-client.mjs          @Anushi0502
+/scripts/refresh-shopify-token.mjs                 @Anushi0502
+/scripts/*delete*.mjs                              @Anushi0502
+/scripts/shopify-catalog-integrity.mjs             @Anushi0502
+/scripts/shopify-variant-cost-price-alignment.mjs  @Anushi0502
+/scripts/shopify-publish-active-products.mjs       @Anushi0502
+/scripts/shopify-collection-*.mjs                  @Anushi0502
+/scripts/shopify-tag-collection-cleanup.mjs        @Anushi0502
+/scripts/repair-shopify-governed-collection-sources.mjs @Anushi0502
+/src/lib/catalog-collection-governance.js          @Anushi0502
+/docs/destructive-operations-policy.md             @Anushi0502

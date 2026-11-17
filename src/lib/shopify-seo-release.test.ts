@@ -605,19 +605,19 @@ describe("Shopify SEO release reconciliation", () => {
     expect(labels.indexOf("Reconcile and verify Shopify SEO/product fields")).toBeLessThan(
       labels.indexOf(merchandisingBackfillLabel),
     );
-    expect(labels.indexOf("Delete verified active zero-image products")).toBeLessThan(
+    expect(labels.indexOf("Report active zero-image products (report only, never deletes)")).toBeLessThan(
       labels.indexOf(merchandisingBackfillLabel),
     );
     expect(labels.indexOf(merchandisingBackfillLabel)).toBeLessThan(
       labels.indexOf("Verify Shopify merchandising backfill"),
     );
-    expect(labels.indexOf("Delete verified active zero-image products")).toBeLessThan(
-      labels.indexOf("Publish every active product to all sales channels"),
+    expect(labels.indexOf("Report active zero-image products (report only, never deletes)")).toBeLessThan(
+      labels.indexOf("Plan publication of active products (dry run, publishes nothing)"),
     );
     const finalPublicationRefreshIndex = labels.findIndex((label) =>
       label.startsWith("Refresh Shopify data after final product publication:"),
     );
-    expect(labels.indexOf("Publish every active product to all sales channels")).toBeLessThan(
+    expect(labels.indexOf("Plan publication of active products (dry run, publishes nothing)")).toBeLessThan(
       finalPublicationRefreshIndex,
     );
     expect(finalPublicationRefreshIndex).toBeLessThan(
@@ -627,7 +627,7 @@ describe("Shopify SEO release reconciliation", () => {
       labels.indexOf("Verify every active product has product-specific SEO and metafields"),
     );
     expect(labels.indexOf("Verify every active product has product-specific SEO and metafields")).toBeLessThan(
-      labels.indexOf("Verify exact collection membership and price rules"),
+      labels.indexOf("Plan final current-generation collection reconciliation (dry run)"),
     );
     expect(labels.indexOf(merchandisingBackfillLabel)).toBeLessThan(labels.indexOf("Build web app"));
     expect(labels.at(-1)).toBe("Sync Android Capacitor shell");
@@ -642,11 +642,31 @@ describe("Shopify SEO release reconciliation", () => {
 
     expect(labels).toContain("Verify trained 128M-record catalog knowledge model");
     expect(labels).toContain("Dry-run exact full-catalog collection reconciliation");
-    expect(labels).toContain("Apply exact full-catalog collection reconciliation");
     expect(labels).toContain("Verify every active product has product-specific SEO and metafields");
-    expect(labels).toContain("Verify exact collection membership and price rules");
+    expect(labels).toContain("Plan final current-generation collection reconciliation (dry run)");
     expect(labels).not.toContain("Rework low Shopify prices with the approved campaign cost");
-    expect(labels.at(-1)).toBe("Final live-readback gate against the applied catalog generation");
+    expect(labels.at(-1)).toBe("Dry-run daily manual collection shuffle");
+  });
+
+  it("never runs collection-rule, pricing, publication, shuffle or delete writes inside a release", () => {
+    for (const profile of ["catalog", "daily", "products"]) {
+      const steps = buildReleaseSteps({ rootDir: "/tmp/salt-shine-enhancer", profile, includeMobile: false });
+      const commands = steps.map((step) => [step.label, ...(step.args || [])].join(" "));
+      for (const forbidden of [
+        "shopify:catalog-integrity:apply",
+        "shopify:variant-cost-price:apply",
+        "shopify:publications:all:apply",
+        "shopify:collections:shuffle:apply",
+        "repair-shopify-governed-collection-sources",
+        "shopify:collection-merges:apply",
+        "shopify:tag-collection-cleanup:apply",
+        "zero-images:apply",
+        "missing-cost:apply",
+        "product-anomalies:repair:apply",
+      ]) {
+        expect(commands.filter((command) => command.includes(forbidden)), `${profile}: ${forbidden}`).toEqual([]);
+      }
+    }
   });
 
   it("keeps the product release on the new-products SEO and publication path", () => {
@@ -656,8 +676,8 @@ describe("Shopify SEO release reconciliation", () => {
 
     expect(labels).toEqual([
       "Run frozen new-product SEO, metafield, and mapping pipeline",
-      "Delete verified zero-image products in the new cohort",
-      "Publish new-cohort products to all sales channels",
+      "Report zero-image products in the new cohort (report only, never deletes)",
+      "Plan publication of new-cohort products (dry run, publishes nothing)",
       "Build web app",
       "Generate Shopify theme bundle",
       "Sync iOS Capacitor shell",

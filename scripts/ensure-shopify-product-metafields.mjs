@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { assertShopifyWriteAllowed } from "./shopify-write-approval-gate.mjs";
 import { execFile } from "node:child_process";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
@@ -104,6 +105,7 @@ async function fetchAdminGraphQL(
   variables = {},
   { attempt = 0, maxAttempts = maxRequestAttempts, allowMutations = false } = {},
 ) {
+  assertShopifyWriteAllowed({ query, variables, operation: "product metafield definitions" });
   const serializedVariables = variables && Object.keys(variables).length ? variables : null;
 
   const runCliOperation = async () => {
